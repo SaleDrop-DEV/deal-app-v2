@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/subscribed_stores.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Available Stores</h1>
+
+        <div class="stores-grid">
+            {% for store in stores %}
+                <div class="store-card-item {% if store.is_subscribed %}subscribed{% endif %}">
+                    <div class="card-header">
+                        {% if store.image_url %}
+                            <img src="{{ store.image_url }}" alt="{{ store.name }} logo" class="store-logo">
+                        {% else %}
+                            <div class="store-logo-placeholder">
+                                <i class="fa fa-shopping-bag"></i>
+                            </div>
+                        {% endif %}
+                        <h3 class="store-name">{{ store.name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'toggle_subscription' %}" method="post" class="subscription-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="store_id" value="{{ store.id }}">
+                            <button type="submit" class="btn-primary {% if store.is_subscribed %}btn-unsubscribe{% else %}btn-subscribe{% endif %}">
+                                {% if store.is_subscribed %}
+                                    Unsubscribe
+                                {% else %}
+                                    Subscribe
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="no-stores-message">No stores available yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

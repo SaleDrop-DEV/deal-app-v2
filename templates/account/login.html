@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block head %}
+<meta name="description" content="Log in bij SaleDrop om je favoriete winkels te volgen en direct meldingen te ontvangen van de beste sales en deals.">
+<meta name="keywords" content="login, inloggen, account toegang, sales, deals, korting, aanbiedingen, kleding, schoenen, accessoires, SaleDrop">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/accounts/log-in/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Inloggen bij SaleDrop - Ontvang direct de beste sales en deals">
+<meta property="og:description" content="Log in en blijf op de hoogte van nieuwe aanbiedingen bij je favoriete winkels.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/accounts/log-in/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Inloggen bij SaleDrop - Ontvang direct de beste sales en deals">
+<meta name="twitter:description" content="Log in en blijf op de hoogte van nieuwe aanbiedingen bij je favoriete winkels.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Inloggen",
+  "url": "https://www.saledrop.app/accounts/log-in/",
+  "description": "Log in bij SaleDrop om je favoriete winkels te volgen en direct meldingen te ontvangen van de beste sales en deals."
+}
+</script>
+
+
+<style>
+.login-card {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 550;
+    color: var(--primary-text-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-gray-medium);
+    border-radius: var(--border-radius-round);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-white);
+}
+
+input:focus {
+    border-color: var(--color-accent);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+input{
+    padding: 12px 16px;
+    /* width: calc(100% - 32px); */
+    width: 100%;
+    border-radius: var(--border-radius-round);
+    border: 1px solid var(--color-gray-medium);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.2);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.error {
+    margin-top: 0.5rem;
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+}
+
+.password-reset-link,
+.signup-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+.signup-link-a {
+    color: var(--color-accent);
+    transition: 0.3s;
+}
+
+.signup-link-a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+}
+
+.password-reset-link a {
+    color: var(--primary-text-color);
+    text-decoration: underline;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="login-card">
+        <h2>Inloggen</h2>
+        <form method="post" action="{% url 'login' %}?next=/deals/my-sales/">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="action-btn">Login</button>
+        </form>
+
+        <p class="password-reset-link">
+            <a href="{% url 'account_reset_password' %}">Wachtwoord vergeten?</a>
+        </p>
+        <p class="signup-link">
+            Nog geen account? <a class="signup-link-a" href="{% url 'signup_view' %}">Registreer</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

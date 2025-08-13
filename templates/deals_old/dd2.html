@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% load static %} {# Django template tag for static files #}
+
+{% block head %}
+    {# Link to index-specific CSS #}
+    <link rel="stylesheet" href="{% static 'css/display_deals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Jouw Sale Overzicht</h1>
+
+    {% if not deals %}
+        <div class="alert" role="alert">
+            Geen deals gevonden met de huidige filter.
+        </div>
+    {% else %}
+        <div class="row">
+            {% for deal in deals %}
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="badge-container">
+                                {% if deal.is_personal_deal %}
+                                    <span class="badge badge-personal">Persoonlijk</span>
+                                {% else %}
+                                    <span class="badge badge-public">Publiek</span>
+                                {% endif %}
+                            </div>
+                            <h3 class="card-title">{{ deal.title|default:"Geen Titel" }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="store-card">
+                                <img src="{{ deal.store.image_url }}" class="store-logo" alt="">
+                                <p>{{ deal.store.name }}</p>
+                            </div>
+                            {% if deal.grabber %}
+                                <p class="deal-grabber">{{ deal.grabber }}</p>
+                            {% endif %}
+                            {% if deal.description %}
+                                <p class="deal-description">{{ deal.description }}</p>
+                            {% endif %}
+                            <button class="btn-primary" onclick="openDealPopup('deal-{{ forloop.counter }}')">Bekijk</button>
+                        </div>
+                    </div>
+                </div>
+                <script id="deal-{{ forloop.counter }}" type="application/json">
+                    {{ deal.deal_json|safe }}
+                </script>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+<div id="deal-popup-overlay" class="popup-overlay" onclick="closeDealPopup()">
+    <div class="popup-card" onclick="event.stopPropagation()">
+        <div id="popup-content">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+let currentSlideIndex = 0;
+
+function openDealPopup(dealId) {
+    const scriptTag = document.getElementById(dealId);
+    if (!scriptTag) return;
+
+    const deal = JSON.parse(scriptTag.textContent);
+    const overlay = document.getElementById('deal-popup-overlay');
+    const popupCard = overlay.querySelector('.popup-card');
+    const content = document.getElementById('popup-content');
+    const store = deal.store || {};
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    let highlightedProductsHtml = '';
+    if (deal.highlighted_products && deal.highlighted_products.length) {
+        highlightedProductsHtml += `
+            <div class="highlighted-products-section">
+                <h5>Uitgelichte Producten:</h5>
+                <div class="product-slideshow">
+                    <div class="product-slideshow-inner" id="popup-slideshow">
+                        ${deal.highlighted_products.map(product => `
+                            <div class="product-item">
+                                <img src="${product.product_image_url || 'https://placehold.co/300x200/cccccc/333333?text=Geen+Afbeelding'}" class="product-image" alt="${product.title || 'Geen Afbeelding'}">
+                                <h6>${product.title || "Onbekend Product"}</h6>
+                                <p class="price-info">
+                                    <span class="new-price">${product.new_price || "N/A"}</span>
+                                    ${product.old_price ? `<span class="old-price">${product.old_price}</span>` : ''}
+                                </p>
+                                <a href="${product.link}" target="_blank" class="btn-view-product">Bekijk Product</a>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${deal.highlighted_products.length > 1 ? `
+                        <button class="slideshow-arrow arrow-left" onclick="moveSlide('popup-slideshow', -1)">&#10094;</button>
+                        <button class="slideshow-arrow arrow-right" onclick="moveSlide('popup-slideshow', 1)">&#10095;</button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    content.innerHTML = `
+        <div class="popup-header">
+            <h2>${deal.title || 'Geen Titel'}</h2>
+        </div>
+        <div class="popup-body">
+            ${deal.store ? `
+                <div class="store-card">
+                    <img src="${deal.store.image_url || 'https://placehold.co/100x50?text=Geen+Logo'}" class="store-logo" alt="">
+                    <p>${deal.store.name || 'Onbekende Winkel'}</p>
+                </div>
+            ` : ''}
+            ${deal.grabber ? `<p class="deal-grabber">${deal.grabber}</p>` : ''}
+            ${deal.description ? `<p class="deal-description">${deal.description}</p>` : ''}
+            ${deal.main_link ? `<div style="width: 100%; text-align: center;"><a href="${deal.main_link}" target="_blank" class="btn-primary">Bekijk Hoofd Deal</a></div>` : ''}
+            ${highlightedProductsHtml}
+            ${deal.end_date ? `<p class="text-muted">Eindigt: ${deal.end_date}</p>` : ''}
+        </div>
+    `;
+
+    currentSlideIndex = 0;
+    moveSlide('popup-slideshow', 0); // reset slideshow position
+    startAutoSlide('popup-slideshow', 3300); // auto slide every 4 seconds
+    // overlay.style.animation = 'popupShow 0.3s forwards';
+    popupCard.style.animation = 'popupShow 0.3s forwards';
+}
+
+function closeDealPopup() {
+    const overlay = document.getElementById('deal-popup-overlay');
+    const popupCard = overlay.querySelector('.popup-card');
+
+    // Animate hide first, then hide the overlay completely
+    // overlay.style.animation = 'popupHide 0.3s forwards';
+    popupCard.style.animation = 'popupHide 0.3s forwards';
+
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        // overlay.style.animation = '';
+        popupCard.style.animation = '';
+        document.body.style.overflow = '';
+    }, 300);  // match duration of animation
+    stopAutoSlide();
+}
+
+function moveSlide(containerId, direction) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const total = container.children.length;
+    currentSlideIndex += direction;
+
+    if (currentSlideIndex < 0) currentSlideIndex = total - 1;
+    if (currentSlideIndex >= total) currentSlideIndex = 0;
+
+    container.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+}
+
+let autoSlideInterval = null;
+
+function startAutoSlide(containerId, interval = 3000) {
+    // Clear previous interval if any
+    if (autoSlideInterval) clearInterval(autoSlideInterval);
+
+    autoSlideInterval = setInterval(() => {
+        moveSlide(containerId, 1);
+    }, interval);
+}
+
+function stopAutoSlide() {
+    if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = null;
+    }
+}
+</script>
+
+{% endblock %}

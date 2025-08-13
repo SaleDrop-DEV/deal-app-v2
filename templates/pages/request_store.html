@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Voor Bedrijven{% endblock %}
+
+{% block head %}
+<meta name="description" content="Werk samen met SaleDrop en bereik duizenden koopjesjagers. Meld uw winkel aan en deel uw beste sales en aanbiedingen via onze app.">
+<meta name="keywords" content="SaleDrop, samenwerking, voor bedrijven, winkel promoten, sales delen, aanbiedingen plaatsen, retail marketing, winkel deals">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/for-business/">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content="Voor Bedrijven | Werk samen met SaleDrop">
+<meta property="og:description" content="Bereik meer klanten door uw beste sales en aanbiedingen te delen via de SaleDrop app.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.saledrop.app/for-business/">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Voor Bedrijven | Werk samen met SaleDrop">
+<meta name="twitter:description" content="Bereik meer klanten door uw beste sales en aanbiedingen te delen via de SaleDrop app.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Extra technisch -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="SaleDrop">
+
+
+    <style>
+        /* Aangepaste styling om te matchen met de aanmeldpagina */
+        .for-business-card {
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: var(--border-radius-round);
+            box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+            max-width: 500px; /* Gebruikt dezelfde max-breedte als de aanmeldkaart */
+            margin: 2rem auto;
+        }
+
+        .for-business-card h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 550;
+            color: var(--primary-text-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary-text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-gray-medium);
+            border-radius: var(--border-radius-round);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-white); /* Standaard witte achtergrond */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px var(--color-accent-light);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05); /* Behoudt de schaal-animatie, maar iets subtieler */
+        }
+
+        /* Nieuwe stijlen voor de berichtcontainer */
+        #form-message-container {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-round);
+            text-align: center;
+            font-weight: 500;
+            display: none; /* Standaard verborgen */
+        }
+        
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <main>
+        <header class="text-center py-10">
+            <h1>Samenwerken met SaleDrop</h1>
+            <p>Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met u op.</p>
+        </header>
+
+        <section class="for-business-card">
+            <h3>Contactverzoek voor bedrijven</h3>
+            <form id="business-request-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="store_name">Winkelnaam</label>
+                    <input type="text" id="store_name" name="store_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="store_email">E-mailadres van de winkel</label>
+                    <input type="email" id="store_email" name="store_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="store_phone_number">Telefoonnummer</label>
+                    <input type="tel" id="store_phone_number" name="store_phone_number" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Bericht (optioneel)</label>
+                    <textarea id="message" name="message" rows="5"></textarea>
+                </div>
+                <button type="submit" class="action-btn">Verzoek versturen</button>
+                <div id="form-message-container"></div>
+            </form>
+        </section>
+    </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const form = document.getElementById('business-request-form');
+    const formMessageContainer = document.getElementById('form-message-container');
+
+    function displayMessage(message, type) {
+        formMessageContainer.textContent = message;
+        formMessageContainer.style.display = 'block';
+        formMessageContainer.className = ''; // Clear existing classes
+        if (type === 'success') {
+            formMessageContainer.classList.add('success-message');
+        } else if (type === 'error') {
+            formMessageContainer.classList.add('error-message');
+        }
+    }
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        // Show a loading spinner or an indication that the form is being submitted
+        document.body.style.cursor = 'wait';
+        formMessageContainer.style.display = 'none'; // Hide previous messages
+
+        const formData = new FormData(form);
+        const requestData = Object.fromEntries(formData.entries());
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify(requestData),
+            });
+
+            if (response.ok) {
+                window.displayMessage('success', "Bedankt! Uw verzoek is ontvangen en wordt zo snel mogelijk behandeld.")
+                form.reset();
+            } else {
+                const errorData = await response.json();
+                let errorMessage = "Er is een onbekende fout opgetreden.";
+                if (errorData.message) {
+                    if (typeof errorData.message === 'string') {
+                        errorMessage = "Fout: " + errorData.message;
+                    } else if (typeof errorData.message === 'object') {
+                        errorMessage = "Fout bij het formulier: " + Object.values(errorData.message).map(err => err[0]).join(' ');
+                    }
+                }
+                window.displayMessage('error', errorMessage)
+            }
+        } catch (error) {
+            console.error('Fout bij het versturen van het verzoek:', error);
+            displayMessage("Er is een netwerkfout opgetreden. Probeer het later opnieuw.", 'error');
+        } finally {
+            document.body.style.cursor = 'default';
+        }
+    });
+</script>
+{% endblock %}

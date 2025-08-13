@@ -1,0 +1,504 @@
+:root {
+    /* Primary brand colors */
+    --color-black: #000000; /* Deep black, used for text, accents */
+    --color-white: #FFFFFF; /* Pure white, used for backgrounds */
+
+    /* Grayscale palette (Apple-inspired) */
+    --color-gray-dark: #1D1D1F; /* Very dark gray, almost black for primary text */
+    --color-gray-medium: #86868B; /* Medium gray, for secondary text, borders */
+    --color-gray-light: #F5F5F7; /* Very light gray, for container backgrounds, subtle dividers */
+    --color-gray-lighter: #f7f7fc; /* Even lighter gray, almost white, for very subtle backgrounds */
+
+    --color-accent: #FF4D00;
+    --color-accent-hover: #ff6d2e;
+    --color-accent-light: #ffd1bd;
+    --color-accent-lighter: #fee8e0;
+
+    /* Accent colors (subtle, if needed, you can activate them) */
+    --color-succes: rgb(92, 184, 92);
+    --color-succes-background: rgb(216, 252, 216);
+    --color-error: #cc0000;
+    --color-error-background: rgb(255, 203, 203);
+
+
+    /* Semantic mappings to UI elements */
+    --primary-text-color: var(--color-gray-dark);
+    --secondary-text-color: var(--color-gray-medium);
+    --link-color: var(--color-black); /* Links are black for high contrast */
+    --link-hover-color: var(--color-gray-medium);
+
+    --navbar-background-color: var(--color-white);
+    --overlay-background-color: var(--color-white);
+
+    --burger-line-color: var(--color-black);
+
+    --primary-button-background: transparent;
+    --primary-button-text: var(--color-gray-dark);
+    --primary-button-hover-background: var(--color-gray-dark);
+    --primary-button-hover-text: var(--color-gray-lighter);
+
+    --header-background-color: var(--color-gray-lighter); /* Changed this from container-background */
+    --sales-item-background-color: var(--color-gray-lighter); /* Example, if you add later */
+
+    /* Navbar height variable for padding adjustment */
+    --navbar-height: 71px; /* Approximate height: 1.5rem padding top + 1.5rem padding bottom + content height */
+    --border-radios: 0;
+    --border-radius-round: 6px;
+}
+
+/* Global Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    color: var(--primary-text-color); /* Use primary-text-color for general text */
+}
+
+body {
+    background-color: var(--color-white); /* Pure white body background */
+    padding-top: var(--navbar-height); /* Adjust based on your navbar's actual height */
+}
+
+a {
+    text-decoration: none;
+    color: var(--link-color);
+    font-weight: 400;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+p {
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--secondary-text-color); /* Subtler gray for paragraphs */
+}
+
+h1, h3 {
+    color: var(--primary-text-color); /* Headings are dark gray */
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 2.5em; /* Adjust as needed */
+    margin-bottom: 0.5em;
+}
+
+h3 {
+    font-weight: 550;
+    font-size: 1.5em; /* Adjust as needed */
+}
+
+h5{
+    font-weight: 550;
+    font-size: 1.5rem; /* Adjust as needed */
+}
+main{
+    min-height: calc(100vh - var(--navbar-height) - 2rem);
+    margin-bottom: 2rem !important;
+}
+
+.accent-color, .active{
+    color: var(--color-accent) !important;
+}
+
+.accent-color-bg{
+    background-color: var(--color-accent) !important;
+}
+
+.action-btn{
+    display: block;
+    background-color: var(--color-accent) !important;
+    color: var(--color-white) !important;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin: 0 auto;
+}
+
+.loader-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-accent-light); /* Light background border */
+  border-top: 3px solid var(--color-accent);    /* Accent-colored arc */
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto; /* Center horizontally */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;           /* Start invisible */
+    }
+    100% {
+        opacity: 1;           /* End fully visible */
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;           /* Start invisible */
+    }
+    100% {
+        opacity: 0;           /* End fully visible */
+        visibility: hidden !important;
+    }
+}
+
+.show-action-btn{
+    visibility: visible !important;
+    animation: fadeIn 0.3s ease-in-out;
+}
+.hide-action-btn{
+    animation: fadeOut 0.3s ease-in-out;
+}
+
+#small-screen-action-btn{
+    visibility: hidden; /* Hidden by default */
+    position: fixed;
+    top: calc(100vh - 60px);
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    z-index: 11005;
+}
+
+.action-btn-pop-up{
+    position: fixed;
+    /* top: calc(100% - 60px); */
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+.bold-text{
+    font-weight: 700;
+}
+
+
+
+
+/* --- Navbar Styles --- */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Space out children (small-device-nav and large-device-nav) */
+    align-items: center;
+    padding: 1.5rem 1rem; /* Padding for mobile */
+    background-color: var(--navbar-background-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+    z-index: 1000; /* Ensure navbar is on top */
+}
+
+.navbar-brand a { /* This style applies to both mobile and desktop brand */
+    font-weight: 600;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--link-color); /* Brand link is black */
+}
+
+/* Small Device Navigation Wrapper */
+.small-device-nav {
+    display: flex; /* Always display on small screens */
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Take full width within navbar on mobile */
+}
+
+/* Burger Icon */
+.burger {
+    position: relative;
+    width: 30px;
+    height: 20px; /* Adjusted height for better spacing of lines */
+    cursor: pointer;
+    z-index: 1001; /* Ensure burger is above overlay */
+}
+
+.burger div {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: var(--burger-line-color);
+    left: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Position each line */
+.burger .line1 {
+    top: 0;
+}
+
+.burger .line2 {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.burger .line3 {
+    bottom: 0;
+}
+
+/* When open, transform into cross */
+.burger.open .line1 {
+    top: 50%; /* Move to center */
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.burger.open .line2 {
+    opacity: 0; /* Fade out middle line */
+}
+
+.burger.open .line3 {
+    bottom: 50%; /* Move to center */
+    transform: translateY(50%) rotate(-45deg);
+}
+
+
+/* Navigation Overlay (Mobile Menu) */
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    right: 0; /* Stays at right edge, transform handles visibility */
+    width: 100%;
+    height: 100%;
+    background-color: var(--overlay-background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.5s ease-in-out; /* Only transition transform for sliding */
+    transform: translateX(100%); /* Initially off-screen to the right */
+    z-index: 999; /* Below burger, above main content */
+}
+
+.nav-overlay.open {
+    transform: translateX(0); /* Slide in */
+}
+
+.nav-links {
+    list-style: none;
+    text-align: center;
+    padding: 0;
+    width: 100%;
+}
+
+.nav-links li {
+    margin: 1.2rem 0; /* Margin between nav items */
+    opacity: 0; /* Start hidden for fade-in effect */
+    transform: translateY(20px); /* Start slightly below for slide-up effect */
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Transition for individual item fade/slide */
+}
+
+/* This class will be added by JS to trigger the fade-in and slide-up for individual items */
+.nav-links li.is-fading-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nav-links li a {
+    font-size: 1.4em; /* Set specific font size for mobile nav items */
+    font-weight: 300; /* Medium weight for clarity */
+    color: var(--primary-text-color);
+    display: block;
+    padding: 0.5rem 0;
+}
+
+.nav-links li a:hover {
+    color: var(--link-hover-color);
+}
+
+.signup-link-nav{
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 2px solid var(--color-accent);
+}
+
+body {
+        padding-top: var(--navbar-height);
+    }
+
+main {
+    max-width: 1000px;
+    margin: 0 auto; /* Top/bottom margin, horizontal auto for centering */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--header-background-color);
+
+}
+
+.primary-btn {
+    background-color: var(--primary-button-background);
+    color: var(--primary-button-text);
+    border: 1px solid var(--primary-button-text);
+    padding: 0.8rem 1.5rem;
+    font-size: 1em;
+    font-weight: 300;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Added color transition */
+
+}
+
+.primary-btn:hover {
+    background-color: var(--primary-button-hover-background);
+    color: var(--primary-button-hover-text);
+}
+
+
+/* Hide large device nav for small screens */
+.large-device-nav {
+    display: none; /* Hidden by default on small screens */
+}
+
+@media (min-width: 768px){
+    /* Hide burger and mobile overlay on larger screens */
+    .burger,
+    .nav-overlay,
+    .small-device-nav { /* Hide the small device nav wrapper */
+        display: none;
+    }
+
+    /* Navbar on desktop will now contain only the large-device-nav */
+    .navbar {
+        justify-content: center; /* Center the large-device-nav within the fixed navbar */
+        padding: 1.5rem 3rem; /* More padding for desktop */
+        box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* Keep shadow on desktop */
+    }
+
+    /* Desktop navigation wrapper */
+    .large-device-nav {
+        display: flex; /* Make it a flex container */
+        justify-content: space-between; /* Space out brand and links */
+        align-items: center;
+        width: 100%; /* Take full width within the navbar */
+        max-width: 1000px; /* Constrain the content width for large screens */
+        margin: 0 auto; /* Center the content within the navbar */
+    }
+
+    /* Styles for the desktop navigation links */
+    .desktop-nav-links {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .desktop-nav-links li {
+        margin-left: 2rem;
+    }
+
+    .desktop-nav-links li a {
+        font-size: 1em; /* Standard font size for desktop links */
+        font-weight: 300; /* Light weight for minimalism */
+        color: var(--link-color);
+        transition: color 0.3s ease; /* Transition for hover effect */
+    }
+
+    .desktop-nav-links li a:hover {
+        color: var(--link-hover-color);
+    }
+}
+
+
+
+/* --- Message Container Styles --- */
+.message-container {
+    position: fixed;
+    top: calc(var(--navbar-height) + 1rem); /* Position below navbar with some spacing */
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 280px;
+    max-width: 90%; /* Responsive width */
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    text-align: center;
+    z-index: 10000;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth fade and slight scale */
+}
+
+.message-container.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.message-container.fade-out {
+    animation: fadeOut_message 0.3s ease-in-out !important;
+}
+
+@keyframes fadeOut_message {
+    0% {
+        opacity: 1;
+    }
+    100%{
+        opacity: 0;
+    }
+}
+
+.message-container .message-text {
+    flex-grow: 1; /* Allow text to take available space */
+    margin-right: 1rem; /* Space between text and close button */
+    color: inherit; /* Inherit color from parent container */
+}
+
+/* Success Message Specifics */
+.success-message {
+    background-color: var(--color-succes-background);
+    color: var(--success-text);
+    border: 1px solid var(--color-succes);
+}
+
+/* Error Message Specifics */
+.error-message {
+    background-color: var(--color-error-background);
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+}
+
+.error-message .message-text {
+    color: var(--color-error);
+}
+
+.error-message .close-btn {
+    font-size: 1.5em;
+    line-height: 1;
+    font-weight: 300;
+    cursor: pointer;
+    color: var(--error-text); /* Inherit color from error message */
+    padding: 0 0.5rem; /* Make it easier to click */
+    transition: opacity 0.2s ease;
+}
+
+.error-message .close-btn:hover {
+    opacity: 0.7;
+}
+
+/* Ensure message containers are hidden on page load */
+.message-container:not(.show) {
+    display: none; /* Hide when not active to prevent occupying space */
+}
+.message-container.show {
+    display: flex; /* Show when active */
+}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact{% endblock %}
+
+{% block head %}
+<meta name="description" content="Neem contact op met SaleDrop voor vragen, samenwerkingen of persaanvragen. Bereikbaar via e-mail en Instagram.">
+<meta name="keywords" content="SaleDrop contact, klantenservice, support, e-mail, Instagram, samenwerking, pers">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/contact/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Contact SaleDrop - Klantenservice & Bedrijfsinformatie">
+<meta property="og:description" content="Vragen over SaleDrop? Neem contact met ons op via e-mail of Instagram.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/contact/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Contact SaleDrop - Klantenservice & Bedrijfsinformatie">
+<meta name="twitter:description" content="Bereik ons voor vragen, samenwerkingen of pers via e-mail en Instagram.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "SaleDrop",
+    "url": "https://www.saledrop.app/",
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@saledrop.app",
+        "availableLanguage": "nl"
+      }
+    ],
+    "sameAs": [
+      "https://www.instagram.com/saledrop"
+    ]
+  }
+}
+</script>
+
+
+
+
+<style>
+    /* Styling voor de contactkaart */
+    .contact-card {
+        background-color: var(--color-white);
+        padding: 2rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+        max-width: 400px;
+        margin: 2rem auto;
+        text-align: center; /* Centreer de inhoud van de kaart */
+    }
+
+    .contact-card h3 {
+        margin-bottom: 1.5rem;
+        color: var(--primary-text-color);
+        font-weight: 550;
+    }
+
+    .contact-card p {
+        margin-bottom: 1rem;
+        color: var(--primary-text-color);
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .contact-card p a {
+        color: var(--color-accent);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .contact-card p a:hover {
+        color: var(--color-accent-hover);
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="contact-card">
+        <h3>Neem contact op</h3>
+        <p><strong>Email:</strong> <a href="mailto:{{ email }}">support@saledrop.app</a></p>
+        <p><strong>Instagram:</strong> <a href="{{ instagram }}" target="_blank" rel="noopener noreferrer">@saledrop</a></p>
+    </div>
+</div>
+{% endblock %}

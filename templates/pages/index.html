@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+<meta name="description" content="SaleDrop: Ontvang direct meldingen van de beste sales en deals bij je favoriete winkels. Mis nooit meer korting op kleding, schoenen en accessoires.">
+<meta name="keywords" content="sales, deals, korting, aanbiedingen, kleding, schoenen, accessoires, SaleDrop, push notificaties">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
+<meta property="og:description" content="Abonneer je gratis en ontvang direct meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
+<meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "SaleDrop",
+  "url": "https://www.saledrop.app/",
+  "description": "SaleDrop: Ontvang direct meldingen van de beste sales en deals bij je favoriete winkels.",
+}
+</script>
+
+<script type="application/json" id="notification-data">
+    {{ notifications|safe }}
+</script>
+{% endblock %}
+
+{% block index_header %}
+<header style="padding-bottom: 1.5rem;" class="animated-header">
+    <h1 style="font-size: 5.5rem !important; font-weight: 400;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
+    <p style="font-weight: bold;" class="header-subtitle">Ontvang als eerste de beste sales en deals</p>
+    <div id="sampleNotifications1" class="notification-container"></div>
+    <button onclick="window.location.href='/accounts/sign-up/'" class="action-btn">Aanmelden</button>
+</header>
+{% endblock%}
+
+{% block content %}
+
+<div class="container">
+    <div id="HowItWorks" class="section">
+        <h1>Hoe werkt het?</h1>
+
+        <div class="section-container-row">
+            <div class="section-container-col">
+                <h3>Zoek je favoriete winkels</h3>
+                <p>Zoek je favoriete winkels in onze zoekfunctie en abonneer je gratis.</p>
+            </div>
+            <div class="section-container-col fade-in-up">
+                <img src="{% static 'images/screenShotSearch.png' %}" alt="Zoekfunctie in de app">
+            </div>
+        </div>
+
+        <div class="section-container-row">
+            <div class="section-container-col">
+                <h3>Ontvang meldingen</h3>
+                <p>Ontvang push notificaties zodra er een nieuwe sale of deal beschikbaar is.</p>
+            </div>
+            <div class="section-container-col fade-in-up">
+                <div id="sampleNotifications2" class="notification-container"></div>
+            </div>
+        </div>
+
+        <div class="section-container-row">
+            <div class="section-container-col">
+                <h3>Bekijk de deals</h3>
+                <p>Bekijk de deal en klik meteen door zodat je favoriete kleding niet uitverkocht raakt.</p>
+            </div>
+            <div class="section-container-col fade-in-up">
+                <img src="{% static 'images/screenShotSaleDetail.png' %}" alt="Deal detail pagina">
+            </div>
+        </div>
+    </div>
+    <div id="forBusinesses" class="section">
+        <div class="for-business-card">
+            <h3>Voor bedrijven</h3>
+            <p>Neem contact met ons op als je wil dat jouw merk in onze app komt.</p>
+            <button onclick="window.location.href='/for-business/'" class="action-btn">Contact</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Fade-in scroll effect
+    const fadeElems = document.querySelectorAll('.fade-in-up');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+    fadeElems.forEach(el => observer.observe(el));
+
+    // Notification rotator
+    const notificationData = JSON.parse(document.getElementById('notification-data').textContent);
+    const containers = [
+        document.getElementById('sampleNotifications1'),
+        document.getElementById('sampleNotifications2')
+    ];
+
+    let currentIndex = 0;
+    const intervalTime = 5000;
+
+    function createNotificationElement(notification) {
+        const bubble = document.createElement('div');
+        bubble.className = 'notification-bubble';
+        bubble.innerHTML = `
+            <strong>${notification.title}</strong>
+            <small>${notification.description}</small>
+            <span>${notification.time}</span>
+        `;
+        return bubble;
+    }
+
+    function handleUpdate(container, newData) {
+        const oldNotification = container.querySelector('.notification-bubble');
+
+        if (oldNotification) {
+            oldNotification.classList.remove('show');
+            oldNotification.classList.add('hide');
+
+            oldNotification.addEventListener('transitionend', () => {
+                oldNotification.remove();
+
+                const newNotification = createNotificationElement(newData);
+                container.innerHTML = ''
+                container.appendChild(newNotification);
+
+                // Force a reflow before showing
+                void newNotification.offsetWidth;
+                newNotification.classList.add('show');
+
+            }, { once: true });
+
+        } else {
+            const newNotification = createNotificationElement(newData);
+            container.innerHTML = ''
+            container.appendChild(newNotification);
+
+            // Force a reflow before showing
+            void newNotification.offsetWidth;
+            newNotification.classList.add('show');
+        }
+    }
+
+    function updateNotifications() {
+        containers.forEach((container, idx) => {
+            const dataIndex = (currentIndex + idx) % notificationData.length;
+            handleUpdate(container, notificationData[dataIndex]);
+        });
+        currentIndex = (currentIndex + 1) % notificationData.length;
+    }
+
+    updateNotifications();
+    setInterval(updateNotifications, intervalTime);
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const letters = document.querySelectorAll(".header-title span");
+
+    setTimeout(() => {
+        letters.forEach((letter, index) => {
+            setTimeout(() => {
+                letter.style.animation = "letterPopIn 0.6s ease-out forwards";
+            }, index * 80); // delay per letter, matching RN delay
+        });
+    }, 300);
+    // Fade-in scroll effect
+
+});
+</script>
+
+{% endblock %}

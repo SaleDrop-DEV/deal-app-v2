@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %} {# Django template tag for static files #}
+
+{% block head %}
+    {# Link to index-specific CSS #}
+    <link rel="stylesheet" href="{% static 'css/display_deals.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Jouw Sale Overzicht</h1>
+
+    {% if not deals %}
+        <div class="alert" role="alert">
+            Er zijn nog geen sales gevonden.
+        </div>
+    {% else %}
+        <div class="row">
+            {% for deal in deals %}
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="badge-container">
+                            {% if deal.is_personal_deal %}
+                                <span class="badge badge-personal">Persoonlijk</span>
+                            {% else %}
+                                <span class="badge badge-public">Publiek</span>
+                            {% endif %}
+                        </div>
+                        <h3 class="card-title">{{ deal.title|default:"Geen Titel" }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="store-card">
+                            <img src="{{ deal.store.image_url }}" class="store-logo" alt="">
+                            <p style="margin: 0">{{ deal.store.name }}</p>
+                        </div>
+                        {% if deal.grabber %}
+                            <p class="deal-grabber">{{ deal.grabber }}</p>
+                        {% endif %}
+                        {% if deal.description %}
+                            <p class="deal-description">{{ deal.description }}</p>
+                        {% endif %}
+                        
+                        {% if deal.main_link %}
+                            <a href="{{ deal.main_link }}" target="_blank" class="btn-primary">Bekijk Hoofd Deal</a>
+                        {% endif %}
+
+                        {% if deal.highlighted_products %}
+                            <div style="display: none;" class="highlighted-products-section">
+                                <h5>Uitgelichte Producten:</h5>
+                                <div class="product-slideshow">
+                                    <div class="product-slideshow-inner" id="slideshow-{{ forloop.counter }}">
+                                        {% for product in deal.highlighted_products %}
+                                            <div class="product-item">
+                                                {% if product.product_image_url %}
+                                                    <img src="{{ product.product_image_url }}" class="product-image" alt="{{ product.title|default:'Product Afbeelding' }}">
+                                                {% else %}
+                                                    <img src="https://placehold.co/300x200/cccccc/333333?text=Geen+Afbeelding" class="product-image" alt="Geen Afbeelding">
+                                                {% endif %}
+                                                <h6>{{ product.title|default:"Onbekend Product" }}</h6>
+                                                <p class="price-info">
+                                                    <span class="new-price">{{ product.new_price|default:"N/A" }}</span>
+                                                    {% if product.old_price %}
+                                                        <span class="old-price">{{ product.old_price }}</span>
+                                                    {% endif %}
+                                                </p>
+                                                <a href="{{ product.link }}" target="_blank" class="btn-view-product">Bekijk Product</a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if deal.highlighted_products|length > 1 %}
+                                        <button class="slideshow-arrow arrow-left" onclick="moveSlide('slideshow-{{ forloop.counter }}', -1)">&#10094;</button>
+                                        <button class="slideshow-arrow arrow-right" onclick="moveSlide('slideshow-{{ forloop.counter }}', 1)">&#10095;</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if deal.end_date and deal.end_date != 'onbekend' and deal.end_date != 'N/A' and deal.end_date != 'null' %}
+                            <p class="text-muted" style="margin-bottom:0">Eindigt: {{ deal.end_date }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div id="sale-pop-up-container" style="display: none">
+        <div class="sale-pop-up">
+            <h2 class="pop-up-title">ZOMER SALE 50% korting</h2>
+            <div class="pop-up-store-card">
+                <h3>GRABBER</h3>
+                <p>DESCRIPTION...</p>
+                <button>Bekijk deals</button>
+            </div>
+            <div class="pop-up-slide-show"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+
+</script>
+{% endblock %}

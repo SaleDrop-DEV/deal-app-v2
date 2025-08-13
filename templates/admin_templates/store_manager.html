@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Deal Scanner - Winkels{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/theme_v2_store_manager.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block content %}
+
+<header><h1>Winkels Beheren</h1></header>
+
+<div class="container">
+    <div class="form-section card">
+        <div class="card-header"><h3 style="text-align: center;">Nieuwe Winkel Toevoegen</h3></div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-fields">
+                    <div class="form-field">
+                        <label for="name">Winkelnaam:</label>
+                        <input type="text" name="name" id="name" class="form-control" required>
+                    </div>
+
+                    <div class="form-field">
+                        <div id="emailsFields" class="email-fields-conatiner">
+                            <div id="email-1" class="email_input_wrapper">
+                                <label for="name">E-mail:</label>
+                                <div class="input-group">
+                                    <!-- display next to eachother -->
+                                    <input type="text" name="name" id="email_input_1" class="form-control" required>
+                                    <button class="remove-email-btn">X</button>
+                                </div>
+                                
+                            </div>
+                            <!-- add more if needed -->
+                        </div>
+                        <button class="add-email-btn">+</button>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="home_url">Home URL:</label>
+                        <input type="text" name="name" id="home_url_input" class="form-control" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="home_url">Sale URL:</label>
+                        <input type="text" name="name" id="sale_url_input" class="form-control" required>
+                    </div>
+
+                    <div class="form-field" id="imageUploadField">
+                        <label for="image">Logo:</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="">Is de mail geverifieerd?</label>
+                        <input type="checkbox" class="form-control" name="" id="isVerifiedInput">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="">Moest je man of vrouw aangeven bij de nieuwsbrief?</label>
+                        <input type="checkbox" class="form-control" name="" id="genderPreferenceSetInput">
+                    </div>
+
+                    <div class="form-field" style="display: block;">
+                        <!-- Only visible if marked check at genderPreferenceSetInput -->
+                        <label for="">Gender</label>
+                        <select name="gender" id="genderInput" class="form-control">
+                            <option value="male">Man</option>
+                            <option value="female">Vrouw</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field" style="display: block;">
+                        <label for="">Heb je toestemming om de content te gebruiken?'</label>
+                        <select name="mayUseContent" id="mayUseContentInput" class="form-control">
+                            <option value="yes">Ja</option>
+                            <option value="no">Nee</option>
+                        </select>
+                    </div>
+
+                    {% for hidden_field in form.hidden_fields %}
+                        {{ hidden_field }}
+                    {% endfor %}
+                    
+                    <button style="width: fit-content; margin: 0 auto;" type="submit" class="primary-btn">Toevoegen</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h3>Overzicht van Winkels</h3>
+    <div style="display: none;" class="stores-grid">
+        {% for store in stores %}
+            <div class="store-card card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    {{ store.name }}
+                    <button class="edit-store-btn btn btn-sm btn-info" data-store-id="{{ store.id }}" data-store-name="{{ store.name }}" data-store-url="{{ store.home_url }}" data-store-emails="{{ store.email_addresses|join:', ' }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if store.image_url %}
+                        <img src="{{ store.image_url }}" class="img-fluid">
+                    {% endif %}
+                    <p><strong>URL:</strong> <a href="{{ store.home_url }}" target="_blank">{{ store.home_url }}</a></p>
+                    <p><strong>E-mails:</strong> {{ store.email_addresses|join:', ' }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">Nog geen winkels beschikbaar.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+        <button class="close-btn" id="closeModal">&times;</button>
+        <h3>Winkel Bewerken</h3>
+        <form id="editForm">
+            {% csrf_token %}
+            <input type="hidden" name="store_id" id="edit_store_id">
+
+            <div class="form-group">
+                <label for="edit_name">Winkelnaam</label>
+                <input type="text" name="name" id="edit_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="edit_home_url">Website URL</label>
+                <input type="url" name="home_url" id="edit_home_url" class="form-control">
+            </div>
+
+            <div id="edit-email-inputs-container">
+                <label>E-mailadressen</label>
+                <div class="email-input-wrapper">
+                    <input type="email" name="edit_email_addresses" class="form-control" placeholder="E-mailadres" required>
+                    <button type="button" class="add-email-btn btn btn-sm btn-primary" title="Voeg e-mailadres toe">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">Opslaan</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Add Email Logic
+    function addEmailInput(container, inputName, value = '') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'email-input-wrapper';
+
+        const input = document.createElement('input');
+        input.type = 'email';
+        input.name = inputName;
+        input.placeholder = 'E-mailadres';
+        input.required = true;
+        input.className = 'form-control';
+        input.value = value;
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn btn-sm btn-danger';
+        delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        delBtn.onclick = () => wrapper.remove();
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(delBtn);
+        container.appendChild(wrapper);
+    }
+
+    document.querySelectorAll('.add-email-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const container = btn.closest('#email-inputs-container') || document.getElementById('edit-email-inputs-container');
+            const inputName = container.id.includes('edit') ? 'edit_email_addresses' : 'email_addresses';
+            addEmailInput(container, inputName);
+        });
+    });
+
+    // Edit Store Modal
+    const editModal = document.getElementById('editModal');
+    const closeModal = document.getElementById('closeModal');
+    const editForm = document.getElementById('editForm');
+
+    document.querySelectorAll('.edit-store-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            editModal.classList.add('active');
+            document.getElementById('edit_store_id').value = btn.dataset.storeId;
+            document.getElementById('edit_name').value = btn.dataset.storeName;
+            document.getElementById('edit_home_url').value = btn.dataset.storeUrl;
+
+            const emailContainer = document.getElementById('edit-email-inputs-container');
+            emailContainer.querySelectorAll('.email-input-wrapper').forEach(e => e.remove());
+
+            const emails = btn.dataset.storeEmails.split(',');
+            emails.forEach(email => {
+                addEmailInput(emailContainer, 'edit_email_addresses', email.trim());
+            });
+        });
+    });
+
+    closeModal.addEventListener('click', () => {
+        editModal.classList.remove('active');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === editModal) {
+            editModal.classList.remove('active');
+        }
+    });
+
+    editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // You can use fetch to send the form data to your Django endpoint.
+        alert('Form submission logic here');
+    });
+});
+</script>
+{% endblock %}

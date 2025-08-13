@@ -1,0 +1,508 @@
+
+/* --- Flash Messages --- */
+.flash-messages {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-round);
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: var(--color-succes-background);
+    color: var(--color-succes);
+    border-color: var(--color-succes);
+}
+
+.alert-info {
+    background-color: var(--color-gray-lighter);
+    color: var(--secondary-text-color);
+    border-color: var(--color-gray-medium);
+}
+
+.alert-danger, .alert-error {
+    background-color: var(--color-error-background);
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+/* --- Card & Form Styles --- */
+
+.card-header {
+    background-color: var(--color-gray-lighter);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1em;
+    border-bottom: 1px solid var(--color-gray-medium);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.form-section {
+    max-width: 600px;
+    padding: 1.5rem;
+
+    margin: 0 auto 3rem;
+    background: var(--color-gray-lighter);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+.required {
+    color: var(--color-error);
+    margin-left: 5px;
+}
+
+.optional {
+    font-weight: normal;
+    color: var(--secondary-text-color);
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-gray-medium);
+    border-radius: var(--border-radius-round);
+    font-size: 1rem;
+    background-color: var(--color-white);
+    color: var(--primary-text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+.form-group input[type="text"], .form-group input[type="url"], .form-group input[type="email"]{
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: var(--border-radius-round);
+    font-size: 1rem;
+}
+.form-group input[type="text"]:focus, 
+.form-group input[type="url"]:focus, 
+.form-group input[type="email"]:focus{
+    outline: none;
+    border: 1px solid var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+
+}
+
+/* --- Buttons --- */
+.btn-submit {
+    display: block;
+    width: auto;
+    margin: 0 auto;
+    background-color: var(--color-accent-light);
+    color: var(--color-white);
+    padding: 0.9rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ready-submit{
+    background-color: var(--color-accent) !important;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.ready-submit:hover,
+.save-changes:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-email {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.btn-info {
+    background-color: var(--color-gray-medium);
+    color: var(--color-white);
+    border: none;
+}
+
+.btn-info:hover {
+    background-color: var(--primary-text-color);
+}
+
+.btn-danger {
+    background-color: var(--color-error-background);
+    color: var(--color-error);
+    border-radius: 50px;
+    border: none;
+    transition: 0.3s;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: block;
+    width: auto;
+    margin: 0 auto;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.btn-danger:hover {
+    transform: scale(1.05);
+}
+
+/* --- Email Inputs --- */
+.email-input-wrapper {
+    /* display: flex; */
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeInUp 0.4s ease forwards;
+}
+.email-input-wrapper-content{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.email-input-wrapper input {
+    flex-grow: 1;
+    margin-right: 0;
+}
+
+/* --- Stores Grid --- */
+.stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+.store-card.card {
+    background-color: var(--color-gray-lighter);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.store-card .card-header {
+    background-color: var(--primary-text-color);
+    color: var(--color-white);
+    text-align: center;
+}
+
+.store-banner {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 1rem;
+    border: 2px solid var(--color-accent);
+}
+
+.store-card .card-body p {
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.store-link {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.store-link:hover {
+    text-decoration: underline;
+}
+
+
+
+
+/* --- Modal Styles --- */
+/* --- Modal Styles --- */
+
+/* The modal overlay sits on top of everything */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* State for when the modal is active and visible */
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* The actual modal content card */
+.modal-card {
+    /* Use the same styling as your .form-section class */
+    background: var(--color-gray-lighter);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem; /* Match the padding of your form section */
+    
+    /* General modal card properties */
+    border-radius: var(--border-radius-round);
+    width: 90%;
+    max-width: 600px;
+    max-height: calc(90vh - 40px);
+    margin: 20px 0;
+    overflow-y: auto;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    position: relative;
+}
+
+
+/* State for when the modal card is active */
+.modal-overlay.active .modal-card {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* The close button inside the modal */
+.modal-card .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--secondary-text-color);
+    transition: color 0.3s ease;
+}
+
+.modal-card .close-btn:hover {
+    color: var(--primary-text-color);
+}
+
+
+/* General button styling for the modal to match */
+.modal-card .action-btn {
+    /* Use the same button styling you defined for the new store form */
+    display: block;
+    width: auto;
+    margin: 0 auto;
+    background-color: var(--color-accent-light);
+    color: var(--color-white);
+    padding: 0.9rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* The dynamic email input container can be simplified */
+#emailInputsContainer{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+#emailInputsContainer .form-control{
+    flex-grow: 1;
+}
+
+/* --- Responsive Adjustments --- */
+@media(min-width: 1040px){
+    .stores-grid {
+        padding: 0 !important;
+    }
+}
+
+@media (max-width: 700px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+        margin-top: 2rem;
+    }
+
+    .form-section .card-body {
+        padding: 1.5rem;
+    }
+
+    .btn-submit {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .stores-grid {
+        grid-template-columns: 1fr;
+    }
+    .stores-grid .store-card{
+        display: block;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.modal-overlay{
+    visibility: hidden;
+    opacity: 0;
+}
+
+.active-pop-up{
+    visibility: visible !important;
+    animation: fadeInUp 0.4s ease forwards;
+
+}
+
+
+
+
+
+
+
+
+/* --- Confirmation Pop-up Styles --- */
+
+/* The confirmation modal overlay, identical to the edit modal */
+#confirmDeleteModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#confirmDeleteModal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* The inner card for the confirmation message */
+.confirmation-delete-pop-up {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 15px rgba(5, 32, 74, 0.2);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    position: relative;
+}
+
+#confirmDeleteModal.active .confirmation-delete-pop-up {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.confirmation-delete-pop-up h3 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-text-color);
+}
+
+/* Styles for the "Ja" (Yes) and "Nee" (No) buttons */
+.confirmation-delete-pop-up .close-btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin: 0 0.5rem; /* Space between the buttons */
+}
+
+/* Specific styling for the 'Ja' (Yes) button */
+#deleteConfirmationBtn {
+    background-color: var(--color-error-background);
+    color: var(--color-error);
+}
+
+
+/* Specific styling for the 'Nee' (No) button */
+#closeDeleteConfirmationBtn {
+    background-color: var(--color-gray-medium);
+    color: var(--primary-text-color);
+}
+.btn-conf{
+    transition: 0.3s;
+}
+.btn-conf:hover{
+    transform: scale(1.05);
+}
+

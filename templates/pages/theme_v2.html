@@ -1,0 +1,504 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/theme_v2_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme_v2_cards.css' %}">
+    <!-- google icons -->
+    <title></title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="small-device-nav">
+            <div class="navbar-brand">
+                <a href="#">Your Logo</a>
+            </div>
+            <div class="burger" id="burger">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+        <!-- Desktop navigation -->
+        <div class="large-device-nav">
+            <div class="navbar-brand">
+                <a href="#">Your Logo</a>
+            </div>
+            <ul class="desktop-nav-links">
+                <li><a class="accent-color" href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="#">Portfolio</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay">
+        <ul class="nav-links nav-list"> {# Added nav-list class here #}
+            <li><a class="accent-color" href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Portfolio</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+    <div class="message-container success-message" id="successMessage">
+        <p class="message-text"></p>
+    </div>
+    <div class="message-container error-message" id="errorMessage">
+        <p class="message-text"></p>
+        <span class="close-btn">&times;</span> {# Using times character for a simple cross #}
+    </div>
+
+    <main>
+        <header>
+            <h1>Mijn sales</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus fugiat quis culpa quisquam, ex aliquid, facilis ratione modi assumenda praesentium voluptatum laborum asperiores reiciendis maiores placeat quasi porro, dolores impedit.</p>
+            <button class="primary-btn">Zoek Winkels</button>
+            <button class="action-btn">Naar sale</button>
+        </header>
+
+        <div class="sales-container-small">
+            {% for deal in deals %}
+                <div class="sales-item">
+                    <h3 class="sale-title">{{ deal.title }}</h3>
+                    <p class="sale-grabber">{{ deal.grabber }}</p>
+                    <p class="store-name accent-color">{{deal.store.name}}</p>
+                    <button class="primary-btn view-details-btn">Bekijk</button>
+                    <script class="sale-data" type="application/json">
+                        {{ deal.deal_json|safe }}
+                    </script>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="sales-container-large">
+            {% for deal in deals %}
+                <div class="sales-item">
+                    <h3 class="sale-title">{{deal.title}}</h3>
+                    <p class="sale-grabber">{{deal.grabber}}</p>
+                    <p class="store-name accent-color">{{deal.store.name}}</p>
+                    <button class="primary-btn view-details-btn">Bekijk</button>
+                    <script class="sale-data" type="application/json">
+                        {{ deal.deal_json|safe }}
+                    </script>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer>
+
+    </footer>
+
+    <button id="small-screen-action-btn" class="action-btn" onclick="">Naar sale</button>
+    
+    <!-- Product Overlay (for small screens) -->
+    <div class="product-overlay" id="productOverlay">
+        <div class="product-content-wrapper">
+            <span class="product-close-btn material-icons">&times;</span>
+            <div class="product-header">
+                <h2 class="product-title"></h2>
+                <div class="store-info">
+                    <img src="" alt="Store Logo" class="store-logo">
+                    <p class="store-name-detail"></p>
+                </div>
+                <p class="product-grabber"></p>
+            </div>
+            <div class="product-details">
+                <p class="product-description"></p>
+                <div class="highlighted-products-section">
+                    <h3>Uitgelichte producten</h3>
+                    <div class="highlighted-products-slider">
+                        <!-- Products will be injected here -->
+                    </div>
+                </div>
+                <div class="product-actions">
+                    <!-- <a href="#" class="primary-btn product-main-link" target="_blank">Go to Deal</a> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pop-up (for large screens) -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="product-modal">
+            <span class="product-close-btn material-icons">&times;</span>
+            <div class="product-header">
+                <h2 class="product-title"></h2>
+                <div class="store-info">
+                    <img src="" alt="Store Logo" class="store-logo">
+                    <p class="store-name-detail"></p>
+                </div>
+                <p class="product-grabber"></p>
+            </div>
+            <div class="product-scroll-area">
+                <div class="product-details">
+                    <p class="product-description"></p>
+                    <div class="highlighted-products-section">
+                        <h3>Highlighted Products</h3>
+                        <div class="highlighted-products-slider">
+                            <!-- Products will be injected here -->
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <!-- <a href="#" class="primary-btn product-main-link" target="_blank">Naar sale</a> -->
+                        
+                    </div>
+                </div>
+            </div>
+            <button id="action-btn-large-screens" class="action-btn action-btn-pop-up">Naar sale</button>
+        </div>
+    </div>
+
+
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Navbar Script (copied from your previous input)
+    const burger = document.getElementById('burger');
+    const navOverlay = document.getElementById('navOverlay');
+    const navLinksList = document.querySelector('.nav-links'); // The UL element
+    const navItems = navLinksList.querySelectorAll('li'); // All LI elements
+
+    burger.addEventListener('click', () => {
+        const isOpen = navOverlay.classList.contains('open');
+
+        burger.classList.toggle('open');
+        navOverlay.classList.toggle('open');
+
+        if (!isOpen) {
+            navItems.forEach(item => {
+                item.classList.remove('is-fading-in');
+                item.style.transitionDelay = '0s';
+            });
+            setTimeout(() => {
+                navItems.forEach((item, index) => {
+                    item.style.transitionDelay = `${index * 0.15}s`;
+                    item.classList.add('is-fading-in');
+                });
+            }, 50);
+        } else {
+            navItems.forEach(item => {
+                item.classList.remove('is-fading-in');
+                item.style.transitionDelay = '0s';
+            });
+        }
+    });
+
+    navLinksList.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navOverlay.classList.contains('open')) {
+                burger.classList.remove('open');
+                navOverlay.classList.remove('open');
+                navItems.forEach(item => {
+                    item.classList.remove('is-fading-in');
+                    item.style.transitionDelay = '0s';
+                });
+            }
+        });
+    });
+
+    // Message Display Functionality (copied from your previous input)
+    let successMessageDiv;
+    let errorMessageDiv;
+    let errorMessageCloseBtn;
+
+    window.displayMessage = function(type, message) {
+        if (!successMessageDiv || !errorMessageDiv) {
+            console.error('Message container elements not found. Ensure DOM is loaded.');
+            return;
+        }
+
+        let targetMessageDiv;
+        if (type === 'success') {
+            targetMessageDiv = successMessageDiv;
+            errorMessageDiv.classList.remove('show', 'fade-out');
+        } else if (type === 'error') {
+            targetMessageDiv = errorMessageDiv;
+            successMessageDiv.classList.remove('show', 'fade-out');
+        } else {
+            console.error('Invalid message type. Use "success" or "error".');
+            return;
+        }
+
+        const messageTextElement = targetMessageDiv.querySelector('.message-text');
+        messageTextElement.textContent = message;
+
+        targetMessageDiv.classList.remove('fade-out');
+        targetMessageDiv.classList.add('show');
+        targetMessageDiv.style.display = 'flex'; // Ensure it's displayed as flex when shown
+
+        if (type === 'success') {
+            setTimeout(() => {
+                targetMessageDiv.classList.add('fade-out');
+                targetMessageDiv.addEventListener('transitionend', function handler() {
+                    targetMessageDiv.classList.remove('show');
+                    targetMessageDiv.style.display = 'none';
+                    targetMessageDiv.removeEventListener('transitionend', handler);
+                });
+            }, 5000);
+        } else if (type === 'error') {
+            errorMessageCloseBtn.onclick = () => {
+                targetMessageDiv.classList.add('fade-out');
+                targetMessageDiv.addEventListener('transitionend', function handler() {
+                    targetMessageDiv.classList.remove('show');
+                    targetMessageDiv.style.display = 'none';
+                    targetMessageDiv.removeEventListener('transitionend', handler);
+                });
+            };
+        }
+    };
+
+    // Assign elements once the DOM is ready
+    successMessageDiv = document.getElementById('successMessage');
+    errorMessageDiv = document.getElementById('errorMessage');
+    errorMessageCloseBtn = errorMessageDiv.querySelector('.close-btn');
+
+    // Set initial display to none for message containers
+    successMessageDiv.style.display = 'none';
+    errorMessageDiv.style.display = 'none';
+
+
+    // --- Product Detail View Functionality ---
+    const productOverlay = document.getElementById('productOverlay');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const productContentWrapper = productOverlay.querySelector('.product-content-wrapper'); // Get the mobile slide-up panel
+    const productModal = modalBackdrop.querySelector('.product-modal'); // Get the desktop modal
+    const productCloseBtns = document.querySelectorAll('.product-close-btn'); // Both overlay and modal close buttons
+    const viewDetailsButtons = document.querySelectorAll('.view-details-btn');
+
+    const action_btn_for_small_screens = document.getElementById('small-screen-action-btn');
+
+
+    // Get references to all elements that will be populated (for both overlay and modal)
+    const productTitleElements = document.querySelectorAll('.product-title');
+    const productGrabberElements = document.querySelectorAll('.product-grabber');
+    const productDescriptionElements = document.querySelectorAll('.product-description');
+    const highlightedProductsSliderElements = document.querySelectorAll('.highlighted-products-slider');
+    const storeNameDetailElements = document.querySelectorAll('.store-name-detail');
+    const storeLogoElements = document.querySelectorAll('.store-logo');
+    const productMainLinkElements = document.querySelectorAll('.product-main-link');
+
+    // Variables for swipe-down-to-close
+    let startY = 0;
+    let currentY = 0;
+    let diffY = 0;
+    let isSwipingDown = false;
+    const swipeThreshold = 10; // Pixels to swipe down to trigger dismiss
+
+    // Function to populate and show the product detail view
+    function showProductDetails(dealData) {
+        // Populate content for all instances (overlay and modal)
+        productTitleElements.forEach(el => el.textContent = dealData.title || 'No Title');
+        productGrabberElements.forEach(el => el.textContent = dealData.grabber || 'No Grabber');
+        productDescriptionElements.forEach(el => el.textContent = dealData.description || 'No Description');
+        storeNameDetailElements.forEach(el => el.textContent = dealData.store ? dealData.store.name : 'Unknown Store');
+        productMainLinkElements.forEach(el => {
+            el.href = dealData.main_link || '#';
+            el.style.display = dealData.main_link ? 'inline-block' : 'none'; // Hide button if no link
+        });
+        storeLogoElements.forEach(el => {
+            el.src = dealData.store && dealData.store.image_url ? dealData.store.image_url : 'https://placehold.co/50x50/F5F5F7/86868B?text=Store';
+            el.alt = dealData.store && dealData.store.name ? `${dealData.store.name} Logo` : 'Store Logo';
+        });
+
+        // Populate highlighted products slider
+        highlightedProductsSliderElements.forEach(slider => {
+            slider.innerHTML = ''; // Clear previous products
+            if (dealData.highlighted_products && Array.isArray(dealData.highlighted_products) && dealData.highlighted_products.length > 0) {
+                dealData.highlighted_products.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.classList.add('highlighted-product-item');
+                    const old_price = product.old_price;
+                    const new_price = product.new_price;
+                    let price_p = ''
+                    if (old_price && new_price) {
+                        price_p = `<p class="product-item-price">${product.new_price && product.new_price !== 'N/A' ? `€${parseFloat(product.new_price).toFixed(2)}` : (product.old_price && product.old_price !== 'N/A' ? `€${parseFloat(product.old_price).toFixed(2)}` : '')}</p>`
+                    }
+
+                    productDiv.innerHTML = `
+                        <img src="${product.product_image_url || 'https://placehold.co/100x100/F5F5F7/86868B?text=Product'}" alt="${product.title || 'Product'} Image">
+                        <p class="product-item-name">${product.title || 'Onbekend'}</p>
+                        ${price_p}
+                    `;
+                    slider.appendChild(productDiv);
+                });
+                document.getElementsByClassName('highlighted-products-section')[0].style.display = 'block';
+                document.getElementsByClassName('highlighted-products-section')[1].style.display = 'block';
+            } else {
+                document.getElementsByClassName('highlighted-products-section')[0].style.display = 'none';
+                document.getElementsByClassName('highlighted-products-section')[1].style.display = 'none';
+                slider.innerHTML = '<p class="no-products-message">No highlighted products available.</p>';
+            }
+        });
+
+        // Determine screen size and show appropriate view
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            // Small screen: slide-up overlay
+            productOverlay.classList.add('show');
+            action_btn_for_small_screens.classList.remove('hide-action-btn')
+            action_btn_for_small_screens.classList.add('show-action-btn');
+            action_btn_for_small_screens.onclick = () => {
+                go_to_sale(dealData.main_link);
+            }
+            document.body.style.overflow = 'hidden'; // Prevent scrolling body
+            // Reset transform in case it was moved by a previous failed swipe
+            productContentWrapper.style.transform = 'translateY(0)';
+            productContentWrapper.style.transition = 'transform 0.3s ease-out'; // Ensure transition is active
+        } else {
+            // Large screen: modal pop-up
+            modalBackdrop.classList.add('show');
+            const top_offset = document.getElementsByClassName("product-modal")[0].offsetHeight;
+            console.log(`height=${top_offset}`)
+            console.log(top_offset - (60 - 32) + "px")
+            // document.getElementById("action-btn-large-screens").style.top = top_offset - (60 - 32) + "px";
+            document.body.style.overflow = 'hidden'; // Prevent scrolling body
+            // Reset transform for modal as well
+            productModal.style.transform = 'scale(1)';
+            productModal.style.transition = 'transform 0.3s ease-out'; // Ensure transition is active
+        }
+    }
+
+    // Function to hide the product detail view
+    function hideProductDetails() {
+        // Trigger fade-out/slide-down animation
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            productContentWrapper.style.transform = 'translateY(100%)'; // Slide down
+            productOverlay.classList.remove('show'); // Fade out backdrop
+            action_btn_for_small_screens.classList.add('hide-action-btn')
+            action_btn_for_small_screens.classList.remove('show-action-btn');
+        } else {
+            productModal.style.transform = 'scale(0.9)'; // Pop back in
+            modalBackdrop.classList.remove('show'); // Fade out backdrop
+        }
+
+        // Wait for the animation to complete before hiding completely and restoring scroll
+        const transitionEndHandler = () => {
+            productOverlay.classList.remove('show'); // Ensure overlay is fully hidden
+            modalBackdrop.classList.remove('show'); // Ensure modal is fully hidden
+            document.body.style.overflow = ''; // Restore body scrolling
+            // Remove the event listener to prevent multiple calls
+            productContentWrapper.removeEventListener('transitionend', transitionEndHandler);
+            productModal.removeEventListener('transitionend', transitionEndHandler);
+        };
+
+        // Add event listeners for transition end
+        productContentWrapper.addEventListener('transitionend', transitionEndHandler);
+        productModal.addEventListener('transitionend', transitionEndHandler);
+    }
+
+    function go_to_sale(link){
+        window.open(link, '_blank');
+    }
+
+    // Event listeners for "Bekijk" buttons
+    viewDetailsButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const salesItem = event.target.closest('.sales-item');
+            const scriptTag = salesItem.querySelector('.sale-data[type="application/json"]');
+
+            if (scriptTag) {
+                let dealData;
+                try {
+                    dealData = JSON.parse(scriptTag.textContent);
+                    console.log('Parsed Deal Data:', dealData);
+
+                    // Ensure store data is directly available or handle its absence
+                    if (!dealData.store && dealData.gmail_data && dealData.gmail_data.domain) {
+                        dealData.store = {
+                            name: dealData.gmail_data.domain,
+                            image_url: `https://placehold.co/50x50/F5F5F7/86868B?text=${dealData.gmail_data.domain.charAt(0).toUpperCase()}`
+                        };
+                    }
+
+                    showProductDetails(dealData);
+                } catch (e) {
+                    console.error('Error parsing JSON data for sale item:', e);
+                    window.displayMessage('error', 'Could not load sale details. Data corrupted. Check console for details.');
+                }
+            } else {
+                console.warn('No JSON data found for this sale item.');
+                window.displayMessage('error', 'No details available for this sale.');
+            }
+        });
+    });
+
+    // Event listeners for close buttons (X icon)
+    productCloseBtns.forEach(btn => {
+        btn.addEventListener('click', hideProductDetails);
+    });
+
+    // Close modal/overlay when clicking outside the content (for large screens)
+    modalBackdrop.addEventListener('click', (event) => {
+        if (event.target === modalBackdrop) { // Ensure click is directly on backdrop, not content
+            hideProductDetails();
+        }
+    });
+
+    // Prevent clicks inside the content from closing the modal/overlay
+    productContentWrapper.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+    productModal.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+
+    // --- Swipe-down-to-close for Mobile Overlay ---
+    productContentWrapper.addEventListener('touchstart', (e) => {
+        if (window.matchMedia('(max-width: 767px)').matches) { // Only for mobile overlay
+            startY = e.touches[0].clientY;
+            // Disable default transition during swipe to allow direct manipulation
+            productContentWrapper.style.transition = 'none';
+        }
+    });
+
+    productContentWrapper.addEventListener('touchmove', (e) => {
+        if (window.matchMedia('(max-width: 767px)').matches) { // Only for mobile overlay
+            currentY = e.touches[0].clientY;
+            diffY = currentY - startY;
+
+            // Only allow swipe down if at the top of the scrollable content
+            // and if the swipe is actually downwards
+            if (productContentWrapper.scrollTop === 0 && diffY > 0) {
+                isSwipingDown = true;
+                // Apply transform directly
+                productContentWrapper.style.transform = `translateY(${diffY}px)`;
+                e.preventDefault(); // Prevent native scroll if we're swiping to dismiss
+            } else if (diffY < 0 && productContentWrapper.scrollTop > 0) {
+                // If swiping up and not at the top, let native scroll handle it
+                isSwipingDown = false; // Ensure swipe-down state is reset
+            } else if (productContentWrapper.scrollTop === 0 && diffY < 0) {
+                // If at top and trying to swipe up, prevent negative transform
+                productContentWrapper.style.transform = `translateY(0px)`;
+                isSwipingDown = false;
+                e.preventDefault(); // Prevent rubber banding if at top
+            }
+        }
+    });
+
+    productContentWrapper.addEventListener('touchend', () => {
+        if (window.matchMedia('(max-width: 767px)').matches) { // Only for mobile overlay
+            // Re-enable transition for smooth return/dismissal
+            productContentWrapper.style.transition = 'transform 0.3s ease-out';
+
+            if (isSwipingDown && diffY > swipeThreshold) {
+                // Dismiss if swipe distance exceeds threshold
+                hideProductDetails();
+            } else {
+                // Snap back to original position
+                productContentWrapper.style.transform = 'translateY(0)';
+            }
+
+            // Reset swipe state
+            startY = 0;
+            currentY = 0;
+            diffY = 0;
+            isSwipingDown = false;
+        }
+    });
+
+});
+</script>
+</html>

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block head %}
+<meta name="description" content="Lees hoe SaleDrop jouw gegevens verzamelt, gebruikt en beschermt volgens ons privacybeleid.">
+<link rel="canonical" href="https://www.saledrop.app/privacy-policy/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Privacybeleid - SaleDrop">
+<meta property="og:description" content="Informatie over hoe SaleDrop persoonsgegevens verzamelt, gebruikt en beschermt.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/privacy-policy/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacybeleid - SaleDrop">
+<meta name="twitter:description" content="Lees hoe SaleDrop jouw gegevens verzamelt, gebruikt en beschermt.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PrivacyPolicy",
+  "name": "Privacybeleid - SaleDrop",
+  "url": "https://www.saledrop.app/privacy-policy/",
+  "description": "SaleDrop legt in dit privacybeleid uit hoe wij persoonsgegevens verzamelen, gebruiken en beschermen.",
+  "dateModified": "2025-08-09",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SaleDrop",
+    "url": "https://www.saledrop.app/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.saledrop.app/static/images/saledrop-logo.png"
+    }
+  }
+}
+</script>
+
+
+    <style>
+        /* CSS voor de specifieke content van de privacy policy pagina */
+        .content-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 1.5rem; /* Zorgt voor padding op mobiel */
+        }
+
+        .content-container h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary-text-color);
+        }
+        
+        .content-container h3 {
+            font-size: 1.5rem;
+            font-weight: 550;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-text-color);
+        }
+
+        .content-container p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--secondary-text-color);
+        }
+        
+        .content-container strong {
+            font-weight: 600;
+            color: var(--primary-text-color);
+        }
+
+        .content-container ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-container ul li {
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-text-color);
+        }
+
+        /* Horizontale lijn voor de 'Laatst bijgewerkt' sectie */
+        .content-container hr {
+            border: 0;
+            height: 1px;
+            background: var(--color-gray-light);
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                margin: 20px auto;
+            }
+        }
+        li{
+            list-style: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1>Privacybeleid</h1>
+        <p>Dit privacybeleid beschrijft hoe SaleDrop informatie verzamelt, gebruikt en deelt wanneer je onze mobiele applicatie gebruikt. Door onze app te gebruiken, ga je akkoord met de voorwaarden van dit privacybeleid.</p>
+
+        <h3>1. Welke informatie verzamelen wij?</h3>
+        <p><strong>Informatie die je direct aan ons verstrekt</strong></p>
+        <p>Wanneer je onze app gebruikt, kunnen we je vragen om persoonlijke informatie te verstrekken, waaronder maar niet beperkt tot:</p>
+        <ul>
+            <li><strong>Contactgegevens:</strong> Je e-mailadres.</li>
+            <li><strong>Accountgegevens:</strong> Gender, wachtwoord en andere informatie die nodig is om je account aan te maken en te beheren.</li>
+        </ul>
+        <p><strong>Informatie die automatisch wordt verzameld</strong></p>
+        <p>Wanneer je onze app gebruikt, kunnen we automatisch bepaalde informatie verzamelen over je apparaat en je gebruik van de app, waaronder:</p>
+        <ul>
+            <li><strong>Apparaatinformatie:</strong> Unieke apparaat-ID's, besturingssysteem, browsertype en mobiel netwerk.</li>
+            <li><li><strong>Gebruiksgegevens:</strong> Informatie over hoe je de app gebruikt, zoals de functies die je gebruikt, de tijd en duur van je sessies, en eventuele fouten die optreden.</li>
+        </ul>
+
+        <h3>2. Hoe gebruiken wij jouw informatie?</h3>
+        <p>We gebruiken de verzamelde informatie voor de volgende doeleinden:</p>
+        <ul>
+            <li><strong>Dienstverlening:</strong> Om de app en de bijbehorende functionaliteiten aan te bieden, te onderhouden en te verbeteren.</li>
+            <li><strong>Communicatie:</strong> Om met je te communiceren over je account, updates, ondersteuning en andere relevante informatie.</li>
+            <li><strong>Personalisatie:</strong> Om de app en de inhoud te personaliseren op basis van jouw voorkeuren en gebruikspatronen.</li>
+            <li><strong>Analyse:</strong> Om te analyseren hoe onze app wordt gebruikt en om de prestaties te meten en te verbeteren.</li>
+            <li><strong>Veiligheid:</strong> Om de veiligheid en integriteit van onze app en onze gebruikers te waarborgen.</li>
+        </ul>
+
+        <h3>3. Hoe delen wij jouw informatie?</h3>
+        <p>Wij verkopen, verhuren of verhandelen jouw persoonlijke gegevens niet aan derden. Wij kunnen jouw informatie wel delen met:</p>
+        <ul>
+            <li><strong>Juridische verplichtingen:</strong> Wanneer we daartoe wettelijk verplicht zijn, kunnen we jouw informatie vrijgeven om te voldoen aan een dagvaarding, gerechtelijk bevel of ander juridisch proces.</li>
+        </ul>
+
+        <h3>4. Hoe beschermen wij jouw gegevens?</h3>
+        <p>Wij nemen passende technische en organisatorische maatregelen om jouw persoonlijke gegevens te beschermen tegen ongeoorloofde toegang, gebruik, openbaarmaking, wijziging of vernietiging.</p>
+
+        <h3>5. Jouw rechten</h3>
+        <p>Je hebt het recht om jouw persoonlijke gegevens in te zien, te corrigeren of te laten verwijderen. Je kunt contact met ons opnemen via {{ email }} om een verzoek in te dienen.</p>
+
+        <h3>6. Wijzigingen in dit privacybeleid</h3>
+        <p>We kunnen dit privacybeleid van tijd tot tijd bijwerken. We zullen je op de hoogte stellen van eventuele wijzigingen door het nieuwe privacybeleid op deze pagina te plaatsen en de "Laatst bijgewerkt" datum bovenaan aan te passen.</p>
+
+        <h3>7. Contact opnemen</h3>
+        <p>Als je vragen hebt over dit privacybeleid, neem dan contact met ons op via:</p>
+        <p>{{ email }}</p>
+
+        <p>---</p>
+        <p><strong>Laatst bijgewerkt: 09/08/2025</strong></p>
+    </div>
+{% endblock %}
+

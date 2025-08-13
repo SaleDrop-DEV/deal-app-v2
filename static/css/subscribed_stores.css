@@ -1,0 +1,534 @@
+:root {
+
+    /* Specific to stores page buttons */
+    --color-button-subscribe: var(--color-accent-light);
+    --color-button-unsubscribe: var(--color-status-error);
+    --color-button-secondary: var(--color-primary-medium);
+    --color-button-secondary-hover: var(--color-primary-medium-hover);
+}
+/* General Headings */
+h1, h2 {
+    color: var(--color-primary-dark);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 2.8rem; /* Adjusted for consistency with previous stores.css */
+    margin-bottom: 2.5rem; /* Adjusted for consistency with previous stores.css */
+}
+
+h2 {
+    font-size: 2rem;
+    margin-top: 3rem;
+}
+
+/* User Greeting */
+.user-greeting {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    color: var(--color-primary-dark);
+}
+
+/* Flash Messages / Alerts */
+.flash-messages {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: var(--color-status-success);
+    color: var(--color-primary-dark);
+    border-color: #c0f0c2; /* Darker shade for border */
+}
+
+.alert-info {
+    background-color: var(--color-neutral-white);
+    color: var(--color-text-muted);
+    border-color: var(--color-neutral-light);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.alert-danger, .alert-error {
+    background-color: var(--color-status-error);
+    color: var(--color-neutral-white);
+    border-color: #b02a37; /* Darker shade for border */
+}
+
+.alert a {
+    color: var(--color-primary-medium);
+    text-decoration: none;
+    font-weight: 600;
+}
+.alert a:hover {
+    text-decoration: underline;
+}
+
+/* Form Section Card (if used on this page, e.g., for adding new stores) */
+.form-section.card {
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background-color: var(--color-neutral-white);
+    overflow: hidden;
+}
+
+.form-section .card-header {
+    background-color: var(--color-primary-medium);
+    color: var(--color-neutral-white);
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.form-section .card-body {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.form-group label .required {
+    color: var(--color-status-error);
+    margin-left: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="url"],
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-neutral-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--color-primary-dark);
+    background-color: var(--color-neutral-white);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="url"]:focus,
+.form-group input[type="file"]:focus {
+    border-color: var(--color-accent-light);
+    box-shadow: 0 0 0 3px rgba(180, 151, 214, 0.2); /* Using rgba with accent-light for consistency */
+    outline: none;
+}
+
+.form-group input[type="file"] {
+    padding: 0.5rem 1rem;
+}
+
+.btn-submit {
+    display: block;
+    width: auto;
+    margin: 0 auto;
+    background-color: var(--color-primary-medium);
+    color: var(--color-neutral-white);
+    padding: 0.9rem 2rem;
+    border-radius: 25px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-submit:hover {
+    background-color: var(--color-primary-medium-hover);
+    transform: translateY(-2px);
+}
+
+/* Stores Grid Layout (Main Content) */
+.stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 2rem; /* Space between cards */
+    justify-content: center;
+}
+
+.store-card-item { /* Renamed from .store-card.card to match HTML */
+    background-color: var(--color-neutral-white);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 2px solid transparent; /* Default border */
+}
+
+.store-card-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.store-card-item.subscribed {
+    border-color: var(--color-accent-light); /* Highlight subscribed stores */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 0 0 3px rgba(180, 151, 214, 0.3); /* Subtle glow */
+}
+
+.store-card-item.subscribed:hover {
+    border-color: var(--color-accent-light-hover);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(180, 151, 214, 0.4);
+}
+
+.store-card-item .card-header { /* Specific header for store items */
+    background-color: var(--color-primary-medium); /* Darker header for store cards */
+    color: var(--color-neutral-white);
+    padding: 1.5rem 1rem; /* Adjusted from previous stores.css */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 120px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.store-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: var(--color-neutral-white);
+    padding: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.store-logo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--color-neutral-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--color-primary-medium);
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.store-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-neutral-white);
+}
+
+.store-card-item .card-body { /* Specific body for store items */
+    padding: 1.5rem;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.store-domain {
+    font-size: 0.95rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 1.5rem;
+}
+.store-domain span {
+    font-weight: 600;
+    color: var(--color-primary-medium);
+}
+
+.store-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* General Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    border: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--color-accent-light); /* Accent color for primary action */
+    color: var(--color-primary-dark);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1rem;
+    border: none;
+    cursor: pointer;
+    /* Added for centering on smaller screens */
+    align-self: center; /* Centers the button within the flex column */
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent-light-hover); /* Darker blue on hover */
+    /* color: var(--color-neutral-white); */
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--color-button-secondary);
+    color: var(--color-neutral-white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-button-secondary-hover);
+    transform: translateY(-2px);
+}
+
+.subscription-form {
+    margin-top: auto;
+    width: 100%;
+}
+
+.btn-subscribe {
+    background-color: var(--color-button-subscribe);
+    color: var(--color-primary-dark);
+}
+
+.btn-subscribe:hover {
+    background-color: var(--color-accent-light-hover);
+    transform: translateY(-2px);
+}
+
+.btn-unsubscribe {
+    background-color: var(--color-button-unsubscribe);
+    color: var(--color-neutral-white);
+}
+
+.btn-unsubscribe:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.no-stores-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
+    grid-column: 1 / -1;
+    padding: 3rem 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+        margin-top: 2rem;
+    }
+
+    .form-section .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-group input {
+        padding: 0.7rem 0.8rem;
+    }
+
+    .btn-submit {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .stores-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .store-card-item {
+        margin: 0 auto;
+        max-width: 350px;
+    }
+
+    .store-card-item .card-header {
+        padding: 1rem 0.5rem;
+        min-height: 100px;
+    }
+
+    .store-logo, .store-logo-placeholder {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+    }
+
+    .store-name {
+        font-size: 1.2rem;
+    }
+
+    .store-card-item .card-body {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animations (from index.css, might be used elsewhere too) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.email-input-wrapper {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Specific button styles (from index.css, if they are meant to be global) */
+.btn-email {
+    background-color: var(--color-primary-medium);
+    color: #fff;
+    border-radius: 100px;
+    padding: 10px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    margin: 10px 0 0 10px;
+}
+
+.btn-email:hover {
+    background-color: var(--color-primary-medium-hover);
+    transform: translateY(-2px);
+}
+
+/* Popup Overlay (if used on this page) */
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  z-index: 1000;
+}
+
+@keyframes popupShow {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popupHide {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.popup-card {
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  padding: 0; /* Adjusted from 1rem */
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 600px;
+  animation-fill-mode: forwards;
+}
+.popup-body{
+    padding: 0 15px 15px 15px;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--color-primary-dark);
+    font-weight: bold;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 15px 15px 5px 15px;
+    background-color: var(--color-primary-dark);
+    color: white;
+}
+
+.popup-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.card .btn-primary { /* This rule seems to be for deal cards, not store cards */
+    margin: auto;
+    text-align: center;
+}
+
+body.popup-open {
+    overflow: hidden;
+}
+
+.is-subscribed-btn{
+    display: inline-block;
+}

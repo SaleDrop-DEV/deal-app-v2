@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Alle Winkels{% endblock %}
+
+{% block head %}
+<meta name="description" content="Bekijk alle winkels en merken die via SaleDrop korting en deals aanbieden. Vind je favoriete shop en mis nooit meer een sale.">
+<meta name="keywords" content="winkels, merken, korting, aanbiedingen, sales, SaleDrop, deals, kledingwinkels, webshops">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/alle-winkels/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Alle Winkels bij SaleDrop - Kortingen & Deals">
+<meta property="og:description" content="Vind je favoriete winkel of merk en ontvang direct meldingen van nieuwe aanbiedingen via SaleDrop.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/alle-winkels/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Alle Winkels bij SaleDrop - Kortingen & Deals">
+<meta name="twitter:description" content="Bekijk alle winkels en merken die korting en deals aanbieden via SaleDrop.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Alle Winkels bij SaleDrop",
+  "description": "Bekijk alle winkels en merken die via SaleDrop korting en deals aanbieden.",
+  "url": "https://www.saledrop.app/alle-winkels/",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "SaleDrop",
+    "url": "https://www.saledrop.app/"
+  }
+}
+</script>
+
+<style>
+    .stores-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+
+    .letter-section {
+        margin-bottom: 2rem;
+    }
+
+    .letter-heading {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--color-accent);
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--color-accent-light);
+        padding-bottom: 0.3rem;
+    }
+
+    .stores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .store-card {
+        background-color: var(--color-gray-light);
+        border-radius: var(--border-radius-round);
+        padding: 0.6rem 0.8rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-text-color);
+        text-align: center;
+        cursor: default;
+    }
+
+    @media (max-width: 500px) {
+        .letter-heading {
+            font-size: 1.5rem;
+        }
+        .stores-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stores-container">
+    <h1 style="text-align: center; font-weight: 600; margin-bottom: 2rem;">
+        Alle Winkels
+    </h1>
+
+    {% for letter, stores in grouped_stores.items %}
+        <div class="letter-section">
+            <div class="letter-heading">{{ letter }}</div>
+            <div class="stores-grid">
+                {% for store in stores %}
+                    <div class="store-card">{{ store }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

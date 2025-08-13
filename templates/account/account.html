@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profiel{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/theme_v2_account.css' %}">
+
+<style>
+    /* Wrap the form with a container for consistent card styling */
+.account-details form#gender-form {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+    max-width: 500px;
+    margin: 1.5rem auto 0;
+}
+
+/* Headings inside the form */
+.account-details h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 550;
+    color: var(--primary-text-color);
+}
+
+/* Form group spacing */
+.account-details .form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Label styling */
+.account-details .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+/* Inputs styling */
+.account-details input[type="text"],
+.account-details input[type="password"],
+.account-details select,
+.account-details textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-gray-medium);
+    border-radius: var(--border-radius-round);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-white);
+}
+
+/* Focus style */
+.account-details input:focus,
+.account-details select:focus,
+.account-details textarea:focus {
+    border-color: var(--color-accent);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+/* Radio buttons container */
+.account-details .radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Radio label styling */
+.account-details .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--primary-text-color);
+    cursor: pointer;
+}
+
+/* Custom radio inputs */
+.account-details .radio-group input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-gray-medium);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Checked radio */
+.account-details .radio-group input[type="radio"]:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+}
+
+/* Dot inside checked radio */
+.account-details .radio-group input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    margin: 3px;
+    background: white;
+    border-radius: 50%;
+}
+
+/* Error message styling */
+.account-details .error {
+    margin-top: 0.5rem;
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+.account-details .action-btn {
+    margin-top: 1rem;
+}
+
+.change-password-link{
+    color: var(--color-accent);
+    transition: text-decoration 0.3s;
+}
+
+.change-password-link:hover{
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+
+
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-layout">
+        <!-- Account Details -->
+        <div class="account-details-container">
+            <h3 style="text-align: center;">Mijn gegevens</h3>
+            <div class="account-details">
+                <p class="bold-text">{{ user.email }}</p>
+                <p id="gender-display">Voorkeur: kleding voor 
+                    <span>
+                        {% if extra_info.gender == 0 %}
+                        mannen.
+                        {% elif extra_info.gender == 1 %}
+                        vrouwen.
+                        {% elif extra_info.gender == 2 %}
+                        beide.
+                        {% else %}
+                        is onbekend.
+                        {% endif %}
+                    </span>
+                </p>
+                <form id="gender-form" method="post" style="display: none;" action="{% url 'account_view' %}">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+
+                    {# Render all fields except gender #}
+                    {% for field in form %}
+                        {% if field.name != 'gender' %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="error">{{ field.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Custom render the gender field #}
+                    <div class="form-group">
+                        <label>Geslacht:</label>
+                        <div class="radio-group" id="id_gender">
+                            {% for subwidget in form.gender %}
+                                {% if subwidget.id_for_label != 'id_gender_0' %}
+                                    <label for="{{ subwidget.id_for_label }}">
+                                        {{ subwidget.tag }} {{ subwidget.choice_label }}
+                                    </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% if form.gender.errors %}
+                            <div class="error">{{ form.gender.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="action-btn">Wijzigen</button>
+                </form>
+
+
+                <button id="edit-gender-btn" class="action-btn">Wijzigen</button>
+                <p style="text-align: center;"><a class="change-password-link" href="{% url 'password_change' %}">Wachtwoord wijzigen</a></p>
+                <button style="margin: 0 auto; display: block;" class="primary-btn" onclick="window.location.href = '/accounts/log-out/'">Uitloggen</button>
+
+            </div>
+            {% if user.is_staff %}
+                <h3 style="text-align: center;">Administratie</h3>
+                <ul class="admin-nav-menu">
+                    <li><a href="{% url 'stores_manager' %}">Store manager</a></li>
+                    <li><a href="/admin-app/">Admin</a></li>
+                    <!-- Add more admin links here -->
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Subscribed Stores -->
+        <div class="subscribed-stores">
+            <h3 style="text-align: center;">Mijn winkels</h3>
+            <div id="subscribedStoresContainer">
+                {% for store in subscribed_stores %}
+                    <div class="subscribed-store-card" id="subscribed-store-{{ store.id }}">
+                        <img src="{{ store.logo_url }}" alt="Store Logo" class="store-logo-img-small">
+                        <span class="subscribed-name">{{ store.name }}</span>
+                        <span class="subscribed-menu">⋮</span>
+                        <div style="display: none;" id="actions-container-{{ store.id }}" class="actions-container">
+                            <div class="action-list">
+                                <button class="unsub-btn">Afmelden</button>
+                                <button class="close-actions-btn last-action-btn">Sluiten</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const editBtn = document.getElementById("edit-gender-btn");
+        const display = document.getElementById("gender-display");
+        const form = document.getElementById("gender-form");
+
+        editBtn.addEventListener("click", function () {
+            display.style.display = "none";
+            form.style.display = "block";
+            editBtn.style.display = "none"; // Hide the button itself
+        });
+    });
+</script>
+<script>
+    // Insert the store cards JS here or include as separate file
+    function getCSRFToken() {
+        let name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function closeAllMenus() {
+        document.querySelectorAll('.actions-container').forEach((menu) => {
+            fadeOutMenu(menu);
+        });
+    }
+
+    function fadeOutMenu(menu) {
+        if (menu.style.display === 'block') {
+            menu.classList.remove('pop-in');
+            menu.classList.add('fade-out');
+
+            menu.addEventListener('animationend', function handleFade() {
+                menu.style.display = 'none';
+                menu.classList.remove('fade-out');
+                menu.removeEventListener('animationend', handleFade);
+            });
+        }
+    }
+
+    function unSubscribeToStore(storeId) {
+        const subscribeBtn = document.getElementById(`subscribe-btn-${storeId}`);
+        const loaderEl = document.getElementById(`newStoresLoader-${storeId}`);
+        if (subscribeBtn) subscribeBtn.style.display = 'none';
+        if (loaderEl) loaderEl.style.display = 'block';
+
+        fetch("{% url 'un_subscribe_to_store_api' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+            },
+            body: JSON.stringify({ store_id: storeId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                window.displayMessage('error', data.error);
+                return;
+            } else {
+                if (subscribeBtn) {
+                    subscribeBtn.onclick = function () {
+                        subscribeToStore(storeId);
+                    };
+                    subscribeBtn.innerHTML = 'Abonneer';
+                    subscribeBtn.classList.remove('is-subscribed-btn', 'action-btn');
+                    subscribeBtn.classList.add('primary-btn', 'subscribe-btn');
+                }
+
+                const subscribedCard = document.getElementById(`subscribed-store-${storeId}`);
+                if (subscribedCard) {
+                    subscribedCard.classList.add('collapse-out');
+                    subscribedCard.addEventListener('animationend', () => {
+                        subscribedCard.remove();
+                    });
+                }
+
+                window.displayMessage('success', data.message);
+            }
+        })
+        .catch(error => {
+            window.displayMessage('error', error);
+        }).finally(() => {
+            if (subscribeBtn) subscribeBtn.style.display = 'block';
+            if (loaderEl) loaderEl.style.display = 'none';
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Toggle actions menu on ⋮ click
+        document.querySelectorAll('.subscribed-menu').forEach((menuIcon) => {
+            const card = menuIcon.closest('.subscribed-store-card');
+            const storeId = card?.id?.split('-')?.pop();
+            const menu = document.getElementById(`actions-container-${storeId}`);
+
+            menuIcon.addEventListener("click", function (e) {
+                e.stopPropagation();
+                closeAllMenus();
+                if (menu) {
+                    menu.classList.remove('fade-out');
+                    menu.style.display = 'block';
+                    menu.classList.add('pop-in');
+                }
+            });
+        });
+
+        // Close menu buttons
+        document.querySelectorAll('.last-action-btn').forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+                const container = e.target.closest('.actions-container');
+                if (container) fadeOutMenu(container);
+            });
+        });
+
+        // "Afmelden" buttons
+        document.querySelectorAll('.unsub-btn').forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+                const card = e.target.closest('.subscribed-store-card');
+                const storeId = card?.id?.split('-')?.pop();
+                unSubscribeToStore(storeId);
+            });
+        });
+
+        // Close menus on outside click
+        document.addEventListener("click", function () {
+            closeAllMenus();
+        });
+    });
+</script>
+
+{% endblock %}
+
+
+

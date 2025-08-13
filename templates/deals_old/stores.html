@@ -1,0 +1,747 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Deal Scanner - Winkels{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/theme_v2_store_manager.css' %}">
+    <link rel="stylesheet" href="{% static 'js/store_manager.js' %}">
+    {# Font Awesome CDN (make sure to use a recent version if you have one) #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    body.no-scroll {
+        overflow: hidden;
+    }
+
+    /* --- Custom Styled Radio Buttons --- */
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--primary-text-color);
+    cursor: pointer;
+}
+
+/* Hide default radio */
+.radio-group input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-gray-medium);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Selected state */
+.radio-group input[type="radio"]:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+}
+
+/* Inner dot */
+.radio-group input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    margin: 3px;
+    background: white;
+    border-radius: 50%;
+}
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <header><h1>Winkels beheren</h1></header>
+
+    <div class="container">
+
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-section signup-card">
+            <h3 style="text-align: center; margin-bottom: 1rem;">Nieuwe Winkel Toevoegen</h3>
+            <form id="newStoreForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">Winkelnaam <span class="required">*</span></label>
+                    {{ form.name }}
+                </div>
+
+                <div id="email-inputs-container" class="form-group">
+                    <label>E-mailadressen <span class="required">*</span></label>
+                    <div class="email-input-wrapper">
+                        <input type="email" name="email_addresses" class="form-control" placeholder="Voer een e-mailadres in" required>
+                        <div id="emailInputsContainer"></div>
+                        <button onclick="addEmailInput()" type="button" id="add-email-btn" class="btn-email btn btn-primary btn-sm flex-shrink-0" title="E-mailadres toevoegen">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_home_url">Website URL <span class="required">*</span></label>
+                    {{ form.home_url }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_sale_url">Sale Pagina URL <span class="optional">(optioneel)</span></label>
+                    {{ form.sale_url }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_image_url">Afbeelding <span class="required">*</span></label>
+                    {{ form.image_url }}
+                </div>
+
+                {# Radio Selects need custom rendering to use the radio-group class #}
+                <div class="form-group">
+                    <label>Is de mail geverifieerd? <span class="required">*</span></label>
+                    <div class="radio-group" id="id_isVerified">
+                        {% for choice in form.isVerified %}
+                            <label for="{{ choice.id_for_label }}">
+                                {{ choice.tag }} {{ choice.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Moest je man of vrouw aangeven bij de nieuwsbrief? <span class="required">*</span></label>
+                    <div class="radio-group" id="id_genderPreferenceSet">
+                        {% for choice in form.genderPreferenceSet %}
+                            <label for="{{ choice.id_for_label }}">
+                                {{ choice.tag }} {{ choice.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Doelgroep winkel <span class="required">*</span></label>
+                    <div class="radio-group" id="id_gender">
+                        {% for choice in form.gender %}
+                            <label for="{{ choice.id_for_label }}">
+                                {{ choice.tag }} {{ choice.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Heb je toestemming om de content te gebruiken? <span class="required">*</span></label>
+                    <div class="radio-group" id="id_mayUseContent">
+                        {% for choice in form.mayUseContent %}
+                            <label for="{{ choice.id_for_label }}">
+                                {{ choice.tag }} {{ choice.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Button is only visible when all fields except for Sale Pagina URL  have some value -->
+                <button onclick="submitNewStore(this.form)" id="submitNewStoreBtn" type="submit" class="btn-submit">Winkel Toevoegen</button>
+            </form>
+        </div>
+
+        <h3 style="text-align: center; margin-bottom: 1rem;;">Overzicht van Winkels</h3>
+        <div class="stores-grid">
+            {% if stores %}
+                {% for store in stores %}
+                    <div id="store_{{ store.id }}" class="store-card card" 
+                         data-store-id="{{ store.id }}"
+                         data-store-name="{{ store.name }}"
+                         data-store-home-url="{{ store.home_url }}"
+                         data-store-sale-url="{{ store.sale_url }}"
+                         data-store-image-url="{{ store.image_url }}"
+                         data-store-emails="{{ store.email_addresses_comma }}"
+                         data-isVerified="{{ store.isVerified }}"
+                         data-genderPreferenceSet="{{ store.genderPreferenceSet }}"
+                         data-gender="{{ store.gender }}"
+                         data-mayUseContent="{{ store.mayUseContent }}"
+                    >
+                        <div class="card-header">
+                            {{ store.name|default:"Onbekende Winkel" }}
+                        </div>
+                        <div class="card-body">
+                            {% if store.image_url %}
+                                <img src="{{ store.image_url }}" alt="Banner for {{ store.name }}" class="store-banner">
+                            {% else %}
+                                <img src="https://placehold.co/400x200/cccccc/333333?text=Geen+Banner" alt="Geen Banner" class="store-banner">
+                            {% endif %}
+
+                            {% if store.domain %}
+                                <p><a href="{{ store.home_url }}" target="_blank" class="store-link">{{ store.domain }}</a></p>
+                            {% endif %}
+
+                            <button style="margin: 0 auto; display: block;" class="primary-btn" title="Winkel bewerken">
+                                Bewerken
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% if not stores %}
+            <div class="alert alert-info" style="display: block; margin: 0 auto;">Nog geen winkels toegevoegd.</div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block pop_up_content %}
+<div id="editStoreModal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+        <div class="form-section signup-card">
+            <h3 style="text-align: center; margin-bottom: 1rem;">Winkel Bewerken</h3>
+            <form id="editStoreForm" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="store_id" id="edit_store_id">
+
+                <div class="form-group">
+                    <label for="edit_name">Winkelnaam <span class="required">*</span></label>
+                    <input type="text" name="name" id="edit_name" class="form-control" required>
+                </div>
+
+                <div id="email-inputs-container" class="form-group">
+                    <label>E-mailadressen <span class="required">*</span></label>
+                    <div class="email-input-wrapper">
+                        <input type="email" name="email_addresses" id="edit_email_addresses" class="form-control" placeholder="Voer een e-mailadres in" required>
+                        <div id="editEmailInputsContainer"></div>
+                        <button onclick="addEditEmailInput()" type="button" id="add-edit-email-btn" class="btn-email btn btn-primary btn-sm flex-shrink-0" title="E-mailadres toevoegen">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_home_url">Website URL <span class="required">*</span></label>
+                    <input type="url" name="home_url" id="edit_home_url" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_sale_url">Sale Pagina URL <span class="optional">(optioneel)</span></label>
+                    <input type="url" name="sale_url" id="edit_sale_url" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_image_url">Afbeelding (laat leeg om huidige te behouden) <span class="required">*</span></label>
+                    <input type="file" name="image_url" id="edit_image_url" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Is de mail geverifieerd? <span class="required">*</span></label>
+                    <div class="radio-group" id="edit_isVerified_group">
+                        <label for="edit_isVerified_0">
+                            <input type="radio" name="isVerified" value="True" id="edit_isVerified_0"> Ja
+                        </label>
+                        <label for="edit_isVerified_1">
+                            <input type="radio" name="isVerified" value="False" id="edit_isVerified_1"> Nee
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Moest je man of vrouw aangeven bij de nieuwsbrief? <span class="required">*</span></label>
+                    <div class="radio-group" id="edit_genderPreferenceSet_group">
+                        <label for="edit_genderPreferenceSet_0">
+                            <input type="radio" name="genderPreferenceSet" value="True" id="edit_genderPreferenceSet_0"> Ja
+                        </label>
+                        <label for="edit_genderPreferenceSet_1">
+                            <input type="radio" name="genderPreferenceSet" value="False" id="edit_genderPreferenceSet_1"> Nee
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Doelgroep winkel: <span class="required">*</span></label>
+                    <div class="radio-group" id="edit_gender_group">
+                        <label for="edit_gender_0">
+                            <input type="radio" name="gender" value="M" id="edit_gender_0"> Male
+                        </label>
+                        <label for="edit_gender_1">
+                            <input type="radio" name="gender" value="F" id="edit_gender_1"> Female
+                        </label>
+                        <label for="edit_gender_2">
+                            <input type="radio" name="gender" value="B" id="edit_gender_2"> Both
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Heb je toestemming om de content te gebruiken? <span class="required">*</span></label>
+                    <div class="radio-group" id="edit_gender_group">
+                        <label for="edit_mayUseContent_0">
+                            <input type="radio" name="mayUseContent" value="True" id="edit_mayUseContent_0"> Ja
+                        </label>
+                        <label for="edit_mayUseContent_1">
+                            <input type="radio" name="mayUseContent" value="False" id="edit_mayUseContent_1"> Nee
+                        </label>
+                    </div>
+                </div>
+                
+                <button onclick="editStore(this.form)" type="submit" class="action-btn save-changes">Wijzigingen Opslaan</button>
+                <button type="button" id="deleteStoreBtn" class="btn btn-danger mt-3 ms-2">Verwijder Winkel</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="confirmDeleteModal" class="modal-overlay">
+    <div class="confirmation-delete-pop-up">
+        <h3>Verwijderen?</h3>
+        <button class="close-btn btn-conf" id="deleteConfirmationBtn">Ja</button>
+        <button class="close-btn btn-conf" id="closeDeleteConfirmationBtn">Nee</button>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script>
+function getCSRFToken() {
+    let name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Function to open the main edit modal
+function displayPopUp(id){
+    const modal = document.getElementById('editStoreModal');
+    modal.classList.add('active');
+    document.body.classList.add('no-scroll');
+
+    const store_card = document.querySelector(`.store-card[data-store-id="${id}"]`);
+    if (!store_card) {
+        console.error('Store card not found for ID:', id);
+        return;
+    }
+
+    document.getElementById('edit_store_id').value = id;
+    document.getElementById('edit_name').value = store_card.dataset.storeName;
+    document.getElementById('edit_home_url').value = store_card.dataset.storeHomeUrl;
+    
+    const saleUrl = store_card.dataset.storeSaleUrl;
+    document.getElementById('edit_sale_url').value = saleUrl === 'None' ? '' : saleUrl;
+
+    const emailContainer = document.getElementById('editEmailInputsContainer');
+    emailContainer.innerHTML = '';
+    const emails = store_card.dataset.storeEmails.split(',').filter(email => email.trim() !== '');
+
+    document.getElementById('edit_email_addresses').value = emails.length > 0 ? emails[0] : '';
+    
+    if (emails.length > 1) {
+        emails.slice(1).forEach(email => {
+            addEditEmailInput(email.trim());
+        });
+    }
+
+    const isVerifiedValue = store_card.dataset.isverified;
+    const isVerifiedRadio = modal.querySelector(`input[name="isVerified"][value="${isVerifiedValue}"]`);
+    if (isVerifiedRadio) {
+        isVerifiedRadio.checked = true;
+    }
+
+    const genderPreferenceSetValue = store_card.dataset.genderpreferenceset;
+    const genderPreferenceSetRadio = modal.querySelector(`input[name="genderPreferenceSet"][value="${genderPreferenceSetValue}"]`);
+    if (genderPreferenceSetRadio) {
+        genderPreferenceSetRadio.checked = true;
+    }
+
+    const genderValue = store_card.dataset.gender;
+
+    if (genderValue) {
+        const genderRadio = modal.querySelector(`input[name="gender"][value="${genderValue}"]`);
+        if (genderRadio) {
+            genderRadio.checked = true;
+        }
+    }
+
+    const mayUseContentValue = store_card.dataset.mayusecontent;
+
+    if (mayUseContentValue) {
+        const mayUseContentRadio = modal.querySelector(`input[name="mayUseContent"][value="${mayUseContentValue}"]`);
+        if (mayUseContentRadio) {
+            mayUseContentRadio.checked = true;
+        }
+    }
+}
+
+// Function to close the modal and reset the form
+function closeModal() {
+    const modal = document.getElementById('editStoreModal');
+    modal.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+    document.getElementById('editStoreForm').reset();
+}
+
+// Function to add a new email input field in the edit modal
+function addEditEmailInput(value = '') {
+    const container = document.getElementById('editEmailInputsContainer');
+    const inputName = 'email_addresses';
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('email-input-wrapper', 'email-input-wrapper-content');
+    
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.name = inputName;
+    input.classList.add('form-control');
+    input.placeholder = 'Voer een e-mailadres in';
+    input.required = true;
+    input.value = value;
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.classList.add('btn', 'btn-email', 'btn-danger');
+    delBtn.title = 'E-mailadres verwijderen';
+    delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+
+    delBtn.addEventListener('click', () => {
+        wrapper.remove();
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(delBtn);
+    container.appendChild(wrapper);
+}
+
+function showDeleteConfirmation(storeId) {
+    const confirmModal = document.getElementById('confirmDeleteModal');
+    confirmModal.classList.add('active');
+    confirmModal.dataset.storeId = storeId; // Store the ID on the modal element
+}
+
+// Function to close the delete confirmation modal
+function closeDeleteConfirmation() {
+    const confirmModal = document.getElementById('confirmDeleteModal');
+    confirmModal.classList.remove('active');
+    confirmModal.dataset.storeId = ''; // Clear the stored ID
+}
+
+// Function to handle the delete API call
+function deleteStore(storeId) {
+    const csrftoken = getCSRFToken();
+
+    fetch(`/deals/stores-manager/delete/${storeId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Remove the store card from the DOM
+            const storeCard = document.querySelector(`.store-card[data-store-id="${storeId}"]`);
+            if (storeCard) {
+                storeCard.remove();
+            }
+            // Close the modals and show a success message
+            closeModal();
+            closeDeleteConfirmation();
+            window.displayMessage('success', data.message);
+        } else {
+            window.displayMessage('error', data.error);
+        }
+    })
+    .catch(error => {
+        window.displayMessage('error', error);
+    });
+}
+
+// Function to handle the edit API call
+function editStore(formElement){
+    const storeId = formElement.querySelector('#edit_store_id').value;
+    event.preventDefault();
+     // Collect all email inputs and join them into a single string
+    const mainEmailInput = document.getElementById('edit_email_addresses');
+    const dynamicEmailInputs = document.getElementById('editEmailInputsContainer').querySelectorAll('input[name="email_addresses"]');
+    
+    let allEmails = [];
+    if (mainEmailInput && mainEmailInput.value.trim() !== '') {
+        allEmails.push(mainEmailInput.value.trim());
+    }
+    dynamicEmailInputs.forEach(input => {
+        if (input.value.trim() !== '') {
+            allEmails.push(input.value.trim());
+        }
+    });
+
+    const formData = new FormData(formElement);
+    formData.append('store_id', storeId);
+
+    formData.delete('email_addresses');
+
+    // Add the combined email string back to the form data
+    formData.append('email_addresses', allEmails.join(','));
+
+    fetch(`/deals/stores-manager/edit/${storeId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+        },
+        body: formData
+            
+    }).then(response => response.json())
+    .then(data => {
+        if (data.error){
+            window.displayMessage('error', data.error);
+            return;
+        } else{
+            window.displayMessage('success', data.message);
+            submitButton.classList.remove('ready-submit');
+            submitButton.onclick = null;
+            newStoreForm.reset();
+            closeModal();
+        }
+    })
+    .catch(error => {
+        window.displayMessage('error', error);
+    });
+}
+
+// Event Listeners for all modal functionality
+document.addEventListener('DOMContentLoaded', () => {
+    // Open main edit modal on 'Bewerken' button click
+    document.querySelectorAll('.store-card .primary-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const card = event.target.closest('.store-card');
+            const storeId = card.dataset.storeId;
+            displayPopUp(storeId);
+        });
+    });
+
+    // Close main edit modal via the 'x' button
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+    // Close main edit modal when clicking the overlay (background)
+    document.getElementById('editStoreModal').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) {
+            closeModal();
+        }
+    });
+
+    // Close main edit modal when pressing the 'Escape' key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && document.getElementById('editStoreModal').classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // --- New event listeners for the delete confirmation modal ---
+    
+    // Open the confirmation modal when the 'Verwijder Winkel' button is clicked
+    document.getElementById('deleteStoreBtn').addEventListener('click', () => {
+        const storeId = document.getElementById('edit_store_id').value;
+        showDeleteConfirmation(storeId);
+    });
+
+    // Handle 'Ja' (Yes) button click in the confirmation modal
+    document.getElementById('deleteConfirmationBtn').addEventListener('click', () => {
+        const storeId = document.getElementById('confirmDeleteModal').dataset.storeId;
+        if (storeId) {
+            deleteStore(storeId);
+        }
+    });
+
+    // Handle 'Nee' (No) button click in the confirmation modal
+    document.getElementById('closeDeleteConfirmationBtn').addEventListener('click', closeDeleteConfirmation);
+    
+    // Close confirmation modal when clicking the overlay
+    document.getElementById('confirmDeleteModal').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) {
+            closeDeleteConfirmation();
+        }
+    });
+});
+
+// Event listener to open the modal when "Bewerken" is clicked
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.store-card .primary-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const card = event.target.closest('.store-card');
+            const storeId = card.dataset.storeId;
+            displayPopUp(storeId);
+        });
+    });
+});
+
+function addEmailInput(value = '') {
+    const container = document.getElementById('emailInputsContainer');
+    const inputName = 'email_addresses';
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('email-input-wrapper', 'email-input-wrapper-content');
+
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.name = inputName;
+    input.classList.add('form-control');
+    input.placeholder = 'Voer een e-mailadres in';
+    input.required = true;
+    input.value = value;
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.classList.add('btn', 'btn-email', 'btn-danger');
+    delBtn.title = 'E-mailadres verwijderen';
+    delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+
+    delBtn.addEventListener('click', () => {
+        wrapper.remove(); // Use .remove() for modern browsers
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(delBtn);
+
+    // Append the new input wrapper to the specified container
+    container.appendChild(wrapper);
+}
+
+const newStoreForm = document.querySelector('.form-section form');
+const newStoreEmailContainer = document.getElementById('emailInputsContainer');
+
+const StoreForm = document.getElementById('newStoreForm');
+const submitButton = document.getElementById('submitNewStoreBtn');
+const emailInputsContainer = document.getElementById('emailInputsContainer');
+
+// Function to check if all required fields have a value
+function checkFormValidity() {
+    // Get all required inputs, excluding the sale_url
+    const requiredInputs = StoreForm.querySelectorAll('input:not([name="sale_url"])[required], textarea[required]');
+
+    let allFieldsValid = true;
+
+    // Check all required text/file inputs
+    for (const input of requiredInputs) {
+        if (input.type === 'file') {
+            // For file input, check if a file has been selected
+            if (!input.files || input.files.length === 0) {
+                allFieldsValid = false;
+                break;
+            }
+        } else if (input.type === 'radio') {
+            // For radio buttons, check if any option in the group is checked
+            const radioGroupName = input.name;
+            if (!StoreForm.querySelector(`input[name="${radioGroupName}"]:checked`)) {
+                allFieldsValid = false;
+                break;
+            }
+        } else {
+            // For text/URL/email inputs, check if the value is not just whitespace
+            if (input.value.trim() === '') {
+                allFieldsValid = false;
+                break;
+            }
+        }
+    }
+
+    // Check the dynamic email fields specifically
+    const dynamicEmails = emailInputsContainer.querySelectorAll('input');
+    const mainEmailInput = StoreForm.querySelector('input[name="email_addresses"]');
+    if (mainEmailInput.value.trim() === '' && dynamicEmails.length === 0) {
+        allFieldsValid = false;
+    }
+
+    if (allFieldsValid) {
+        submitButton.classList.add('ready-submit');
+        submitButton.onclick = function() { submitNewStore(this.form); };
+    } else {
+        submitButton.classList.remove('ready-submit');
+        submitButton.onclick = null;
+    }
+}
+
+// Add event listeners to all required inputs
+newStoreForm.addEventListener('input', checkFormValidity);
+document.addEventListener('DOMContentLoaded', checkFormValidity);
+
+
+function submitNewStore(formElement){
+    event.preventDefault();
+
+    // Collect all email inputs and join them into a single string
+    const mainEmailInput = document.querySelector('#email-inputs-container input[name="email_addresses"]');
+    const dynamicEmailInputs = newStoreEmailContainer.querySelectorAll('input[name="email_addresses"]');
+    
+    let allEmails = [];
+    if (mainEmailInput && mainEmailInput.value.trim() !== '') {
+        allEmails.push(mainEmailInput.value.trim());
+    }
+    dynamicEmailInputs.forEach(input => {
+        if (input.value.trim() !== '') {
+            allEmails.push(input.value.trim());
+        }
+    });
+
+    // Create a new FormData object
+    const formData = new FormData(formElement);
+    
+    // Remove the old email fields
+    formData.delete('email_addresses');
+
+    // Add the combined email string back to the form data
+    formData.append('email_addresses', allEmails.join(','));
+
+    fetch("{% url 'stores_manager' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+        },
+        body: formData
+            
+    }).then(response => response.json())
+    .then(data => {
+        if (data.error){
+            window.displayMessage('error', data.error);
+        } else{
+            window.displayMessage('success', data.message);
+            submitButton.classList.remove('ready-submit');
+            submitButton.onclick = null;
+            newStoreForm.reset();
+        }
+    })
+    .catch(error => {
+        window.displayMessage('error', error);
+    });
+};
+
+</script>
+{% endblock %}

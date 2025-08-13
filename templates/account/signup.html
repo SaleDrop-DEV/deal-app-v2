@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registreren{% endblock %}
+
+{% block head %}
+<meta name="description" content="Registreer gratis bij SaleDrop en ontvang direct meldingen van de beste sales en deals bij je favoriete winkels. Mis nooit meer korting!">
+<meta name="keywords" content="registreren, aanmelden, account maken, sales, deals, korting, aanbiedingen, kleding, schoenen, accessoires, SaleDrop">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/accounts/sign-up/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
+<meta property="og:description" content="Maak gratis een account aan en ontvang meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/accounts/sign-up/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
+<meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Registreren",
+  "url": "https://www.saledrop.app/accounts/sign-up/",
+  "description": "Registreer gratis bij SaleDrop en ontvang direct meldingen van de beste sales en deals bij je favoriete winkels."
+}
+</script>
+
+
+<style>
+.signup-card {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.signup-card h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 550;
+    color: var(--primary-text-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+/* Updated selector to apply to text and password inputs only */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-gray-medium);
+    border-radius: var(--border-radius-round);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-white);
+}
+
+input:focus {
+    border-color: var(--color-accent);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--primary-text-color);
+}
+
+/* Custom styled radio buttons */
+.radio-group input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-gray-medium);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 0; 
+}
+
+.radio-group input[type="radio"]:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+}
+
+/* Corrected centering for the inner dot */
+.radio-group input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.error {
+    margin-top: 0.5rem;
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+.login-link-a {
+    color: var(--color-accent);
+    transition: 0.3s;
+}
+.login-link-a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+}
+.action-btn-inactive{
+    background-color: var(--color-accent-light);
+    color: white;
+    width: fit-content;
+    display: block;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 auto;
+}
+.action-btn-inactive:hover{
+    color: white !important;
+}
+
+/* Pop-in animation */
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pop-in {
+    animation: popIn 0.3s ease forwards;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="signup-card">
+        <h3>Meld je nu aan</h3>
+        <form method="post" action="{% url 'signup_view' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                {% if field.name != 'gender' %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="error">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-group">
+                <label>Geslacht:</label>
+                <div class="radio-group" id="id_gender">
+                    {% for subwidget in form.gender %}
+                        <label for="{{ subwidget.id_for_label }}">
+                            {{ subwidget.tag }} {{ subwidget.choice_label }}
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.gender.errors %}
+                    <div class="error">{{ form.gender.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Privacy policy checkbox -->
+            <div class="form-group" style="text-align:center;">
+                <label style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
+                    <input type="checkbox" id="accept-privacy">
+                    Ik accepteer het <a href="{% url 'privacy_policy' %}" target="_blank">privacybeleid</a>
+                </label>
+            </div>
+
+            <a id="privacy-policy" class="action-btn-inactive" href="#">Registreren</a>
+            <button style="display: none;" type="submit" class="action-btn">Registreren</button>
+        </form>
+
+        <p class="login-link">Heb je al een account? <a class="login-link-a" href="{% url 'login' %}">Inloggen</a></p>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const privacyLink = document.getElementById("privacy-policy");
+    const hiddenSubmit = document.querySelector("button[type='submit']");
+    const checkbox = document.getElementById("accept-privacy");
+
+    checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+            privacyLink.style.display = "none";
+            hiddenSubmit.style.display = "block";
+            hiddenSubmit.classList.add("pop-in");
+        } else {
+            privacyLink.style.display = "block";
+            hiddenSubmit.style.display = "none";
+            hiddenSubmit.classList.remove("pop-in");
+        }
+    });
+});
+</script>
+{% endblock %}

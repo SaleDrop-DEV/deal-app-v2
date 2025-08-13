@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block head %}
+<meta name="description" content="Lees de algemene voorwaarden van SaleDrop. Informatie over gebruik van de app, intellectueel eigendom, aansprakelijkheid en wijzigingen.">
+<meta name="keywords" content="algemene voorwaarden, SaleDrop, gebruiksvoorwaarden, juridische informatie, app beleid">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.saledrop.app/terms-of-service/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Algemene Voorwaarden - SaleDrop">
+<meta property="og:description" content="Lees de algemene voorwaarden van SaleDrop. Belangrijk voor het gebruik van onze app en diensten.">
+<meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
+<meta property="og:url" content="https://www.saledrop.app/terms-of-service/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Algemene Voorwaarden - SaleDrop">
+<meta name="twitter:description" content="Belangrijke juridische voorwaarden voor het gebruik van de SaleDrop app en diensten.">
+<meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TermsOfService",
+  "name": "Algemene Voorwaarden - SaleDrop",
+  "url": "https://www.saledrop.app/terms-of-service/",
+  "description": "Algemene voorwaarden voor het gebruik van de SaleDrop app, inclusief informatie over gebruik, intellectueel eigendom, aansprakelijkheid en wijzigingen.",
+  "dateModified": "2025-08-09",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SaleDrop",
+    "url": "https://www.saledrop.app/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.saledrop.app/static/images/saledrop-logo.png"
+    }
+  }
+}
+</script>
+
+
+
+    <style>
+        /* CSS voor de specifieke content van de privacy policy pagina */
+        .content-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 1.5rem; /* Zorgt voor padding op mobiel */
+        }
+
+        .content-container h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary-text-color);
+        }
+        
+        .content-container h3 {
+            font-size: 1.5rem;
+            font-weight: 550;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-text-color);
+        }
+
+        .content-container p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--secondary-text-color);
+        }
+        
+        .content-container strong {
+            font-weight: 600;
+            color: var(--primary-text-color);
+        }
+
+        .content-container ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-container ul li {
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-text-color);
+        }
+
+        /* Horizontale lijn voor de 'Laatst bijgewerkt' sectie */
+        .content-container hr {
+            border: 0;
+            height: 1px;
+            background: var(--color-gray-light);
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                margin: 20px auto;
+            }
+        }
+        li{
+            list-style: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1>Algemene Voorwaarden</h1>
+        <p>Welkom bij SaleDrop! Deze algemene voorwaarden zijn van toepassing op jouw gebruik van onze mobiele applicatie. Door de app te gebruiken, stem je in met deze Voorwaarden.</p>
+
+        <h3>1. Gebruik van de app</h3>
+        <p>De app is bedoeld voor persoonlijk, niet-commercieel gebruik. Je mag de app niet gebruiken voor onwettige doeleinden of op een manier die de app of de bijbehorende diensten schaadt.</p>
+
+        <h3>2. Intellectueel Eigendom</h3>
+        <p>Alle inhoud, functies en functionaliteit binnen de app, inclusief maar niet beperkt tot tekst, afbeeldingen, logo's en software, zijn eigendom van SaleDrop of haar licentiegevers en worden beschermd door internationale auteursrechten, handelsmerken en andere intellectuele eigendomsrechten.</p>
+
+        <h3>3. Gebruikersaccounts</h3>
+        <p>Je bent verantwoordelijk voor het beschermen van je accountgegevens en wachtwoord. Je stemt ermee in om ons onmiddellijk op de hoogte te stellen van elk ongeoorloofd gebruik van je account.</p>
+
+        <h3>4. Beperking van Aansprakelijkheid</h3>
+        <p>De app wordt geleverd op een "as is" en "as available" basis. Wij garanderen niet dat de app ononderbroken of foutloos zal functioneren. SaleDrop is niet aansprakelijk voor enige directe, indirecte, incidentele, speciale of gevolgschade die voortvloeit uit jouw gebruik van de app.</p>
+
+        <h3>6. Wijzigingen in de Voorwaarden</h3>
+        <p>Wij behouden ons het recht voor om deze Voorwaarden op elk moment te wijzigen. Wij zullen je op de hoogte stellen van belangrijke wijzigingen door de bijgewerkte Voorwaarden in de app te publiceren. Je voortdurende gebruik van de app na een dergelijke wijziging betekent dat je de nieuwe Voorwaarden accepteert.</p>
+
+        <h3>7. Contact opnemen</h3>
+        <p>Als je vragen hebt over deze Voorwaarden, neem dan contact met ons op via:</p>
+        <p>{{ email }}</p>
+
+        <hr>
+        <p><strong>Laatst bijgewerkt: 09/08/2025</strong></p>
+    </div>
+{% endblock %}

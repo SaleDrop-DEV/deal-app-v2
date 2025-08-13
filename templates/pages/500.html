@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}404 - Pagina niet gevonden{% endblock %}
+
+{% block head %}
+<style>
+/* CSS voor de 404-kaart, gebaseerd op de stijl van de inlogkaart */
+.error-card {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+    max-width: 500px;
+    margin: 2rem auto;
+    text-align: center; /* Om de inhoud te centreren */
+}
+
+.error-card h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 550;
+    color: var(--primary-text-color);
+}
+
+.error-card p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    color: var(--primary-text-color);
+}
+
+ .action-btn{
+    width: fit-content;
+    margin: 0 auto;
+    display: block;
+ }
+
+.action-btn:hover {
+    transform: scale(1.05);
+    /* background-color: var(--color-accent-hover); */
+}
+
+.action-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+/* Definieer enkele CSS-variabelen voor de styling */
+:root {
+    --color-white: #ffffff;
+    --color-accent: #FF4D00;
+    --color-accent-hover: #ff6d2b;
+    --color-accent-light: rgba(255, 77, 0, 0.2);
+    --primary-text-color: #0d111d;
+    --border-radius-round: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="error-card">
+        <h2>500 - Server Error</h2>
+        <p>Sorry, er is iets misgegaan. Probeer het later opnieuw.</p>
+        <a href="{% url 'index' %}" class="action-btn">Ga naar Home</a>
+    </div>
+</div>
+{% endblock %}

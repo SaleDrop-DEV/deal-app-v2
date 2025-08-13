@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 CURRENT_URL = 'https://saledrop.app'

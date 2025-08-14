@@ -241,3 +241,33 @@ CELERY_TASK_TIME_LIMIT = 300 # 5 minutes (adjust if fetching many emails)
 
 # Optional: If you want to limit the number of concurrent tasks a worker handles
 CELERY_WORKER_CONCURRENCY = 15 # Adjust based on your server resources
+
+
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {"format": "{levelname} {asctime} {module} {message}", "style": "{"},
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "/root/deal_app_project/deal_app_project.log",
+            "formatter": "verbose",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file", "console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}

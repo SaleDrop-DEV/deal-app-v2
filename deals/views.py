@@ -668,7 +668,7 @@ def edit_store_view(request, store_id):
                 if ext not in allowed_extensions:
                     return JsonResponse({'error': 'Ongeldig afbeeldingsbestand. Alleen JPG, JPEG, PNG en GIF zijn toegestaan.'}, status=400)
 
-                upload_dir = os.path.join(settings.MEDIA_ROOT, 'media', 'store_logos')
+                upload_dir = os.path.join(settings.MEDIA_ROOT, 'store_logos')
                 os.makedirs(upload_dir, exist_ok=True)
                 filename = f"{uuid.uuid4()}.{ext}"
                 full_path = os.path.join(upload_dir, filename)

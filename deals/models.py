@@ -199,13 +199,13 @@ class Store(models.Model):
         return self.subscriptions.all()
     
     def delete(self, *args, **kwargs):
-        # If the field is a Django ImageField or FileField
-        if self.image_url:
-            # Get the full filesystem path
-            old_image_path = self.image_url.path
-            if os.path.exists(old_image_path):
-                os.remove(old_image_path)
-        # Then delete the object itself
+        # Build the full filesystem path to the file
+        old_image_path = os.path.join(settings.BASE_DIR, self.image_url.lstrip('/'))
+    
+        if os.path.exists(old_image_path):
+            os.remove(old_image_path)
+    
+        # Call the parent delete method to remove the model
         super().delete(*args, **kwargs)
 
     def to_dict(self):

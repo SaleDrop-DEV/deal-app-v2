@@ -556,7 +556,7 @@ def stores_manager_view(request):
                         return JsonResponse({'error': 'Ongeldig afbeeldingsbestand. Alleen JPG, JPEG, PNG en GIF zijn toegestaan.'}, status=400)
                     else:
                         # Define the directory where images will be saved
-                        upload_dir = os.path.join(settings.MEDIA_ROOT, 'media', 'store_logos')
+                        upload_dir = os.path.join(settings.MEDIA_ROOT, 'store_logos')
                         os.makedirs(upload_dir, exist_ok=True)
 
                         filename = f"{uuid.uuid4()}.{ext}"
@@ -677,7 +677,7 @@ def edit_store_view(request, store_id):
                     with open(full_path, 'wb+') as destination:
                         for chunk in image.chunks():
                             destination.write(chunk)
-                    store.image_url = os.path.join(settings.MEDIA_URL, 'media', 'store_logos', filename)
+                    store.image_url = os.path.join(settings.MEDIA_URL, 'store_logos', filename)
                 except IOError as e:
                     return JsonResponse({'error': f'Foutmelding bij opslaan van afbeelding: {e}'}, status=500)
 

@@ -602,7 +602,7 @@ def stores_manager_view(request):
             else:
                 return JsonResponse({'error': 'Fout bij het toevoegen van de winkel. Controleer de formuliervelden.', 'message': form.errors.as_json()}, status=400)
         except Exception as e:
-            return JsonResponse({'error': e}, status=502)
+            return JsonResponse({'error': str(e)}, status=502)
     else:
         form = StoreForm()
 

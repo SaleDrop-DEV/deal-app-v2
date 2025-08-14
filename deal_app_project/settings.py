@@ -106,6 +106,9 @@ DATABASES = {
         'PASSWORD': 'PatronHein1913!#79',
         'HOST': '148.230.125.181',  # IP-adres of domeinnaam van je VPS
         'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        }
     }
 }
 

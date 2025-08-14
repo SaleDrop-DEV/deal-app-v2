@@ -1,6 +1,6 @@
 # from .fetch_emails import activate_gmail_watch as activate_gmail_watch_general
 # from .fetch_emails_F import activate_gmail_watch as activate_gmail_watch_female
-from .models import GmailToken
+from deals.models import GmailToken
 from django.core.management.base import BaseCommand
 
 TOPIC_NAME_general = "projects/deals-app-465712/topics/gmail-notifications"

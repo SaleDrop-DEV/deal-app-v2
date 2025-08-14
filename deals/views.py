@@ -566,7 +566,7 @@ def stores_manager_view(request):
                             with open(full_path, 'wb+') as destination:
                                 for chunk in image.chunks():
                                     destination.write(chunk)
-                            store.image_url = f"{settings.MEDIA_URL}store_logos/{filename}".replace('/media/media', '/media')
+                            store.image_url = f"/media/store_logos/{filename}"
                         except IOError as e:
                             return JsonResponse({'error': f'Foutmelding bij opslaan van afbeelding: {e}'}, status=405)
                 else:
@@ -677,7 +677,7 @@ def edit_store_view(request, store_id):
                     with open(full_path, 'wb+') as destination:
                         for chunk in image.chunks():
                             destination.write(chunk)
-                    store.image_url = f"{settings.MEDIA_URL}store_logos/{filename}".replace('/media/media', '/media')
+                    store.image_url = f"/media/store_logos/{filename}"
                 except IOError as e:
                     return JsonResponse({'error': f'Foutmelding bij opslaan van afbeelding: {e}'}, status=500)
 

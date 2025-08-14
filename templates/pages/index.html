@@ -39,11 +39,35 @@
 <script type="application/json" id="notification-data">
     {{ notifications|safe }}
 </script>
+<style>
+    /* Voeg deze code toe aan je index.css bestand */
+.header-title span {
+    display: inline-block; /* Belangrijk voor transformaties */
+    opacity: 0;
+    transform: scale(0.5); /* Begin de letters klein */
+    animation: none; /* Zorgt ervoor dat de animatie niet direct start */
+}
+
+@keyframes letterPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1); /* Een lichte 'overshoot' voor een springend effect */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+</style>
 {% endblock %}
 
 {% block index_header %}
 <header style="padding-bottom: 1.5rem;" class="animated-header">
-    <h1 style="font-size: 5.5rem !important; font-weight: 400;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
+    <h1 style="font-weight: 400;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
     <p style="font-weight: bold;" class="header-subtitle">Ontvang als eerste de beste sales en deals</p>
     <div id="sampleNotifications1" class="notification-container"></div>
     <button onclick="window.location.href='/accounts/sign-up/'" class="action-btn">Aanmelden</button>

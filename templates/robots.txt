@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /deals/stores-manager/
+Disallow: /admin-app/
+

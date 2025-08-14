@@ -8,7 +8,8 @@ admin.site.register(GmailSaleAnalysis)
 admin.site.register(Store)
 admin.site.register(ScrapeData)
 admin.site.register(SubscriptionData)
-
+admin.site.register(Url)
+admin.site.register(GmailToken)
 
 class HasStoreFilter(admin.SimpleListFilter):
     title = 'Store linked'

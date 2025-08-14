@@ -4,6 +4,7 @@ from deals import views as deals_views
 from pages import views as pages_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -13,6 +14,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),  # Allauth routes
     path('deals/', include('deals.urls')),
     path('api/', include('api.urls')),
+    path("robots.txt", TemplateView.as_view(
+        template_name="robots.txt",
+        content_type="text/plain"
+    )),
 
     path('webhooks/gmail/', deals_views.gmail_webhook, name='gmail_webhook'),
     path('test/<int:gender>/', deals_views.send_simple_html_email, name='test')

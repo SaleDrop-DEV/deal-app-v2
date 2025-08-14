@@ -200,9 +200,9 @@ class Store(models.Model):
     
     def delete(self, *args, **kwargs):
         # If the field is a Django ImageField or FileField
-        if self.image:
+        if self.image_url:
             # Get the full filesystem path
-            old_image_path = self.image.path
+            old_image_path = self.image_url.path
             if os.path.exists(old_image_path):
                 os.remove(old_image_path)
         # Then delete the object itself

@@ -59,7 +59,7 @@ def fetch_and_save_emails(service, gmail_address, max_emails=10, label_ids=['INB
             plain_text_body, html_body = get_email_parts(msg_data)
 
             timestamp = int(msg_data.get('internalDate', 0)) / 1000.0
-            received_date = timezone.make_aware(datetime.fromtimestamp(timestamp), timezone.utc)
+            received_date = timezone.make_aware(datetime.fromtimestamp(timestamp), timezone.get_current_timezone())
 
             if not GmailMessage.objects.filter(sender=sender, subject=subject, received_date=received_date).exists():
                 GmailMessage.objects.create(

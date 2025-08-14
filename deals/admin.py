@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData
+from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken
 
 
 

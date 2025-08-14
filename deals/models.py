@@ -199,13 +199,14 @@ class Store(models.Model):
         return self.subscriptions.all()
     
     def delete(self, *args, **kwargs):
-        # Build the full filesystem path to the file
-        old_image_path = os.path.join(settings.BASE_DIR, self.image_url.lstrip('/'))
-    
-        if os.path.exists(old_image_path):
-            os.remove(old_image_path)
-    
-        # Call the parent delete method to remove the model
+        if self.image_url:
+            # remove leading slash if present
+            relative_path = self.image_url.lstrip('/').replace('media/', '', 1)
+            old_image_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+            else:
+                print(f"File not found: {old_image_path}")
         super().delete(*args, **kwargs)
 
     def to_dict(self):

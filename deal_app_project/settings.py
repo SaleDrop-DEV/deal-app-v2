@@ -3,7 +3,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['saledrop.app', 'www.saledrop.app']
 
 CURRENT_URL = 'https://saledrop.app'
 INSTA_URL = 'https://www.instagram.com/saledrop.app/'

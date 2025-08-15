@@ -281,7 +281,7 @@ class Url(models.Model):
         return self.visits_by_users.all()
     
     def __str__(self):
-        return self.url
+        return self.general_url
     
     def to_dict(self):
         return {

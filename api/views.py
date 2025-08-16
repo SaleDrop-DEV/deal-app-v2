@@ -11,7 +11,7 @@ from time import sleep
 from .models import API_Errors_Site
 
 
-SLEEP_TIME = 0.3 #for testing 0 for production 
+SLEEP_TIME = 0 #for testing 0 for production 
 
 def get_store_logo(store_name):
     """

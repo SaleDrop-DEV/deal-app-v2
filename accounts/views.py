@@ -159,7 +159,7 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        return redirect('stores')
+        return redirect(f"{reverse('stores')}?succesfuly_activated=1")
     else:
         data = {
             'title': "Verificatie link is niet geldig.",

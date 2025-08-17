@@ -8,7 +8,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             for token in GmailToken.objects.all():
-                token.refresh_token()
+                self.stdout.write(f"token.name: {str(token.name)}")
+                token.update_token()
         except Exception as e:
             self.stderr.write(self.style.ERROR(f'Error refreshing tokens: {e}'))
         self.stdout.write(self.style.SUCCESS('Gmail token refreshed.'))

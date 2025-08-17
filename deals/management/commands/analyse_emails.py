@@ -51,7 +51,9 @@ def analyze_email_with_gemini(email_html, sender, subject):
         f"- is_personal_deal: true/false\n"
         f"- title: string (titel van de sale, indien beschikbaar)\n"
         f"- grabber: string (korte pakkende kortingszin)\n"
-        f"- description: string (beschrijving van de deal). Verander indien nodig zodat deze voor een breder publiek geldig wordt. Geen teksten zoals jouw eerste bestelling wacht nog even, etc. \n"
+        f"- description: string (een neutrale, brede beschrijving van de aanbieding, geschreven in een algemene toon. \
+          Gebruik geen bezittelijke voornaamwoorden, geen verwijzingen naar eerste bestellingen, en geen direct marketing-taal. \
+          Schrijf alsof het een redactionele beschrijving is voor een breed publiek.)\n"
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"

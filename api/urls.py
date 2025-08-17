@@ -33,7 +33,8 @@ urlpatterns = [
     path('fetch-popular-stores/', IOS_views.IOS_API_fetch_popular_stores, name='API_fetch_popular_stores'),
     path('save-token/', IOS_views.IOS_API_save_expo_push_token, name='save-expo-push-token'),
     path('sale-details/', IOS_views.get_analysis_detail, name='get_analysis_detail'),
-    path('delete-expo-push-token/', IOS_views.IOS_API_delete_expo_push_token, name='delete-expo-push-token')
+    path('delete-expo-push-token/', IOS_views.IOS_API_delete_expo_push_token, name='delete-expo-push-token'),
+    path('delete-account/', IOS_views.IOS_API_delete_account, name='delete-account')
 
 
 ]

@@ -338,6 +338,27 @@ class GmailToken(models.Model):
             print(f"[{self.name}] No refresh token available — cannot refresh.")
             return False
 
+    def update_token(self):
+        """
+        Re-fetch the Gmail token using credentials_json.
+        Runs OAuth flow with consent prompt and updates token_json in DB.
+        """
+        try:
+            # Create a flow from stored credentials_json dict
+            flow = InstalledAppFlow.from_client_config(self.credentials_json, self.SCOPES)
+            creds = flow.run_local_server(port=0, prompt='consent')
+
+            # Save token to DB
+            self.token_json = json.loads(creds.to_json())
+            self.save(update_fields=["token_json", "updated_at"])
+
+            print(f"[{self.name}] Token successfully updated via OAuth flow.")
+            return True
+
+        except Exception as e:
+            print(f"[{self.name}] Failed to update token: {e}")
+            return False
+
     def get_gmail_service(self):
         """
         Returns an authenticated Gmail API service object using stored tokens.
@@ -347,10 +368,11 @@ class GmailToken(models.Model):
 
         if self.token_json:
             creds = Credentials.from_authorized_user_info(info=self.token_json, scopes=self.SCOPES)
-
+            return build('gmail', 'v1', credentials=creds)
+        
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                print(f"[{self.name}] Token expired — refreshing...")
+                print(f"[{self.name}] Token expired — refresh!")
                 self.refresh_token()
                 creds = Credentials.from_authorized_user_info(info=self.token_json, scopes=self.SCOPES)
             else:
@@ -361,7 +383,7 @@ class GmailToken(models.Model):
                 self.token_json = json.loads(creds.to_json())
                 self.save(update_fields=["token_json", "updated_at"])
 
-        return build('gmail', 'v1', credentials=creds)
+        return None
     
     def activate_gmail_watch(self, user_id, topic_name):
         """

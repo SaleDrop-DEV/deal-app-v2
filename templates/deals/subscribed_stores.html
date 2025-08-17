@@ -587,5 +587,22 @@ function submitForm() {
 
 
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const successActivated = urlParams.get('succesfuly_activated');
+
+    if (successActivated && typeof window.displayMessage === 'function') {
+      // Show the message
+      window.displayMessage('success', 'Uw account is succesvol geactiveerd.');
+
+      // Remove the query parameter from the URL
+      urlParams.delete('succesfuly_activated');
+      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  });
+</script>
 {% endblock %}
 

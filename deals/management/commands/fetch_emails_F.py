@@ -1,82 +1,122 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from deals.models import GmailMessage, ScrapeData, GmailToken
-from googleapiclient.errors import HttpError
-from datetime import datetime
-import base64
+import imaplib
+import email
+from email.header import decode_header
+from email.utils import parsedate_to_datetime
+from email.utils import parseaddr
 
 
-def get_email_parts(msg):
-    plain_text_body = None
-    html_body = None
-
-    if 'parts' in msg['payload']:
-        for part in msg['payload']['parts']:
-            if part['mimeType'] == 'text/plain' and 'body' in part and 'data' in part['body']:
-                plain_text_body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8', errors='ignore')
-            elif part['mimeType'] == 'text/html' and 'body' in part and 'data' in part['body']:
-                html_body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8', errors='ignore')
-            if 'parts' in part:
-                nested_plain, nested_html = get_email_parts({'payload': part})
-                if nested_plain and not plain_text_body:
-                    plain_text_body = nested_plain
-                if nested_html and not html_body:
-                    html_body = nested_html
-    elif 'body' in msg['payload'] and 'data' in msg['payload']['body']:
-        if msg['payload']['mimeType'] == 'text/plain':
-            plain_text_body = base64.urlsafe_b64decode(msg['payload']['body']['data']).decode('utf-8', errors='ignore')
-        elif msg['payload']['mimeType'] == 'text/html':
-            html_body = base64.urlsafe_b64decode(msg['payload']['body']['data']).decode('utf-8', errors='ignore')
-    return plain_text_body, html_body
+gmail_address = "donnapatrona79@gmail.com"
 
 
-def fetch_and_save_emails(service, gmail_address, max_emails=10, label_ids=['INBOX']):
-    messages_fetched = 0
-    try:
-        results = service.users().messages().list(
-            userId='me',
-            labelIds=label_ids,
-            maxResults=max_emails
-        ).execute()
+def fetch_and_save_emails(max_emails=10)->int:
+    IMAP_SERVER = 'imap.gmail.com'
+    IMAP_PORT = 993
+    EMAIL_ACCOUNT = gmail_address
+    APP_PASSWORD = GmailToken.objects.get(name='FEMALE-IMAP').credentials_json['password']
 
-        messages = results.get('messages', [])
-        for msg in messages:
-            msg_id = msg['id']
-            msg_data = service.users().messages().get(
-                userId='me',
-                id=msg_id,
-                format='full'
-            ).execute()
+    # Connect to Gmail
+    mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
+    mail.login(EMAIL_ACCOUNT, APP_PASSWORD)
+    mail.select('inbox')  # Select the inbox folder
 
-            headers = msg_data['payload'].get('headers', [])
-            sender = subject = None
-            for header in headers:
-                if header['name'].lower() == 'from':
-                    sender = header['value']
-                elif header['name'].lower() == 'subject':
-                    subject = header['value']
+    # Search emails (ALL = every email)
+    status, data = mail.search(None, 'ALL')
+    mail_ids = list(reversed(data[0].split()))
 
-            plain_text_body, html_body = get_email_parts(msg_data)
+    def decode_email_header(header_value):
+        decoded_parts = decode_header(header_value)
+        decoded_string = ''
+        for part, encoding in decoded_parts:
+            if isinstance(part, bytes):
+                decoded_string += part.decode(encoding or 'utf-8', errors='ignore')
+            else:
+                decoded_string += part
+        return decoded_string
 
-            timestamp = int(msg_data.get('internalDate', 0)) / 1000.0
-            received_date = timezone.make_aware(datetime.fromtimestamp(timestamp), timezone.get_current_timezone())
+    def correct_sender(sender):
+        name, email = parseaddr(sender)[1]
+        return f"{name} <{email}>"
+        
 
-            if not GmailMessage.objects.filter(sender=sender, subject=subject, received_date=received_date).exists():
-                GmailMessage.objects.create(
-                    gmail_message_id=msg_id,
-                    sender=sender or "Unknown sender",
-                    subject=subject or "No Subject",
-                    body=html_body or plain_text_body,
-                    received_date=received_date,
-                    email_to=gmail_address
-                )
-                messages_fetched += 1
-                print(f"NEW: Email from {sender} with subject '{subject}'.")
+    def extract_bodies(msg):
+        """
+        Extracts both plain text and HTML bodies from an email message.
+        Returns a tuple: (plain_text_body, html_body)
+        """
+        plain_text_body = None
+        html_body = None
 
-        return True, None, messages_fetched
+        if msg.is_multipart():
+            for part in msg.walk():
+                content_type = part.get_content_type()
+                content_disposition = str(part.get('Content-Disposition'))
+                if 'attachment' in content_disposition:
+                    continue
+                payload = part.get_payload(decode=True)
+                if payload is None:
+                    continue
+                decoded = payload.decode(errors='ignore')
 
-    except HttpError as error:
-        return False, str(error), messages_fetched
+                if content_type == 'text/plain' and plain_text_body is None:
+                    plain_text_body = decoded
+                elif content_type == 'text/html' and html_body is None:
+                    html_body = decoded
+        else:
+            content_type = msg.get_content_type()
+            payload = msg.get_payload(decode=True)
+            if payload:
+                decoded = payload.decode(errors='ignore')
+                if content_type == 'text/plain':
+                    plain_text_body = decoded
+                elif content_type == 'text/html':
+                    html_body = decoded
+
+        return plain_text_body, html_body
+
+    def get_email(msg):
+        plain_text, html = extract_bodies(msg)
+        return {
+            'gmail_message_id': msg.get('Message-ID', ''),
+            'sender': correct_sender(decode_email_header(msg.get('From', ''))),
+            'subject': decode_email_header(msg.get('Subject', '')),
+            'received_date': msg.get('Date', ''),
+            'body': html or plain_text,  # prefer HTML if available
+        }
+
+    count = 0
+    for num in mail_ids[:max_emails]:
+        status, msg_data = mail.fetch(num, '(RFC822)')
+        
+        # msg_data can contain multiple parts; find the one with the actual email
+        for response_part in msg_data:
+            if isinstance(response_part, tuple):
+                raw_email = response_part[1]
+                msg = email.message_from_bytes(raw_email)
+                data = get_email(msg)
+                
+                # Parse date safely
+                received_date = parsedate_to_datetime(msg.get('Date'))
+                if timezone.is_naive(received_date):
+                    received_date = timezone.make_aware(received_date, timezone.get_current_timezone())
+                
+                # Deduplication & saving
+                if not GmailMessage.objects.filter(subject=data['subject'], received_date=received_date, email_to=gmail_address).exists():
+                    print(f"NEW: Email from {data['sender']} with subject '{data['subject']}'.")
+                    GmailMessage.objects.create(
+                        gmail_message_id=data['gmail_message_id'],
+                        sender = data['sender'] or "Unknown sender",
+                        subject=data['subject'] or "No Subject",
+                        body=data['body'],
+                        received_date=received_date,
+                        email_to=gmail_address
+                    )
+                    count += 1
+    mail.close()
+    mail.logout()
+    return count
 
 
 class Command(BaseCommand):
@@ -85,28 +125,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         task_name = 'Fetch Gmail Emails'
         execution_time = timezone.now()
-
+        
+        fetch_and_save_emails()
         try:
-            token_obj = GmailToken.objects.get(name="donnapatrona79@gmail.com")  # adjust name
-        except GmailToken.DoesNotExist:
-            self.stdout.write(self.style.ERROR("No GmailToken found for 'female_account'"))
-            return
-
-        try:
-            service = token_obj.get_gmail_service()
-            success, error_message, count = fetch_and_save_emails(service, gmail_address="donnapatrona79@gmail.com", max_emails=50)
-
-            if not success:
-                ScrapeData.objects.create(
-                    task=task_name,
-                    succes=False,
-                    major_error=True,
-                    error=error_message or "",
-                    execution_date=execution_time
-                )
-                self.stdout.write(self.style.ERROR(f'Failed to fetch emails: {error_message}'))
-            else:
-                self.stdout.write(self.style.SUCCESS(f'Emails fetched and saved successfully. Total new: {count}'))
+            count = fetch_and_save_emails()
+            self.stdout.write(self.style.SUCCESS(f'Emails fetched and saved successfully. Total new: {count}'))
 
         except Exception as e:
             ScrapeData.objects.create(

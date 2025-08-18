@@ -37,7 +37,7 @@ def fetch_and_save_emails(max_emails=10)->int:
         return decoded_string
 
     def correct_sender(sender):
-        name, email = parseaddr(sender)[1]
+        name, email = parseaddr(sender)
         return f"{name} <{email}>"
         
 

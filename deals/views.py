@@ -623,7 +623,7 @@ def stores_manager_view(request):
         form = StoreForm()
 
     all_stores = [s.to_dict() for s in Store.objects.all()]
-    return render(request, 'deals_old/stores.html', {
+    return render(request, 'admin_templates/store_manager.html', {
         'stores': all_stores,
         'form': form,
         'page': 'store-manager'

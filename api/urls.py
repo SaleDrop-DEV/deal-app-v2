@@ -14,6 +14,7 @@ urlpatterns = [
 
     #ADMIN#
     path('set-stores-in-sheets/', views.set_stores_in_sheets, name='set_stores_in_sheets'),
+    path('get-stores-admin/', views.fetch_stores_for_admin, name='get_all_stores'),
 
 
     # API Authentication URLs (for JWT)

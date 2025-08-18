@@ -1028,6 +1028,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let searchTimeout = null;
 
     nameInput.addEventListener("input", () => {
+        resultsContainer.style.display = "block";
         const query = nameInput.value.trim();
 
         if (searchTimeout) clearTimeout(searchTimeout);

@@ -20,7 +20,7 @@ urlpatterns = [
     )),
 
     path('webhooks/gmail/', deals_views.gmail_webhook, name='gmail_webhook'),
-    path('test/<int:gender>/', deals_views.send_simple_html_email, name='test')
+    #path('test/<int:gender>/', deals_views.send_simple_html_email, name='test')
 ]
 
 handler404 = pages_views.custom_404_view

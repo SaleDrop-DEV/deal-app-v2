@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Deal Scanner - Winkels Manager{% endblock %}
+{% block title %}Deal Scanner - Winkels{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/theme_v2_store_manager.css' %}">
@@ -64,6 +64,58 @@
 
 
 </style>
+
+<style>
+    /* NEW styles */
+
+#newStoreForm {
+    position: relative;
+    z-index: 1;
+}
+
+#searchResults {
+    display: none;
+    border: 1px solid #ddd;
+    background: white;
+    position: absolute;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    padding: 5px;
+}
+
+.search-result-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background: #f5f5f5;
+}
+
+.search-result-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+.badge {
+    margin-left: auto;
+    background: #4caf50;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+</style>
 {% endblock %}
 
 {% block content %}
@@ -91,10 +143,14 @@
                 <div class="form-group">
                     <label for="id_name">Winkelnaam <span class="required">*</span></label>
                     {{ form.name }}
+                    <div id="searchResults">
+                        <!-- This should flow above everything but below the input off course -->
+                        <!-- When a user enter the winkelnaam, whenever she types something after some delay api call is made and displayed here -->
+                    </div>
                 </div>
 
                 <div id="email-inputs-container" class="form-group">
-                    <label>E-mailadressen <span class="required">*</span></label>
+                    <label>E-mailadressen (Niet xx@mails.domein.com of xx@notifications.domein.com)<span class="required">*</span></label>
                     <div class="email-input-wrapper">
                         <input type="email" name="email_addresses" class="form-control" placeholder="Voer een e-mailadres in" required>
                         <div id="emailInputsContainer"></div>
@@ -170,43 +226,41 @@
         </div>
 
         <h3 style="text-align: center; margin-bottom: 1rem;;">Overzicht van Winkels</h3>
-        <div class="stores-grid">
-            {% if stores %}
-                {% for store in stores %}
-                    <div id="store_{{ store.id }}" class="store-card card" 
-                         data-store-id="{{ store.id }}"
-                         data-store-name="{{ store.name }}"
-                         data-store-home-url="{{ store.home_url }}"
-                         data-store-sale-url="{{ store.sale_url }}"
-                         data-store-image-url="{{ store.image_url }}"
-                         data-store-emails="{{ store.email_addresses_comma }}"
-                         data-isVerified="{{ store.isVerified }}"
-                         data-genderPreferenceSet="{{ store.genderPreferenceSet }}"
-                         data-gender="{{ store.gender }}"
-                         data-mayUseContent="{{ store.mayUseContent }}"
-                    >
-                        <div class="card-header">
-                            {{ store.name|default:"Onbekende Winkel" }}
-                        </div>
-                        <div class="card-body">
-                            {% if store.image_url %}
-                                <img src="{{ store.image_url }}" alt="Banner for {{ store.name }}" class="store-banner">
-                            {% else %}
-                                <img src="https://placehold.co/400x200/cccccc/333333?text=Geen+Banner" alt="Geen Banner" class="store-banner">
-                            {% endif %}
+        <!-- Filter and Sort Controls -->
+        <div class="filter-section">
+            <div class="select-group">
+                <label for="sort-select" class="label">Sorteren op:</label>
+                <select id="sort-select" class="select-input">
+                    <option value="dateIssued" selected>Datum (nieuwste eerst)</option>
+                    <option value="dateIssuedReverse">Datum (oude eerst)</option>
+                    <option value="name">Naam (a-z)</option>
+                    <option value="subscriptions">Abonnementen (meeste eerst)</option>
+                    <option value="subscriptionsReverse">Abonnementen (minste eerst)</option>
+                </select>
+            </div>
 
-                            {% if store.domain %}
-                                <p><a href="{{ store.home_url }}" target="_blank" class="store-link">{{ store.domain }}</a></p>
-                            {% endif %}
+            <div class="select-group">
+                <label for="filter-select" class="label">Filteren op:</label>
+                <select id="filter-select" class="select-input">
+                    <option value="none" selected>Alle</option>
+                    <option value="verified">Geverifieerd</option>
+                    <option value="notVerified">Niet geverifieerd</option>
+                    <option value="mayUseContent">Mag content gebruiken</option>
+                    <option value="mayNotUseContent">Mag geen content gebruiken</option>
+                </select>
+            </div>
 
-                            <button style="margin: 0 auto; display: block;" class="primary-btn" title="Winkel bewerken">
-                                Bewerken
-                            </button>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
+            <div id="totalResults">
+            </div>
         </div>
+        
+        <div id="stores-grid" class="stores-grid">
+            <!-- This will be filled with de sorting -->
+        </div>
+        <div id="loadingIndicator"  style="display: none; margin-top: 1.5rem;" class="loader-spinner" aria-label="Loading..."></div>
+        <p style="text-align: center; margin-top: 1rem;" id="noStoresMessage">Geen winkels meer.</p>
+
+
         {% if not stores %}
             <div class="alert alert-info" style="display: block; margin: 0 auto;">Nog geen winkels toegevoegd.</div>
         {% endif %}
@@ -348,6 +402,7 @@ function displayPopUp(id){
     document.body.classList.add('no-scroll');
 
     const store_card = document.querySelector(`.store-card[data-store-id="${id}"]`);
+    console.log(store_card.dataset);
     if (!store_card) {
         console.error('Store card not found for ID:', id);
         return;
@@ -377,6 +432,7 @@ function displayPopUp(id){
     if (isVerifiedRadio) {
         isVerifiedRadio.checked = true;
     }
+
 
     const genderPreferenceSetValue = store_card.dataset.genderpreferenceset;
     const genderPreferenceSetRadio = modal.querySelector(`input[name="genderPreferenceSet"][value="${genderPreferenceSetValue}"]`);
@@ -782,5 +838,262 @@ function submitNewStore(formElement){
         window.displayMessage('error', error);
     });
 };
+
+
+
+
+// ALL NEW JAVASCRIPT FOR DYNAMIC NEW STORES //
+
+// The URL for your Django API endpoint
+const API_URL = '/api/get-stores-admin/';
+// Get the CSRF token from the cookie
+const CSRF_TOKEN = getCSRFToken();
+
+// DOM elements
+const storesGrid = document.getElementById('stores-grid');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const sortSelect = document.getElementById('sort-select');
+const filterSelect = document.getElementById('filter-select');
+const noStoresMessage = document.getElementById('noStoresMessage');
+
+// State variables
+let currentPage = 1;
+let currentSort = sortSelect.value;
+let currentFilter = filterSelect.value;
+let isLoading = false;
+let hasNextPage = true;
+
+/**
+ * Renders a single store card HTML element from store data.
+ * @param {object} store - The store data object from the API.
+ * @returns {string} The HTML string for the store card.
+ */
+const createStoreCard = (store) => {
+    const imageUrl = store.image_url || 'https://placehold.co/400x200/cccccc/333333?text=Geen+Banner';
+    const domainLink = store.home_url && store.domain
+        ? `<p class="domain-link"><a href="${store.home_url}" target="_blank" class="link">${store.domain}</a></p>`
+        : '';
+
+    // Convert JS booleans → Django-style strings
+    const isVerifiedValue = store.verified === true ? "True" : "False";
+    const genderPreferenceSetValue = store.genderPreferenceSet === true ? "True" : "False";
+    const mayUseContentValue = store.mayUseContent === true ? "True" : "False";
+
+    return `
+        <div id="store_${store.id}" class="store-card card"
+            data-store-id="${store.id}"
+            data-store-name="${store.name}"
+            data-store-home-url="${store.home_url}"
+            data-store-sale-url="${store.sale_url}"
+            data-store-image-url="${store.image_url}"
+            data-store-emails="${store.email_addresses_comma}"
+            data-isverified="${isVerifiedValue}"
+            data-genderpreferenceset="${genderPreferenceSetValue}"
+            data-gender="${store.gender}"
+            data-mayusecontent="${mayUseContentValue}"
+        >
+            <div class="card-header">
+                ${store.name || 'Onbekende Winkel'}
+            </div>
+            <div class="card-body">
+                <img src="${imageUrl}" alt="Banner for ${store.name}" class="store-banner">
+                ${domainLink}
+                <p style="text-align: center;">${store.subscriptions} abonnees</p>
+                <button class="primary-btn" title="Winkel bewerken" style="margin: 0 auto; display: block;">
+                    Bewerken
+                </button>
+            </div>
+        </div>
+    `;
+};
+
+
+/**
+ * Fetches stores from the API and renders them.
+ * @param {boolean} reset - If true, clears the grid and resets page number.
+ */
+const fetchStores = async (reset = false) => {
+    if (isLoading || (!hasNextPage && !reset)) {
+        return;
+    }
+    
+    isLoading = true;
+    loadingIndicator.style.display = 'block';
+    noStoresMessage.style.display = 'none';
+
+    if (reset) {
+        currentPage = 1;
+        storesGrid.innerHTML = '';
+        document.getElementById('totalResults').innerHTML = '';
+        hasNextPage = true;
+    }
+
+    try {
+        const payload = {
+            page: currentPage,
+            order: currentSort,
+        };
+        // Only add the sort_on parameter if a specific filter is selected
+        if (currentFilter !== 'none') {
+            payload.sort_on = currentFilter;
+        }
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN,
+            },
+            body: JSON.stringify(payload),
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.stores.length === 0 && currentPage === 1) {
+            noStoresMessage.style.display = 'block';
+        } else {
+            document.getElementById('totalResults').innerHTML = `<p>${data.totalFound} resultaten</p>`;
+            data.stores.forEach(store => {
+                const storeCardHtml = createStoreCard(store);
+                storesGrid.insertAdjacentHTML('beforeend', storeCardHtml);
+            });
+            // get amount of elements in grid
+            const gridItems = document.querySelectorAll('.store-card');
+            if (gridItems.length === data.totalFound) {
+                noStoresMessage.style.display = 'block';
+            };
+        }
+        
+        hasNextPage = data.hasNextPage;
+
+    } catch (error) {
+        console.error('Failed to fetch stores:', error);
+        // You could add a user-facing error message here
+        alert('Er is een fout opgetreden bij het laden van de winkels.');
+    } finally {
+        isLoading = false;
+        loadingIndicator.style.display = 'none';
+        
+        // This part handles a common issue where the first page doesn't fill the screen
+        // and the scroll event isn't triggered. We immediately check for more items.
+        if (hasNextPage && document.body.offsetHeight < window.innerHeight) {
+            currentPage++;
+            fetchStores();
+        }
+        
+        document.querySelectorAll('.store-card .primary-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const card = event.target.closest('.store-card');
+                const storeId = card.dataset.storeId;
+                displayPopUp(storeId);
+            });
+        });
+    }
+};
+
+// Event Listeners
+window.addEventListener('scroll', () => {
+    // Check if the user has scrolled to the bottom of the page.
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        // If there's a next page and we aren't already loading, fetch more stores.
+        if (hasNextPage && !isLoading) {
+            currentPage++;
+            fetchStores();
+        }
+    }
+});
+
+sortSelect.addEventListener('change', (e) => {
+    currentSort = e.target.value;
+    fetchStores(true); // Reset and fetch new data
+});
+
+filterSelect.addEventListener('change', (e) => {
+    currentFilter = e.target.value;
+    fetchStores(true); // Reset and fetch new data
+});
+
+// Initial fetch on page load
+fetchStores();
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const nameInput = document.getElementById("id_name");
+    const resultsContainer = document.getElementById("searchResults");
+
+    let searchTimeout = null;
+
+    nameInput.addEventListener("input", () => {
+        const query = nameInput.value.trim();
+
+        if (searchTimeout) clearTimeout(searchTimeout);
+
+        if (query.length === 0) {
+            resultsContainer.innerHTML = "";
+            resultsContainer.style.display = "none";
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch("/api/search-stores/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken(),
+                    },
+                    body: JSON.stringify({ query, page: 1 })
+                });
+
+                const data = await response.json();
+
+                if (data.stores && data.stores.length > 0) {
+                    resultsContainer.innerHTML = data.stores.map(store => `
+                        <div class="search-result-item" data-store-id="${store.id}">
+                            <img src="${store.image_url}" alt="${store.name}" class="search-result-logo">
+                            <span>${store.name}</span>
+                            ${store.is_subscribed ? '<span class="badge">✓ Subscribed</span>' : ''}
+                        </div>
+                    `).join("");
+                } else {
+                    resultsContainer.innerHTML = "<div class='search-result-empty'><p style='text-align: center;'>Geen winkels gevonden.</p></div>";
+                }
+            } catch (error) {
+                console.error("Search error:", error);
+                resultsContainer.innerHTML = "<div class='search-result-error'>Er ging iets mis.</div>";
+            }
+        }, 300);
+    });
+
+    // Show dropdown only when input is focused
+    nameInput.addEventListener("focus", () => {
+        if (resultsContainer.innerHTML.trim() !== "") {
+            resultsContainer.style.display = "block";
+        }
+    });
+
+    // Hide dropdown on blur, but allow clicking items
+    nameInput.addEventListener("blur", () => {
+        setTimeout(() => {
+            resultsContainer.style.display = "none";
+        }, 200); // delay to allow click
+    });
+
+    // Delegate click handling to results container
+    resultsContainer.addEventListener("click", (e) => {
+        const item = e.target.closest(".search-result-item");
+        if (item) {
+            nameInput.value = item.querySelector("span").innerText;
+            resultsContainer.innerHTML = "";
+            resultsContainer.style.display = "none";
+        }
+    });
+});
+
+
 </script>
 {% endblock %}

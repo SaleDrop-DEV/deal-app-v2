@@ -332,4 +332,98 @@ def set_stores_in_sheets(request):
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
 
+#NEW#
+@login_required
+def fetch_stores_for_admin(request):
+    if request.user.is_superuser:
+        try:
+            if request.method == 'POST':
+                data = json.loads(request.body)
+                page_number = int(data.get('page', 1))
+                options_sort = [
+                    'verified',#bool 
+                    'notVerified',
+                    'mayUseContent',#bool
+                    'mayNotUseContent',
+                    None
+                ]
+                sort_on = data.get('sort_on', None)
+                if sort_on not in options_sort:
+                    return JsonResponse({'error': 'Invalid sort_on parameter.'}, status=400)
+                
+                options_order = [
+                    'dateIssued',#new-old & old-new
+                    'dateIssuedReverse',
+                    'name',
+                    'subscriptions',#most first
+                    'subscriptionsReverse',
+                    None
+                ]
+                order = data.get('order', None)
+                if order not in options_order:
+                    return JsonResponse({'error': 'Invalid order parameter.'}, status=400)
+                
+                #SORTING ON#
+                if sort_on == 'verified':
+                    stores = deals_models.Store.objects.filter(isVerified=True).order_by('name')
+                elif sort_on == 'notVerified':
+                    stores = deals_models.Store.objects.filter(isVerified=False).order_by('name')
+                elif sort_on == 'mayUseContent':
+                    stores = deals_models.Store.objects.filter(mayUseContent=True).order_by('name')
+                elif sort_on == 'mayNotUseContent':
+                    stores = deals_models.Store.objects.filter(mayUseContent=False).order_by('name')
+                else:
+                    stores = deals_models.Store.objects.all().order_by('name')
+
+                #ORDER#
+                if order == 'subscriptions':
+                    stores = stores.annotate(
+                            subscriber_count=Count('subscriptions')
+                        ).order_by('-subscriber_count')
+                elif order == 'subscriptionsReverse':
+                    stores = stores.annotate(
+                            subscriber_count=Count('subscriptions')
+                        ).order_by('subscriber_count')  
+                elif order == 'dateIssued':
+                    stores = stores.order_by('-dateIssued')
+                elif order == 'dateIssuedReverse':
+                    stores = stores.order_by('dateIssued')
+                
+
+                totalFound = stores.count()
+
+                paginator = Paginator(stores, 15)
+                page_obj = paginator.get_page(page_number)
+                response = []
+                for store in page_obj:
+                    response.append({
+                        'id': store.id,
+                        'name': store.name,
+                        'home_url': store.home_url,
+                        'sale_url': store.sale_url,
+                        'verified': store.isVerified,
+                        'mayUseContent': store.mayUseContent,
+                        'dateIssued': store.dateIssued,
+                        'email_addresses_comma': store.email_addresses,
+                        'genderPreferenceSet': store.genderPreferenceSet,
+                        'gender': store.gender,
+                        'domain': store.domain,
+                        'image_url': store.image_url,
+                        'subscriptions': len(store.get_subscribers())
+                    })
+
+                return JsonResponse({
+                    'stores': response,
+                    'totalFound': totalFound,
+                    'hasNextPage': page_obj.has_next()
+                })
+        except Exception as e:
+            print(str(e))
+            JsonResponse({'error': "Er ging iets mis."}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
+
+    return JsonResponse({'error': 'Invalid request method'})
+        
 

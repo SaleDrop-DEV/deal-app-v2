@@ -12,6 +12,9 @@ urlpatterns = [
     path('un-subscribe-to-store/', views.un_subscribe_to_store_api_view, name='un_subscribe_to_store_api'),
     path('request-recommendation/', views.send_recommendation_api, name='request_recommendation_api'),
 
+    #ADMIN#
+    path('set-stores-in-sheets/', views.set_stores_in_sheets, name='set_stores_in_sheets'),
+
 
     # API Authentication URLs (for JWT)
     path('get-token/', IOS_views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'), #This endpoint accepts a POST request with a username and password and returns an access and refresh token pair

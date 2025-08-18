@@ -216,5 +216,120 @@ def send_recommendation_api(request):
             )
             return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
         
+import json
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
+
+from deals.models import Store, GmailToken
+
+@login_required
+def set_stores_in_sheets(request):
+    def upload_to_sheets(to_sheets: list) -> bool:
+        """
+        Deze functie verwerkt de lijst met winkelobjecten en exporteert deze naar een Google Sheet.
+        De authenticatie wordt gedaan met behulp van een service account.
+
+        Args:
+            to_sheets (list): Een lijst met dictionaries, waarbij elke dictionary de gegevens van een winkel bevat.
+
+        Returns:
+            bool: True bij succes, False bij een fout.
+        """
+        try:
+            # Lees de onbewerkte data van de credentials uit de database
+            credentials_data = GmailToken.objects.get(name="Sheets").credentials_json
+            
+            # Controleer of de data al een dictionary is.
+            # Anders, probeer het te parsen als een JSON-string.
+            if isinstance(credentials_data, str):
+                info = json.loads(credentials_data)  # JSON string → dict
+            else:
+                info = credentials_data  # is al dict
+            
+            # Initialiseer de credentials met de service account info
+            # De benodigde scopes (toegangsrechten) zijn hier ingesteld voor de Sheets API
+            scopes = ['https://www.googleapis.com/auth/spreadsheets']
+            credentials = Credentials.from_service_account_info(info, scopes=scopes)
+
+            # Bouw de service voor de Sheets API
+            service = build('sheets', 'v4', credentials=credentials)
+
+            # De ID van de Google Sheet. Vervang 'YOUR_SPREADSHEET_ID' met de daadwerkelijke ID.
+            # Je vindt de ID in de URL van je spreadsheet: https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit
+            spreadsheet_id = '1TQ6vdAUFIOiOe48Rg-T_BiuxRrG30ygF9Mi0kLmZ57U'
+
+            # De A1-notatie van het bereik om te updaten. Dit start bij de eerste cel in het eerste blad.
+            range_name = 'AUTOMATED (NOT edit)!A1'
+
+            # Converteer de lijst van dictionaries naar een lijst van lijsten (rijen) voor de API
+            # Voeg een header-rij toe
+            if not to_sheets:
+                values = [[]]
+            else:
+                headers = list(to_sheets[0].keys())
+                values = [headers] + [list(item.values()) for item in to_sheets]
+
+            body = {
+                'values': values
+            }
+            
+            # Voer de API-aanvraag uit om de gegevens bij te werken
+            result = service.spreadsheets().values().update(
+                spreadsheetId=spreadsheet_id,
+                range=range_name,
+                valueInputOption='RAW',
+                body=body
+            ).execute()
+
+            return True
+
+        except Exception as e:
+            # Log de fout in de database of naar de console voor debugging
+            API_Errors_Site.objects.create(
+                task="Upload to sheets (function)",
+                error=str(e)
+            )
+            print(f"Fout bij het uploaden: {e}")
+            return False
+
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            try:
+                # Query de database voor alle 'Store' objecten
+                stores = Store.objects.all()
+                to_sheets = []
+                for store in stores:
+                    # Maak een dictionary van elke winkel met de gewenste velden
+                    obj = {
+                        'name': store.name,
+                        'website': store.home_url,
+                        'sale_url': store.sale_url,
+                        'subscriptions': len(store.get_subscribers())
+                    }
+                    to_sheets.append(obj)
+                
+                # Roep de interne functie aan om de gegevens te uploaden
+                success = upload_to_sheets(to_sheets=to_sheets)
+                
+                # Geef een JSON-response terug, afhankelijk van het resultaat
+                if success:
+                    return JsonResponse({'message': 'Gegevens succesvol geüpload naar Google Sheets.'})
+                else:
+                    return JsonResponse({'error': 'Fout bij het uploaden naar Google Sheets.'}, status=500)
+
+            except Exception as e:
+                # API_Errors_Site.objects.create(
+                #     task="Set stores in sheets",
+                #     error=str(e)
+                # )
+                print(str(e))
+                return JsonResponse({'error': 'Er is een interne serverfout opgetreden.'}, status=500)
+        else:
+            # Als het geen POST-verzoek is, geef een HTTP 405 Method Not Allowed terug
+            return JsonResponse({'error': 'Deze methode is niet toegestaan.'}, status=405)
+    else:
+        # Geen superuser, stuur een 403 Forbidden
+        return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
+
 
 

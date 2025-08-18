@@ -344,13 +344,17 @@ def all_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
-            deal['personal'] = analysis.is_personal_deal
-            deal['main_link'] = f"/deals/visit/{analysis.id}/{request.user.id}/"
-            deal['deal_json'] = json.dumps(deal, cls=DjangoJSONEncoder)
-            deal['date_received'] = deal['gmail_data']['received_date']
-            deal['parsed_date_received'] = parse_date_received(analysis.message.received_date)
+            obj = {
+                'title': deal['title'],
+                'grabber': deal['grabber'],
+                'description': deal['description'],
+                'personal': analysis.is_personal_deal,
+                'store': deal['store'],
+                'parsed_date_received': parse_date_received(analysis.message.received_date),
+            }
+            obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
 
-            data.append(deal)
+            data.append(obj)
 
         return render(request, 'deals/deals.html', {
             'title': "Alle deals",
@@ -388,11 +392,17 @@ def all_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
-            deal['main_link'] = f"/deals/visit/{analysis.id}/{request.user.id}/"
-            deal['personal'] = analysis.is_personal_deal
-            deal['deal_json'] = json.dumps(deal, cls=DjangoJSONEncoder)
-            deal['date_received'] = deal['gmail_data']['received_date']
-            deal['parsed_date_received'] = parse_date_received(analysis.message.received_date)
+            obj = {
+                'title': deal['title'],
+                'grabber': deal['grabber'],
+                'description': deal['description'],
+                'personal': analysis.is_personal_deal,
+                'store': deal['store'],
+                'parsed_date_received': parse_date_received(analysis.message.received_date),
+            }
+            obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
+
+            data.append(obj)
 
             data.append(deal)
 
@@ -429,13 +439,16 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
-            deal['main_link'] = f"/deals/visit/{analysis.id}/{request.user.id}/"
-            deal['personal'] = analysis.is_personal_deal
-            deal['deal_json'] = json.dumps(deal, cls=DjangoJSONEncoder)
-            deal['date_received'] = deal['gmail_data']['received_date']
-            deal['parsed_date_received'] = parse_date_received(analysis.message.received_date)
-
-            data.append(deal)
+            obj = {
+                'title': deal['title'],
+                'grabber': deal['grabber'],
+                'description': deal['description'],
+                'personal': analysis.is_personal_deal,
+                'store': deal['store'],
+                'parsed_date_received': parse_date_received(analysis.message.received_date),
+            }
+            obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
+            data.append(obj)
 
         return render(request, 'deals/deals.html', {
             'title': "Persoonlijke sales",
@@ -473,13 +486,16 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
-            deal['main_link'] = f"/deals/visit/{analysis.id}/{request.user.id}/"
-            deal['personal'] = analysis.is_personal_deal
-            deal['deal_json'] = json.dumps(deal, cls=DjangoJSONEncoder)
-            deal['date_received'] = deal['gmail_data']['received_date']
-            deal['parsed_date_received'] = parse_date_received(analysis.message.received_date)
-
-            data.append(deal)
+            obj = {
+                'title': deal['title'],
+                'grabber': deal['grabber'],
+                'description': deal['description'],
+                'personal': analysis.is_personal_deal,
+                'store': deal['store'],
+                'parsed_date_received': parse_date_received(analysis.message.received_date),
+            }
+            obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
+            data.append(obj)
 
         return JsonResponse({
             'deals': data,

@@ -293,7 +293,7 @@ def analyze_gmail_messages(max_analyses=10):
     num_messages = len(messages_subset)
     for i, message in enumerate(messages_subset):
         in_analysis = message.in_analysis
-        if message is not in_analysis:
+        if not in_analysis:
             message.in_analysis = True
             message.save()
             cleaned_html_body = shorten_email_html(message.body)

@@ -315,8 +315,8 @@ def analyze_gmail_messages(max_analyses=10):
                 sendPushNotifications(analysis=analysis)
                 if i < num_messages - 1: # If it's not the last message
                     sleep(1.5)
-            else:
-                raise ValueError(f"Failed to analyze email (id={message.id}).")
+            #else:
+            #    raise ValueError(f"Failed to analyze email (id={message.id}).")
 
 
 

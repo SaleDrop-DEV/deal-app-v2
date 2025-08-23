@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="{% static 'css/theme_v2_base.css' %}">
     <script src="{% static 'js/navbar.js' %}"></script>
     <script src="{% static 'js/display_message.js' %}"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B8RBYV18TQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-B8RBYV18TQ');
+    </script>
+    
     <!-- favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon2.png' %}">
     <title>SaleDrop | {% block title %}{% endblock %}</title>

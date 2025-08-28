@@ -297,6 +297,18 @@ def analyze_gmail_messages(max_analyses=10):
             message.save()
             cleaned_html_body = shorten_email_html(message.body)
             analysis_data = analyze_email_with_gemini(cleaned_html_body, message.sender, message.subject)
+            if analysis_data is None:
+                print("Error occured with fetching the data from gemini.")
+                ScrapeData.objects.create(
+                    task="Analyze Gmail Messages",
+                    succes=False,
+                    major_error=False,
+                    error="Error occured with fetching the data from gemini.",
+                    execution_date=timezone.now()
+                )
+                message.in_analysis = False
+                message.save()
+                continue
             if analysis_data["is_sale_mail"]:
                 scrape_and_save_general_url(analysis_data["main_link"])
             if analysis_data:

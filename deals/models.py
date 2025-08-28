@@ -114,7 +114,7 @@ class GmailSaleAnalysis(models.Model):
 
 
     def __str__(self):
-        return f"Analysis for Message ID {self.message.id} - Probability: {self.deal_probability}"
+        return f"[{self.message.id}]{self.title} - Probability: {self.deal_probability}"
     
     def to_dict(self):
         data = {

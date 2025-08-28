@@ -115,6 +115,22 @@ class GmailSaleAnalysis(models.Model):
 
     def __str__(self):
         return f"[{self.message.id}]{self.title} - Probability: {self.deal_probability}"
+
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to set the related GmailMessage's in_analysis field to False
+        before deleting the analysis object itself.
+        """
+        # Get the related GmailMessage object before this analysis is deleted.
+        # Store the ID to prevent issues if the message is also being deleted.
+        message_id = self.message_id
+        
+        # Call the default delete method first to ensure it's removed by Django
+        super().delete(*args, **kwargs)
+        try:
+            GmailMessage.objects.filter(id=message_id).update(in_analysis=False)
+        except GmailMessage.DoesNotExist:
+            pass
     
     def to_dict(self):
         data = {

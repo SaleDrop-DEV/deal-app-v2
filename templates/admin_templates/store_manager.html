@@ -61,13 +61,6 @@
     border-radius: 50%;
 }
 
-
-
-</style>
-
-<style>
-    /* NEW styles */
-
 #newStoreForm {
     position: relative;
     z-index: 1;
@@ -115,6 +108,24 @@
     font-size: 12px;
 }
 
+</style>
+
+<style>
+    @keyframes fadeInCard {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.store-card.fade-in-card {
+    animation-name: fadeInCard;
+    animation-duration: 0.5s; /* Adjust the duration as needed */
+    animation-fill-mode: forwards; /* Keep the end state of the animation */
+    opacity: 0; /* Start with opacity 0 */
+}
 </style>
 {% endblock %}
 
@@ -258,6 +269,7 @@
             <!-- This will be filled with de sorting -->
         </div>
         <div id="loadingIndicator"  style="display: none; margin-top: 1.5rem;" class="loader-spinner" aria-label="Loading..."></div>
+        <button style="margin-top: 1rem;" class="action-btn" id="loadMoreBtn">Meer laden</button>
         <p style="text-align: center; margin-top: 1rem;" id="noStoresMessage">Geen winkels meer.</p>
 
 
@@ -856,6 +868,10 @@ const sortSelect = document.getElementById('sort-select');
 const filterSelect = document.getElementById('filter-select');
 const noStoresMessage = document.getElementById('noStoresMessage');
 
+// NEW
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+
 // State variables
 let currentPage = 1;
 let currentSort = sortSelect.value;
@@ -913,6 +929,7 @@ const createStoreCard = (store) => {
  * @param {boolean} reset - If true, clears the grid and resets page number.
  */
 const fetchStores = async (reset = false) => {
+    
     if (isLoading || (!hasNextPage && !reset)) {
         return;
     }
@@ -920,6 +937,8 @@ const fetchStores = async (reset = false) => {
     isLoading = true;
     loadingIndicator.style.display = 'block';
     noStoresMessage.style.display = 'none';
+    loadMoreBtn.style.display = 'none';
+
 
     if (reset) {
         currentPage = 1;
@@ -957,14 +976,31 @@ const fetchStores = async (reset = false) => {
             noStoresMessage.style.display = 'block';
         } else {
             document.getElementById('totalResults').innerHTML = `<p>${data.totalFound} resultaten</p>`;
-            data.stores.forEach(store => {
+            data.stores.forEach((store, index) => {
+                // const storeCardHtml = createStoreCard(store);
+                // storesGrid.insertAdjacentHTML('beforeend', storeCardHtml);
                 const storeCardHtml = createStoreCard(store);
-                storesGrid.insertAdjacentHTML('beforeend', storeCardHtml);
+                
+                // Create a temporary element to safely parse the HTML string
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = storeCardHtml;
+                const storeCard = tempDiv.firstElementChild;
+                
+                // Add the fade-in class
+                storeCard.classList.add('fade-in-card');
+                
+                // Set the animation delay based on the card's index
+                storeCard.style.animationDelay = `${index * 0.05}s`;
+                
+                // Append the fully configured card to the grid
+                storesGrid.appendChild(storeCard);
             });
             // get amount of elements in grid
             const gridItems = document.querySelectorAll('.store-card');
             if (gridItems.length === data.totalFound) {
                 noStoresMessage.style.display = 'block';
+            } else{
+                loadMoreBtn.style.display = 'block';
             };
         }
         
@@ -1082,6 +1118,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             resultsContainer.style.display = "none";
         }, 200); // delay to allow click
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+        // Check if we are already loading or if there are no more pages
+        if (isLoading || !hasNextPage) {
+            return;
+        }
+        currentPage++;
+        fetchStores();
     });
 
     // Delegate click handling to results container

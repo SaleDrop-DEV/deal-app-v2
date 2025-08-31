@@ -40,7 +40,7 @@ GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemin
 
 EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 
-def analyze_email_with_gemini_refined(email_html, sender, subject):
+def analyze_email_with_gemini(email_html, sender, subject):
     """
     Analyseer e-mailinhoud met Gemini API en retourneer data passend bij GmailSaleAnalysis model.
     """

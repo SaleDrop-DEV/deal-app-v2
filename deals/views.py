@@ -810,11 +810,17 @@ def visit_sale_view(request, gmail_analysis_id, user_id):
     gmail_message: GmailSaleAnalysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
     if gmail_message.message.store and gmail_message.main_link:
         redirect_url = get_sale_page_url(gmail_message.message.store, gmail_message.main_link)
-        if Url.objects.filter(url_ctrk=redirect_url).exists():
-            Url.objects.get(url_ctrk=redirect_url).add_visit(user=user)
+        if Url.objects.filter(general_url=redirect_url).exists():
+            objects = Url.objects.filter(general_url=redirect_url)
+            if len(objects) > 1:
+                for url in objects:
+                    url.add_visit(user)
+            else:
+                objects.add_visit(user)
         return redirect(redirect_url)
     else:
         return Http404()
+
 
 
 # Gmail webhook #

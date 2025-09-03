@@ -51,7 +51,7 @@ def analyze_email_with_gemini(email_html, sender, subject):
         f"Extraheer de volgende velden nauwkeurig:\n\n"
         f"- is_sale_mail: true/false\n"
         f"- is_personal_deal: true/false\n"
-        f"- title: string (Een **zeer korte titel** van maximaal 5 woorden, bijv. 'SALE MANGO' of 'Nieuwe collectie'. Gebruik geen kortingspercentages hier.)\n"
+        f"- title: string (Een **zeer korte titel** van maximaal 7 woorden, bijv. 'SALE MANGO' of 'Nieuwe collectie'. Gebruik geen kortingspercentages hier.)\n"
         f"- grabber: string (Een **korte, pakkende kortingszin**, zoals '-70% korting' of 'Tot 50% korting'. Dit is de belangrijkste promotiezin.)\n"
         f"- description: string (Een **neutrale, redactionele beschrijving** van de aanbieding. Dit mag langere details bevatten. \
           Vermijd bezittelijke voornaamwoorden, persoonlijke verwijzingen en directe marketing-taal. Geef een korte en duidelijke samenvatting van de aanbieding, geschreven in een casual toon.)\n"
@@ -260,7 +260,8 @@ def sendPushNotifications(analysis: GmailSaleAnalysis):
 
             if expo_tokens:
                 title = f"{store.name}: {analysis.title}"
-                body = f"{analysis.grabber}"
+                grabber = analysis.grabber if len(analysis.grabber) is not 'N/A' else "Nieuwe deal beschikbaar!"
+                body = grabber
                 data = {
                     "page": "SaleDetail",
                     "analysisId": analysis.id,
@@ -304,20 +305,32 @@ def analyze_gmail_messages(max_analyses=10):
             if analysis_data["is_sale_mail"]:
                 scrape_and_save_general_url(analysis_data["main_link"])
             if analysis_data:
-                analysis = GmailSaleAnalysis.objects.create(
-                    message=message,
-                    is_sale_mail=analysis_data["is_sale_mail"],
-                    is_personal_deal=analysis_data["is_personal_deal"],
-                    title=analysis_data["title"],
-                    grabber=analysis_data["grabber"],
-                    description=analysis_data["description"],
-                    main_link=analysis_data["main_link"],
-                    highlighted_products=analysis_data["highlighted_products"],
-                    deal_probability=analysis_data["deal_probability"]
-                )
-                sendPushNotifications(analysis=analysis)
-                if i < num_messages - 1: # If it's not the last message
-                    sleep(1.5)
+                if len(analysis_data["title"]) > 7:
+                    ScrapeData.objects.create(
+                        task="Analyze Gmail Messages",
+                        succes=False,
+                        major_error=False,
+                        error="Title returned by gemini is false",
+                        execution_date=timezone.now()
+                    )
+                    message.in_analysis = False
+                    message.save()
+                    continue
+                else:
+                    analysis = GmailSaleAnalysis.objects.create(
+                        message=message,
+                        is_sale_mail=analysis_data["is_sale_mail"],
+                        is_personal_deal=analysis_data["is_personal_deal"],
+                        title=analysis_data["title"],
+                        grabber=analysis_data["grabber"],
+                        description=analysis_data["description"],
+                        main_link=analysis_data["main_link"],
+                        highlighted_products=analysis_data["highlighted_products"],
+                        deal_probability=analysis_data["deal_probability"]
+                    )
+                    sendPushNotifications(analysis=analysis)
+                    if i < num_messages - 1: # If it's not the last message
+                        sleep(1.5)
             #else:
             #    raise ValueError(f"Failed to analyze email (id={message.id}).")
 

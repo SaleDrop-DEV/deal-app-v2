@@ -258,7 +258,7 @@ def sendPushNotifications(analysis: GmailSaleAnalysis):
 
             if expo_tokens:
                 title = f"{store.name}: {analysis.title}"
-                grabber = analysis.grabber if len(analysis.grabber) is not 'N/A' else "Nieuwe deal beschikbaar!"
+                grabber = analysis.grabber if analysis.grabber != 'N/A' else "Nieuwe deal beschikbaar!"
                 body = grabber
                 data = {
                     "page": "SaleDetail",

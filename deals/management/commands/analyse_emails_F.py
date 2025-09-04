@@ -305,7 +305,7 @@ def analyze_gmail_messages(max_analyses=10):
             if analysis_data["is_sale_mail"]:
                 scrape_and_save_general_url(analysis_data["main_link"])
             if analysis_data:
-                if len(analysis_data["title"]) > 7:
+                if " " in analysis_data["title"] and len(analysis_data["title"].split(" ")) > 7:
                     ScrapeData.objects.create(
                         task="Analyze Gmail Messages",
                         succes=False,

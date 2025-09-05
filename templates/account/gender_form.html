@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profiel Voltooien{% endblock %}
+
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+
+<style>
+.signup-card {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.signup-card h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 550;
+    color: var(--primary-text-color);
+}
+
+.signup-card .subtitle {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--secondary-text-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--primary-text-color);
+    cursor: pointer;
+}
+
+/* Custom styled radio buttons */
+.radio-group input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-gray-medium);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 0; 
+}
+
+.radio-group input[type="radio"]:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+}
+
+/* Inner dot for checked radio */
+.radio-group input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.error {
+    margin-top: 1rem;
+    text-align: center;
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+}
+
+.skip-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--secondary-text-color);
+}
+
+.skip-link a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: 0.3s;
+}
+.skip-link a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+}
+
+/* Pop-in animation */
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pop-in {
+    animation: popIn 0.4s ease-out forwards;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="signup-card pop-in">
+        <h3>Nog één stap</h3>
+        <p class="subtitle">Selecteer je geslacht om je profiel te voltooien.</p>
+        
+        {# --- FIX 3: Add the action attribute to the form --- #}
+        <form method="post" action="{% url 'complete_profile' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <div class="radio-group" id="id_gender">
+                    <label for="id_gender_man">
+                        <input type="radio" name="gender" value="man" id="id_gender_man" required> Man
+                    </label>
+                    <label for="id_gender_vrouw">
+                        <input type="radio" name="gender" value="vrouw" id="id_gender_vrouw"> Vrouw
+                    </label>
+                    <label for="id_gender_anders">
+                        <input type="radio" name="gender" value="anders" id="id_gender_anders"> Anders
+                    </label>
+                </div>
+                {% if error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="action-btn">Profiel voltooien</button>
+        </form>
+
+        <p class="skip-link">
+            <a href="{% url 'stores' %}">Overslaan</a>, je kunt dit altijd nog wijzigen in je accountinstellingen.
+        </p>
+    </div>
+</div>
+{% endblock %}

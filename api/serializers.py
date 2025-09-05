@@ -24,11 +24,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = User.EMAIL_FIELD  # make sure EMAIL_FIELD is set correctly in your user model
 
     def validate(self, attrs):
-        print("Validating...")
         email = attrs.get("email")
-        print(email)
         password = attrs.get("password")
-        print(password)
 
         if email and password:
             user = authenticate(request=self.context.get('request'),

@@ -117,7 +117,8 @@ def signup_view(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             # You must include the protocol (http or https)
-            activation_link = f"{settings.CURRENT_URL}{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+            base_activation_url = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+            activation_link = f"{settings.CURRENT_URL}{base_activation_url}?source=web"
 
             message = render_to_string('email/validation_email.html', {
                 'user': user,
@@ -147,7 +148,6 @@ def signup_view(request):
     return render(request, 'account/signup.html', {'form': form, 'page': 'signup'})
 
 
-# This is the view that will handle the activation link
 def activate(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -159,10 +159,47 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        return redirect(f"{reverse('stores')}?succesfuly_activated=1")
+        source = request.GET.get('source')
+        if source == 'app':
+            return redirect('complete_profile')
+        else:
+            return redirect(f"{reverse('stores')}?succesfuly_activated=1")
     else:
         data = {
             'title': "Verificatie link is niet geldig.",
             'description': "De link is niet geldig of is verbruikt."
         }
         return render(request, 'account/message_template.html', context=data)
+
+
+@login_required
+def complete_profile(request):
+    """
+    Handles both displaying the gender form and processing its submission.
+    """
+    user = request.user
+    # --- FIX 2: Handle the POST request from the form submission ---
+    if request.method == 'POST':
+        gender_str = request.POST.get('gender')
+        valid_genders = ['man', 'vrouw', 'anders']
+
+        if gender_str in valid_genders:
+            gender_map = {'man': 0, 'vrouw': 1, 'anders': 2}
+            gender_int = gender_map.get(gender_str)
+            
+            # Use get_or_create to safely create the record.
+            extra_info, created = ExtraUserInformation.objects.get_or_create(user=user)
+            
+            # Now, 'extra_info' is the actual object, not a tuple
+            extra_info.gender = gender_int
+            extra_info.save()
+            
+            # Redirect to the main page after successful submission
+            return redirect(f"{reverse('stores')}?succesfuly_activated=1")
+        else:
+            # If the submission is invalid, show an error.
+            error = "Selecteer een geldige optie."
+            return render(request, 'account/gender_form.html', {'error': error})
+
+    # This part handles the initial GET request.
+    return render(request, 'account/gender_form.html')

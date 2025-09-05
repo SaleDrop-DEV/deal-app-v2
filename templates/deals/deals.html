@@ -7,6 +7,19 @@
 <link rel="stylesheet" href="{% static 'css/theme_v2_deals.css' %}">
 <script src="{% static 'js/sale_cards_modal_logic.js' %}"></script>
 <script src="{% static 'js/load_more_sales.js' %}"></script>
+<style>
+
+    .product-overlay{
+        margin-bottom: calc(env(safe-area-inset-bottom));
+    }
+    #small-screen-action-btn{
+        top: 0 !important;
+        left: 0 !important;
+        position: relative !important;
+        transform: none !important;
+    }
+
+</style>
 {% endblock %}
 
 {% block content %}
@@ -117,7 +130,11 @@
                 </div>
                 <div class="product-actions">
                     <!-- <a href="#" class="primary-btn product-main-link" target="_blank">Go to Deal</a> -->
+                    <!-- <button id="small-screen-action-btn" class="action-btn">Naar sale</button> -->
                 </div>
+            </div>
+            <div style="position: relative;">
+                <button id="small-screen-action-btn" class="action-btn" onclick="">Naar sale</button>
             </div>
         </div>
     </div>
@@ -146,8 +163,6 @@
                         </div>
                     </div>
                     <div class="product-actions">
-                        <!-- <a href="#" class="primary-btn product-main-link" target="_blank">Naar sale</a> -->
-                        
                     </div>
                 </div>
             </div>

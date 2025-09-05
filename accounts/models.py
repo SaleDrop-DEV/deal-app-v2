@@ -12,6 +12,14 @@ class ExtraUserInformation(models.Model):
     isPayedUser = models.BooleanField(default=False)
     expoToken = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        gender_map = {
+            0: 'Man',
+            1: 'Vrouw',
+            2: 'Anders',
+        }
+        return f"{self.user.email}: {gender_map.get(self.gender, 'Unknown')}"
+
 
 # In your app's models.py
 

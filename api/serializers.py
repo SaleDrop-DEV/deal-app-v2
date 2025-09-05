@@ -113,7 +113,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         # You must include the protocol (http or https)
-        activation_link = f"{settings.CURRENT_URL}{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+        base_activation_url = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+        activation_link = f"{settings.CURRENT_URL}{base_activation_url}?source=app"
 
         message = render_to_string('email/validation_email.html', {
             'user': user,

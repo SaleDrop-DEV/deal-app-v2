@@ -331,8 +331,6 @@ def set_stores_in_sheets(request):
         # Geen superuser, stuur een 403 Forbidden
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
-
-#NEW#
 @login_required
 def fetch_stores_for_admin(request):
     if request.user.is_superuser:
@@ -340,42 +338,40 @@ def fetch_stores_for_admin(request):
             if request.method == 'POST':
                 data = json.loads(request.body)
                 page_number = int(data.get('page', 1))
-                options_sort = [
-                    'verified',#bool 
-                    'notVerified',
-                    'mayUseContent',#bool
-                    'mayNotUseContent',
-                    None
-                ]
                 sort_on = data.get('sort_on', None)
+                order = data.get('order', None)
+                search_name = data.get('search_name', None) # NEW: Get search term
+
+                # Option lists for validation
+                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', None]
+                options_order = ['dateIssued', 'dateIssuedReverse', 'name', 'subscriptions', 'subscriptionsReverse', None]
+
+                # Validate parameters
                 if sort_on not in options_sort:
                     return JsonResponse({'error': 'Invalid sort_on parameter.'}, status=400)
-                
-                options_order = [
-                    'dateIssued',#new-old & old-new
-                    'dateIssuedReverse',
-                    'name',
-                    'subscriptions',#most first
-                    'subscriptionsReverse',
-                    None
-                ]
-                order = data.get('order', None)
                 if order not in options_order:
                     return JsonResponse({'error': 'Invalid order parameter.'}, status=400)
-                
-                #SORTING ON#
-                if sort_on == 'verified':
-                    stores = deals_models.Store.objects.filter(isVerified=True).order_by('name')
-                elif sort_on == 'notVerified':
-                    stores = deals_models.Store.objects.filter(isVerified=False).order_by('name')
-                elif sort_on == 'mayUseContent':
-                    stores = deals_models.Store.objects.filter(mayUseContent=True).order_by('name')
-                elif sort_on == 'mayNotUseContent':
-                    stores = deals_models.Store.objects.filter(mayUseContent=False).order_by('name')
-                else:
-                    stores = deals_models.Store.objects.all().order_by('name')
 
-                #ORDER#
+                # Base QuerySet
+                stores = deals_models.Store.objects.all()
+
+                # NEW: Apply search filter if a search_name is provided
+                if search_name:
+                    stores = stores.filter(name__icontains=search_name)
+                else:
+                    print("no search name")
+
+                # SORTING ON
+                if sort_on == 'verified':
+                    stores = stores.filter(isVerified=True)
+                elif sort_on == 'notVerified':
+                    stores = stores.filter(isVerified=False)
+                elif sort_on == 'mayUseContent':
+                    stores = stores.filter(mayUseContent=True)
+                elif sort_on == 'mayNotUseContent':
+                    stores = stores.filter(mayUseContent=False)
+
+                # ORDER
                 if order == 'subscriptions':
                     stores = stores.annotate(
                             subscriber_count=Count('subscriptions')
@@ -388,12 +384,15 @@ def fetch_stores_for_admin(request):
                     stores = stores.order_by('-dateIssued')
                 elif order == 'dateIssuedReverse':
                     stores = stores.order_by('dateIssued')
-                
+                else: # Default order by name if no other order is specified
+                     stores = stores.order_by('name')
+
 
                 totalFound = stores.count()
 
                 paginator = Paginator(stores, 15)
                 page_obj = paginator.get_page(page_number)
+                
                 response = []
                 for store in page_obj:
                     response.append({
@@ -409,7 +408,7 @@ def fetch_stores_for_admin(request):
                         'gender': store.gender,
                         'domain': store.domain,
                         'image_url': store.image_url,
-                        'subscriptions': len(store.get_subscribers())
+                        'subscriptions': store.subscriptions.count() # Use .count() for efficiency
                     })
 
                 return JsonResponse({
@@ -419,11 +418,9 @@ def fetch_stores_for_admin(request):
                 })
         except Exception as e:
             print(str(e))
-            JsonResponse({'error': "Er ging iets mis."}, status=500)
+            return JsonResponse({'error': "Er ging iets mis."}, status=500)
 
     else:
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
     return JsonResponse({'error': 'Invalid request method'})
-        
-

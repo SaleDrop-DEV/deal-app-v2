@@ -126,6 +126,44 @@
     animation-fill-mode: forwards; /* Keep the end state of the animation */
     opacity: 0; /* Start with opacity 0 */
 }
+
+
+
+/* A container for the search bar to manage spacing and alignment */
+.search-bar {
+display: flex;
+justify-content: center;
+width: 100%;
+max-width: 600px;
+margin: 1.5rem auto;
+}
+
+/* Styling for the search input field itself */
+#searchStoreInput {
+width: 100%;
+padding: 0.75rem 1rem;
+border: 1px solid #e5e7eb;
+border-radius: 0.5rem;
+font-size: 1rem;
+font-family: 'Inter', sans-serif;
+color: #1f2937;
+background-color: #ffffff;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Styles for the placeholder text */
+#searchStoreInput::placeholder {
+color: #9ca3af;
+font-weight: 400;
+}
+
+/* Focus state for a clean, professional look */
+#searchStoreInput:focus {
+border: 1px solid #FF4D00;
+box-shadow: 0 0 0 3px #fee8e0;
+outline: none;
+}
 </style>
 {% endblock %}
 
@@ -236,8 +274,12 @@
             </form>
         </div>
 
-        <h3 style="text-align: center; margin-bottom: 1rem;;">Overzicht van Winkels</h3>
+        <h3 style="text-align: center; margin-bottom: 1rem;">Overzicht van Winkels</h3>
         <!-- Filter and Sort Controls -->
+        <div class="search-bar">
+            <input type="text" name="Zoek winkel" id="searchStoreInput" placeholder="Zoek een winkel" class="form-control">
+        </div>
+
         <div class="filter-section">
             <div class="select-group">
                 <label for="sort-select" class="label">Sorteren op:</label>
@@ -929,6 +971,10 @@ const createStoreCard = (store) => {
  * @param {boolean} reset - If true, clears the grid and resets page number.
  */
 const fetchStores = async (reset = false) => {
+
+    // NEW //
+    const storeInputName = document.getElementById('searchStoreInput')
+
     
     if (isLoading || (!hasNextPage && !reset)) {
         return;
@@ -955,6 +1001,15 @@ const fetchStores = async (reset = false) => {
         // Only add the sort_on parameter if a specific filter is selected
         if (currentFilter !== 'none') {
             payload.sort_on = currentFilter;
+        }
+
+        // Add the search term to the payload if it exists
+        if (storeInputName.value && storeInputName.value.trim() !== '') {
+            console.log(storeInputName.value)
+            payload.search_name = storeInputName.value;
+        } else{
+            console.log("no search term")
+            payload.search_name = null;
         }
 
         const response = await fetch(API_URL, {
@@ -1056,6 +1111,24 @@ filterSelect.addEventListener('change', (e) => {
 // Initial fetch on page load
 fetchStores();
 
+document.addEventListener('DOMContentLoaded', () => {
+    // Get the search input element by its ID.
+    const searchInput = document.getElementById('searchStoreInput');
+
+    // Check if the input element exists to prevent errors.
+    if (searchInput) {
+        // Add an 'input' event listener. This event fires whenever the value
+        // of an <input> element has been changed.
+        searchInput.addEventListener('input', () => {
+            // Call the fetchStores function and pass 'true' to it.
+            // The 'true' argument tells fetchStores to reset the grid
+            // and start a new search from page 1 with the new search term.
+            fetchStores(true);
+        });
+    }
+});
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
     const nameInput = document.getElementById("id_name");
@@ -1140,6 +1213,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
+</script>
+
+<script>
+    function getCSRFToken() {
+        let name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
 </script>
 {% endblock %}

@@ -187,9 +187,8 @@ class Store(models.Model):
     genderPreferenceSet = models.BooleanField(default=False) # False: Newsletter didn't ask for gender
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True) # only filled in if gender preference is not set
     mayUseContent = models.BooleanField(default=False)
-
-    # NEW FIELD #
     dateIssued = models.DateTimeField(default=timezone.now(), null=False)
+    isWeirdDomain = models.BooleanField(default=False, null=False, blank=False)
 
 
 
@@ -240,7 +239,9 @@ class Store(models.Model):
             'isVerified': self.isVerified,
             'genderPreferenceSet': self.genderPreferenceSet,
             'gender': self.gender,
-            'mayUseContent': self.mayUseContent
+            'mayUseContent': self.mayUseContent,
+            'isWeirdDomain': self.isWeirdDomain,
+            'dateIssued': self.dateIssued.strftime('%Y-%m-%d %H:%M:%S') if self.dateIssued else ''
         }
 
 class SubscriptionData(models.Model):

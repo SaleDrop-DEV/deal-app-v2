@@ -111,6 +111,7 @@ class GmailSaleAnalysis(models.Model):
     main_link = models.TextField(null=True, blank=True)
     highlighted_products = models.JSONField(null=True, blank=True)
     deal_probability = models.FloatField()
+    is_new_deal_better = models.BooleanField(default=True, null=False, blank=False)
 
 
     def __str__(self):

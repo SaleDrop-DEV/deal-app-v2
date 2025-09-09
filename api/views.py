@@ -412,7 +412,8 @@ def fetch_stores_for_admin(request):
                         'gender': store.gender,
                         'domain': store.domain,
                         'image_url': store.image_url,
-                        'subscriptions': store.subscriptions.count() # Use .count() for efficiency
+                        'subscriptions': store.subscriptions.count(), # Use .count() for efficiency
+                        'is_weird_domain': store.isWeirdDomain,
                     })
 
                 return JsonResponse({

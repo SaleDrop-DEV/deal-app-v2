@@ -194,9 +194,10 @@ def un_subscribe_to_store_api_view(request):
             )
             return JsonResponse({'error': "Er ging iets mis."}, status=500)
         
-@login_required        
+from .tasks import send_new_recommendation_email
+
+@login_required
 def send_recommendation_api(request):
-    sleep(SLEEP_TIME)
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -208,6 +209,8 @@ def send_recommendation_api(request):
                 store=store
             )
             new_rec.save()
+
+            send_new_recommendation_email.delay(store)
             return JsonResponse({'success': True,'message': 'Bedankt! Wij proberen deze winkel zo snel mogelijk toe te voegen.'})
         except Exception as e:
             API_Errors_Site.objects.create(
@@ -215,6 +218,7 @@ def send_recommendation_api(request):
                 error = str(e)
             )
             return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
+       
         
 import json
 from google.oauth2.service_account import Credentials

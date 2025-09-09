@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/theme_v2_account.css' %}">
+
+<style>
+    /* Root variables for consistency */
+    :root {
+        --color-black: #000000;
+        --color-white: #FFFFFF;
+        --color-gray-dark: #1D1D1F;
+        --color-gray-medium: #86868B;
+        --color-gray-light: #F5F5F7;
+        --color-gray-lighter: #f7f7fc;
+        --color-accent: #FF4D00;
+        --color-accent-hover: #ff6d2e;
+        --color-accent-light: #ffd1bd;
+        --primary-text-color: var(--color-gray-dark);
+        --secondary-text-color: var(--color-gray-medium);
+        --border-radius-round: 6px;
+    }
+
+    /* Main Page Layout */
+    .dashboard-layout {
+        display: grid;
+        gap: 1.5rem;
+        padding: 2rem 1rem;
+        grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 768px) {
+        .dashboard-layout {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .dashboard-layout {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    
+    .dashboard-card {
+        background-color: var(--color-white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-card-header {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--secondary-text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-card-value {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+    }
+    
+    .chart-card {
+        grid-column: 1 / -1; /* Span full width */
+    }
+
+    @media (min-width: 1200px) {
+        .chart-card {
+            grid-column: span 2; /* Span two columns on large screens */
+        }
+        .stores-card {
+            grid-column: span 2;
+        }
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 300px; /* Adjust height as needed */
+    }
+
+    .stores-card .store-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .store-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .store-item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: contain;
+        border: 1px solid var(--color-gray-light);
+    }
+    
+    .store-info {
+        flex-grow: 1;
+    }
+
+    .store-info .name {
+        font-weight: 500;
+        color: var(--primary-text-color);
+    }
+
+    .store-info .sub-count {
+        font-size: 0.85rem;
+        color: var(--secondary-text-color);
+    }
+</style>
+
+{% endblock %}
+{% block content %}
+<header>
+    <h1>Dashboard</h1>
+    <button class="action-btn" onclick="location.href='/admin-app/';">Administratie</button>
+</header>
+
+<div class="container">
+    <div class="dashboard-layout">
+        <div class="dashboard-card">
+            <h3 class="dashboard-card-header">Totaal Aantal Gebruikers</h3>
+            <p class="dashboard-card-value">{{ total_user_count }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h3 class="dashboard-card-header">Totaal Aantal Kliks</h3>
+            <p class="dashboard-card-value">{{ total_clicks }}</p>
+        </div>
+
+        <div class="dashboard-card chart-card">
+            <h3 class="dashboard-card-header">Google Search Clicks (Laatste 2 Weken)</h3>
+            <div class="chart-container">
+                <canvas id="gscChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card chart-card">
+            <h3 class="dashboard-card-header">Bing Webmaster Clicks (Laatste 2 Weken)</h3>
+            <div class="chart-container">
+                <canvas id="bingChart"></canvas>
+            </div>
+        </div>
+
+        <div class="dashboard-card stores-card">
+            <h3 class="dashboard-card-header">Populairste Winkels</h3>
+            <div class="store-list">
+                {% for store in most_subscribed_stores %}
+                <div class="store-item">
+                    <img src="{{ store.logo_url }}" alt="{{ store.name }} logo">
+                    <div class="store-info">
+                        <p class="name">{{ store.name }}</p>
+                        <p class="sub-count">{{ store.subscriber_count }} abonnees</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Geen data beschikbaar.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="gsc-data" type="application/json">{{ gsc_data_json|safe }}</script>
+<script id="bing-data" type="application/json">{{ bing_data_json|safe }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // --- Helper function to create a chart ---
+    function createChart(canvasId, labels, data, label, color) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: `${color}33`, // Semi-transparent fill
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4 // Makes the line smooth
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Process and render Google Search Console Chart ---
+    try {
+        const gscRawData = JSON.parse(document.getElementById('gsc-data').textContent);
+        if (gscRawData && gscRawData.length > 0) {
+            // Sort data by date just in case it's not ordered
+            gscRawData.sort((a, b) => new Date(a.keys[0]) - new Date(b.keys[0]));
+            
+            const gscLabels = gscRawData.map(row => {
+                const date = new Date(row.keys[0]);
+                return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+            });
+            const gscClicks = gscRawData.map(row => row.clicks);
+            
+            createChart('gscChart', gscLabels, gscClicks, 'Google Clicks', 'var(--color-accent)');
+        }
+    } catch (e) {
+        console.error("Error processing GSC data:", e);
+    }
+
+    // --- Process and render Bing Webmaster Chart ---
+    try {
+        const bingRawData = JSON.parse(document.getElementById('bing-data').textContent);
+        if (bingRawData && bingRawData.length > 0) {
+            // Aggregate data by date, as the API gives a flat list of queries
+            const aggregatedData = bingRawData.reduce((acc, item) => {
+                const date = item.Date.split('T')[0]; // Get only the date part
+                acc[date] = (acc[date] || 0) + item.Clicks;
+                return acc;
+            }, {});
+
+            // Sort dates
+            const sortedDates = Object.keys(aggregatedData).sort((a, b) => new Date(a) - new Date(b));
+
+            const bingLabels = sortedDates.map(dateStr => {
+                 const date = new Date(dateStr);
+                 return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+            });
+            const bingClicks = sortedDates.map(date => aggregatedData[date]);
+
+            createChart('bingChart', bingLabels, bingClicks, 'Bing Clicks', '#0078D4'); // Bing's brand color
+        }
+    } catch (e) {
+        console.error("Error processing Bing data:", e);
+    }
+});
+</script>
+{% endblock %}

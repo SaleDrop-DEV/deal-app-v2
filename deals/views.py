@@ -805,18 +805,33 @@ def toggle_subscription(request):
 
 
 
+from deals.models import Click
+from django.http import Http404
+
 def visit_sale_view(request, gmail_analysis_id, user_id):
     user = get_object_or_404(User, id=user_id)
-    gmail_message: GmailSaleAnalysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
-    if gmail_message.message.store and gmail_message.main_link:
-        redirect_url = get_sale_page_url(gmail_message.message.store, gmail_message.main_link)
-        if Url.objects.filter(general_url=redirect_url).exists():
-            Url.objects.get(general_url=redirect_url).add_visit(user=user)
-        else:
-            print("User does not exist.")
-        return redirect(redirect_url)
-    else:
+    gmail_analysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
+
+    if not (gmail_analysis.message.store and gmail_analysis.main_link):
         return Http404()
+
+    redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
+    url_object = Url.objects.filter(general_url=redirect_url_string).first()
+
+    click_url_to_save = None
+    if url_object:
+        url_object.add_visit(user=user)
+        click_url_to_save = url_object
+
+    Click.objects.create(
+        user=user,
+        analysis=gmail_analysis,
+        store=gmail_analysis.message.store,
+        url=click_url_to_save
+    )
+
+    return redirect(redirect_url_string)
+
 
 
 

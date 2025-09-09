@@ -19,6 +19,20 @@
         transform: none !important;
     }
 
+    .new-badge{
+        color: var(--color-accent);
+        font-size: 0.65rem !important;
+        padding: 0.15rem 0.4rem;
+        font-weight: bold;
+        background-color: var(--color-accent-light);
+        border-radius: 20px;
+    }
+    .sale-grabber {
+        display: flex;         /* Make the <p> a flex container */
+        align-items: center;   /* Vertically center all items inside it */
+        gap: 0.5rem;           /* Optional: Adds a nice space between the badge and other text */
+    }
+
 </style>
 {% endblock %}
 
@@ -32,7 +46,13 @@
         {% for deal in deals %}
             <div class="sales-item {% if deal.personal == True %}personal-sale{% endif %}">
                 <h3 class="sale-title">{{ deal.title }}</h3>
-                <p class="sale-grabber">{{ deal.grabber }}</p>
+                <p class="sale-grabber">{{ deal.grabber }}
+                    {% if request.user.is_staff %}
+                        {% if deal.is_new_deal_better %}
+                            <span class="new-badge">NIEUW</span>
+                        {% endif %}
+                    {% endif %}
+                </p>
                 <p class="store-name accent-color">{{ deal.store.name }}</p>
                 <button class="primary-btn view-details-btn">Bekijk</button>
                 <p class="sale-date-received">{{ deal.parsed_date_received }}</p>

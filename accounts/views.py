@@ -203,3 +203,145 @@ def complete_profile(request):
 
     # This part handles the initial GET request.
     return render(request, 'account/gender_form.html')
+
+
+
+from deals.models import GmailToken, Click, Store
+from api.models import API_Errors_Site
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from datetime import datetime, timedelta
+import requests
+from django.db.models import Count
+import json
+
+
+
+
+@login_required
+def admin_dashboard(request):
+    def get_google_search_console_data(token_name="googleSearchConsole"):
+        def get_data(credentials_info, property_url, days=-14):
+            """
+            Haalt GSC data op voor een specifieke website met een credentials dictionary.
+            """
+            SCOPES = ['https://www.googleapis.com/auth/webmasters.readonly']
+
+            try:
+                # Authenticatie direct vanuit het dictionary object
+                credentials = service_account.Credentials.from_service_account_info(
+                    credentials_info, scopes=SCOPES)
+
+                # Bouw de service
+                service = build('searchconsole', 'v1', credentials=credentials)
+
+                # Definieer de API-request
+                request_body = {
+                    'startDate': (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d'),
+                    'endDate': datetime.now().strftime('%Y-%m-%d'),
+                    'dimensions': ['date'],
+                    'rowLimit': 100 # Ensure we get all recent data points
+                }
+
+                response = service.searchanalytics().query(
+                    siteUrl=property_url,
+                    body=request_body
+                ).execute()
+                return response.get('rows', [])
+            except Exception as e:
+                print(f"Fout bij ophalen GSC data: {e}")
+                return None
+
+        try:
+            token_object = GmailToken.objects.get(name=token_name)
+            json_token = token_object.token_json
+            site_property = 'sc-domain:saledrop.app'
+            gsc_data = get_data(json_token, site_property)
+            return gsc_data
+        except GmailToken.DoesNotExist:
+            return None
+        except Exception as e:
+            API_Errors_Site.objects.create(
+                task = "Fetching google search data.",
+                error = str(e)
+            )
+            return None
+
+    def get_bing_webmaster_data(token_name="bingWebmaster"):
+        def fetch_bing_analytics(api_key, site_url):
+            """
+            Fetches query performance data from the Bing Webmaster API.
+            """
+            endpoint = f"https://ssl.bing.com/webmaster/api.svc/json/GetQueryStats?siteUrl={site_url}&apikey={api_key}"
+            
+            try:
+                response = requests.get(endpoint)
+                response.raise_for_status()
+                data = response.json()
+                return data.get('d', [])
+            except requests.exceptions.RequestException as e:
+                print(f"Fout bij ophalen Bing data: {e}")
+                return None
+
+        def get_dashboard_bing_data(site_url, token_name=token_name):
+            """
+            Retrieves the Bing API key from the database and fetches the analytics.
+            """
+            try:
+                token_object = GmailToken.objects.get(name=token_name)
+                api_key = token_object.token_json.get('key')
+                if not api_key:
+                    print("API key not found in token JSON.")
+                    return None
+                
+                return fetch_bing_analytics(api_key, site_url)
+                
+            except GmailToken.DoesNotExist:
+                print(f"Token with name '{token_name}' not found.")
+                return None
+            except Exception as e:
+                print(f"An error occurred while getting Bing dashboard data: {e}")
+                return None
+
+        # It's more efficient to fetch data for the main domain once
+        site_url = "https://saledrop.app/"
+        bing_data = get_dashboard_bing_data(site_url)
+        return bing_data
+
+    def get_total_clicks():
+        return Click.objects.count()
+
+    def get_n_most_subscribed_stores(n=5):
+        results = Store.objects.all().annotate(
+            subscriber_count=Count('subscriptions')
+        ).order_by('-subscriber_count')
+        data = []
+        for result in results[:n]:
+            data.append({
+                'name': result.name,
+                'logo_url': result.image_url,
+                'subscriber_count': result.subscriber_count,
+            })
+        return data
+
+
+    if request.user.is_staff:
+        gsc_data = get_google_search_console_data()
+        bing_data = get_bing_webmaster_data()
+        total_user_count = CustomUser.objects.count()
+
+        context = {
+            # Serialize data for JavaScript
+            'gsc_data_json': json.dumps(gsc_data or []),
+            'bing_data_json': json.dumps(bing_data or []),
+            
+            # Data for direct rendering
+            'total_user_count': total_user_count,
+            'total_clicks': get_total_clicks(),
+            'most_subscribed_stores': get_n_most_subscribed_stores()
+        }
+        return render(request, 'admin_templates/dashboard.html', context)
+    else:
+        return redirect('account_view')
+
+

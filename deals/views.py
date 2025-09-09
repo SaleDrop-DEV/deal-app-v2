@@ -134,6 +134,7 @@ def public_deals_view(request, sales_per_page=9):
                 },
                 'date_received': deal['gmail_data']['received_date'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
+                'is_new_deal_better': analysis.is_new_deal_better,
             }
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)

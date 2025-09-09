@@ -22,6 +22,16 @@ class StoreForm(forms.ModelForm):
         widget=forms.RadioSelect,
         required=True
     )
+
+    # NEW #
+    isWeirdDomain = forms.ChoiceField(
+        label="Was de domein van de email vreemd?",
+        choices=YES_NO_CHOICES,
+        widget=forms.RadioSelect,
+        required=True
+    )
+    # END NEW #
+
     genderPreferenceSet = forms.ChoiceField(
         label="Moest je man of vrouw aangeven bij de nieuwsbrief?",
         choices=YES_NO_CHOICES,
@@ -54,7 +64,8 @@ class StoreForm(forms.ModelForm):
             'isVerified',
             'genderPreferenceSet',
             'gender',
-            'mayUseContent'
+            'mayUseContent',
+            'isWeirdDomain'
         ]
         widgets = {
             'email_addresses': forms.Textarea(attrs={

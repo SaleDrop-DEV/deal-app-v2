@@ -435,3 +435,19 @@ class GmailToken(models.Model):
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
+
+class Click(models.Model):
+    """
+    This model keeps track of the clicks from users on a store page.
+    If the user clicks on a link and the url exists, not a standard home url or sale url, 
+    this url is given but off course can be null (in case the url a user is sent to is home/sale)
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    analysis = models.ForeignKey(GmailSaleAnalysis, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    url = models.ForeignKey(Url, on_delete=models.CASCADE, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.store} visited at {self.timestamp}"
+

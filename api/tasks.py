@@ -11,7 +11,7 @@ def send_new_recommendation_email(store_name):
     subject = 'SaleDrop Admin | Nieuwe winkel aanvraag is binnengekomen!'
     message = f"Er is een nieuwe winkel aanvraag binnengekomen: {store_name}"
     from_email = 'support@saledrop.app'
-    recipient_list = ['support@saledrop.app']
+    recipient_list = ['u4987625257@gmail.com']
 
     try:
         send_mail(subject, message, from_email, recipient_list)

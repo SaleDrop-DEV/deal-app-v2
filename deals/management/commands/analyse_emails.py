@@ -52,7 +52,8 @@ def analyze_email_with_gemini(email_html, sender, subject):
         f"- title: string (Een **zeer korte titel** van maximaal 7 woorden, bijv. 'SALE MANGO' of 'Nieuwe collectie'. Gebruik geen kortingspercentages hier.)\n"
         f"- grabber: string (Een **korte, pakkende kortingszin**, zoals '-70% korting' of 'Tot 50% korting'. Dit is de belangrijkste promotiezin.)\n"
         f"- description: string (Een **neutrale, redactionele beschrijving** van de aanbieding. Dit mag langere details bevatten. \
-          Vermijd bezittelijke voornaamwoorden, persoonlijke verwijzingen en directe marketing-taal. Geef een korte en duidelijke samenvatting van de aanbieding, geschreven in een casual toon.)\n"
+          Vermijd bezittelijke voornaamwoorden, persoonlijke verwijzingen en directe marketing-taal. Geef een korte en duidelijke samenvatting van de aanbieding, geschreven in een casual toon.)"
+        f" Start de beschrijving met: Bij 'merk' is nu/vanaf. De beschrijving moet niet overkomen alsof het uit een email komt, vermijd dus 'in deze email'.\n"
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"

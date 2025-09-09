@@ -1,12 +1,13 @@
 from django.contrib import admin
 
-from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken, User # Make sure to import User
+from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken, User, Click
 
 # Register other models without custom admin
 admin.site.register(GmailSaleAnalysis)
 admin.site.register(Store)
 admin.site.register(SubscriptionData)
 admin.site.register(GmailToken)
+admin.site.register(Click)
 
 # --- GmailMessage Admin Configuration ---
 class HasStoreFilter(admin.SimpleListFilter):

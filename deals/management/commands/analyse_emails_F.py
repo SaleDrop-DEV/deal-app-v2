@@ -40,7 +40,7 @@ GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemin
 
 EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 
-def analyze_email_with_gemini(email_html, sender, subject):
+def analyze_email_with_gemini(email_html, sender, subject, prompt_addition):
     """
     Analyseer e-mailinhoud met Gemini API en retourneer data passend bij GmailSaleAnalysis model.
     """
@@ -59,6 +59,7 @@ def analyze_email_with_gemini(email_html, sender, subject):
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"
+        f"- is_deal_new_better: boolean \n{prompt_addition}\n\n"
         f"Als een variabele er niet is, gebruik dan 'N/A'.\n"
         f"Geef de output als een JSON object dat het gevraagde schema volgt.\n"
         # f"Sender: {sender}\n"
@@ -76,6 +77,8 @@ def analyze_email_with_gemini(email_html, sender, subject):
             "description": {"type": "STRING"},
             "main_link": {"type": "STRING"},
             "deal_probability": {"type": "NUMBER"},
+            "is_deal_new_better": {"type": "BOOLEAN"},
+            
             "highlighted_products": {
                 "type": "ARRAY",
                 "items": {
@@ -130,8 +133,12 @@ def analyze_email_with_gemini(email_html, sender, subject):
         "description": parsed.get("description"),
         "main_link": parsed.get("main_link"),
         "highlighted_products": parsed.get("highlighted_products", []),
-        "deal_probability": float(parsed.get("deal_probability", 0.0))
+        "deal_probability": float(parsed.get("deal_probability", 0.0)),
+
+        "is_deal_new_better": parsed.get("is_deal_new_better", True)
+
     }
+
 
 
 def get_unanalyzed_gmail_messages():
@@ -327,7 +334,8 @@ def analyze_gmail_messages(max_analyses=10):
                         description=analysis_data["description"],
                         main_link=analysis_data["main_link"],
                         highlighted_products=analysis_data["highlighted_products"],
-                        deal_probability=analysis_data["deal_probability"]
+                        deal_probability=analysis_data["deal_probability"],
+                        is_new_deal_better=analysis_data["is_new_deal_better"]
                     )
                     sendPushNotifications(analysis=analysis)
                     if i < num_messages - 1: # If it's not the last message

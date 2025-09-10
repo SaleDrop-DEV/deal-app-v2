@@ -314,11 +314,11 @@ def analyze_gmail_messages(max_analyses=10):
             #only get analyses with the same store
             gmailMessages = GmailMessage.objects.filter(store=store).order_by('-received_date')
             prompts = []
-            for message in gmailMessages:
-                if message.analysis:
-                    if message.analysis.is_sale_mail and not message.analysis.is_personal_deal and message.analysis.deal_probability > 0.925:
-                        prompt_part = f"Titel: {message.analysis.title}\n"
-                        prompt_part += f"Grabber: {message.analysis.grabber}\n"
+            for old_message in gmailMessages:
+                if old_message.analysis:
+                    if old_message.analysis.is_sale_mail and not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > 0.925:
+                        prompt_part = f"Titel: {old_message.analysis.title}\n"
+                        prompt_part += f"Grabber: {old_message.analysis.grabber}\n"
                         prompts.append(prompt_part)
                         if len(prompts) >= 2:
                             break

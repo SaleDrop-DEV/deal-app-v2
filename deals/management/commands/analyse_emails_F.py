@@ -308,12 +308,45 @@ def analyze_gmail_messages(max_analyses=10):
         if not in_analysis:
             message.in_analysis = True
             message.save()
+
+            #get last 2 deals of the store
+            store = message.store
+            #only get analyses with the same store
+            gmailMessages = GmailMessage.objects.filter(store=store).order_by('-received_date')
+            prompts = []
+            for message in gmailMessages:
+                if message.analysis:
+                    if message.analysis.is_sale_mail and not message.analysis.is_personal_deal and message.analysis.deal_probability > 0.925:
+                        prompt_part = f"Titel: {message.analysis.title}\n"
+                        prompt_part += f"Grabber: {message.analysis.grabber}\n"
+                        prompts.append(prompt_part)
+                        if len(prompts) >= 2:
+                            break
+            if len(prompts) == 0:
+                prompt_addition = f"Er zijn nog geen eerdere analyses gemaakt dus graag is_new_deal_better True zetten."
+            else:
+                prompt_addition = f"De vorige analyses van dezelfde winkel zijn geweest:\n{''.join(prompts)}. Geef aan of in deze mail een nieuwe of een betere deal staat d.m.v. is_new_deal_better = True"
+
+
+
             cleaned_html_body = shorten_email_html(message.body)
-            analysis_data = analyze_email_with_gemini(cleaned_html_body, message.sender, message.subject)
+            analysis_data = analyze_email_with_gemini(cleaned_html_body, message.sender, message.subject, prompt_addition)
+            if analysis_data is None:
+                print("Error occured with fetching the data from gemini.")
+                ScrapeData.objects.create(
+                    task="Analyze Gmail Messages",
+                    succes=False,
+                    major_error=False,
+                    error="Error occured with fetching the data from gemini.",
+                    execution_date=timezone.now()
+                )
+                message.in_analysis = False
+                message.save()
+                continue
             if analysis_data["is_sale_mail"]:
                 scrape_and_save_general_url(analysis_data["main_link"])
             if analysis_data:
-                if " " in analysis_data["title"] and len(analysis_data["title"].split(" ")) > 7:
+                if len(analysis_data["title"]) > 7:
                     ScrapeData.objects.create(
                         task="Analyze Gmail Messages",
                         succes=False,
@@ -340,8 +373,10 @@ def analyze_gmail_messages(max_analyses=10):
                     sendPushNotifications(analysis=analysis)
                     if i < num_messages - 1: # If it's not the last message
                         sleep(1.5)
-            #else:
-            #    raise ValueError(f"Failed to analyze email (id={message.id}).")
+            # else:
+            #     raise ValueError(f"Failed to analyze email (id={message.id}).")
+
+
 
 
 

@@ -429,3 +429,59 @@ def fetch_stores_for_admin(request):
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
     return JsonResponse({'error': 'Invalid request method'})
+
+
+
+
+
+#NEW#
+# At the top of your views.py, make sure you have this import
+from django.http import HttpResponseNotFound
+from django.views.decorators.http import require_POST
+from pages.models import recommendation
+
+@login_required
+@require_POST # Ensures this view only accepts POST requests
+def check_recommendation(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    try:
+        # 1. Read the raw request body and parse it as JSON
+        data = json.loads(request.body)
+        recommendation_id = data.get('recommendation_id')
+
+        # 2. Check if the ID was provided in the JSON payload
+        if recommendation_id is None:
+            return JsonResponse({'error': 'recommendation_id not provided in request body'}, status=400)
+
+        # 3. Safely get the recommendation object
+        try:
+            # We use int() here, now that we know recommendation_id is not None
+            rec = recommendation.objects.get(id=int(recommendation_id))
+        except recommendation.DoesNotExist:
+            # This handles the case where the recommendation was already deleted/handled
+            return HttpResponseNotFound(JsonResponse({'error': 'Recommendation not found.'}))
+        except ValueError:
+            # This handles if recommendation_id is not a valid number (e.g., "abc")
+             return JsonResponse({'error': 'Invalid recommendation_id format.'}, status=400)
+
+
+        # 4. Update the object and save it
+        rec.handled = True
+        rec.save()
+
+        return JsonResponse({'success': True, 'message': 'Recommendation marked as handled.'})
+
+    except json.JSONDecodeError:
+        # This catches errors if the front-end sends malformed JSON
+        return JsonResponse({'error': 'Invalid JSON format in request body.'}, status=400)
+    except Exception as e:
+        # General catch-all for any other unexpected errors
+        print(e)
+        API_Errors_Site.objects.create(
+            task="Check recommendation",
+            error=str(e)
+        )
+        return JsonResponse({'error': "Er ging iets mis op de server."}, status=500)
+

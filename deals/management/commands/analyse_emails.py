@@ -310,16 +310,17 @@ def analyze_gmail_messages(max_analyses=10):
             #get last 2 deals of the store
             store = message.store
             #only get analyses with the same store
-            gmailMessages = GmailMessage.objects.filter(store=store).order_by('-received_date')
+            gmailMessages = GmailMessage.objects.filter(store=store, analysis__isnull=False).order_by('-received_date')
             prompts = []
             for old_message in gmailMessages:
                 if old_message.analysis:
-                    if old_message.analysis.is_sale_mail and not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > 0.925:
-                        prompt_part = f"Titel: {old_message.analysis.title}\n"
-                        prompt_part += f"Grabber: {old_message.analysis.grabber}\n"
-                        prompts.append(prompt_part)
-                        if len(prompts) >= 2:
-                            break
+                    if hasattr(old_message, 'analysis') and old_message.analysis.is_sale_mail:
+                        if not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > 0.925:
+                            prompt_part = f"Titel: {old_message.analysis.title}\n"
+                            prompt_part += f"Grabber: {old_message.analysis.grabber}\n"
+                            prompts.append(prompt_part)
+                            if len(prompts) >= 2:
+                                break
             if len(prompts) == 0:
                 prompt_addition = f"Er zijn nog geen eerdere analyses gemaakt dus graag is_new_deal_better True zetten."
             else:
@@ -344,7 +345,7 @@ def analyze_gmail_messages(max_analyses=10):
             if analysis_data["is_sale_mail"]:
                 scrape_and_save_general_url(analysis_data["main_link"])
             if analysis_data:
-                if len(analysis_data["title"]) > 7:
+                if len(analysis_data["title"].split()) > 7:
                     ScrapeData.objects.create(
                         task="Analyze Gmail Messages",
                         succes=False,
@@ -371,6 +372,7 @@ def analyze_gmail_messages(max_analyses=10):
                     sendPushNotifications(analysis=analysis)
                     if i < num_messages - 1: # If it's not the last message
                         sleep(1.5)
+
 
 
 

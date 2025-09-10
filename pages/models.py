@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import naturaltime
 
 User = settings.AUTH_USER_MODEL 
 
@@ -14,6 +15,7 @@ class recommendation(models.Model):
     
     def to_dict(self):
         return {
+            'id': self.id,
             'user': self.user.id,
             'store': self.store,
             'isHandled': self.handled,
@@ -44,3 +46,14 @@ class BusinessRequest(models.Model):
 
     def __str__(self):
         return self.store_name
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'store_name': self.store_name,
+            'store_email': self.store_email,
+            'store_phone_number': self.store_phone_number,
+            'message': self.message,
+            'date_sent': self.date_sent.strftime('%d %b %Y, %H:%M'),
+            'date_sent_natural': naturaltime(self.date_sent)
+        }

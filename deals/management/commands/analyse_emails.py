@@ -57,7 +57,7 @@ def analyze_email_with_gemini(email_html, sender, subject, prompt_addition):
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"
-        f"- is_deal_new_better: boolean \n{prompt_addition}\n\n"
+        f"- is_new_deal_better: boolean \n{prompt_addition}\n\n"
         f"Als een variabele er niet is, gebruik dan 'N/A'.\n"
         f"Geef de output als een JSON object dat het gevraagde schema volgt.\n"
         # f"Sender: {sender}\n"
@@ -75,7 +75,7 @@ def analyze_email_with_gemini(email_html, sender, subject, prompt_addition):
             "description": {"type": "STRING"},
             "main_link": {"type": "STRING"},
             "deal_probability": {"type": "NUMBER"},
-            "is_deal_new_better": {"type": "BOOLEAN"},
+            "is_new_deal_better": {"type": "BOOLEAN"},
             
             "highlighted_products": {
                 "type": "ARRAY",
@@ -133,9 +133,10 @@ def analyze_email_with_gemini(email_html, sender, subject, prompt_addition):
         "highlighted_products": parsed.get("highlighted_products", []),
         "deal_probability": float(parsed.get("deal_probability", 0.0)),
 
-        "is_deal_new_better": parsed.get("is_deal_new_better", True)
+        "is_new_deal_better": parsed.get("is_new_deal_better", True)
 
     }
+
 
 
 

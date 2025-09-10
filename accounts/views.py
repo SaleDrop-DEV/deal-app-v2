@@ -207,6 +207,7 @@ def complete_profile(request):
 
 
 from deals.models import GmailToken, Click, Store
+from pages.models import recommendation, BusinessRequest
 from api.models import API_Errors_Site
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -214,7 +215,6 @@ from datetime import datetime, timedelta
 import requests
 from django.db.models import Count
 import json
-
 
 
 
@@ -324,6 +324,11 @@ def admin_dashboard(request):
             })
         return data
 
+    def get_unhandled_recommendations():
+        return [data.to_dict() for data in recommendation.objects.filter(handled=False).order_by('date_sent').all()]
+
+    def get_six_latest_business_requests():
+        return [data.to_dict() for data in BusinessRequest.objects.order_by('-date_sent').all()[:6]]
 
     if request.user.is_staff:
         gsc_data = get_google_search_console_data()
@@ -338,10 +343,13 @@ def admin_dashboard(request):
             # Data for direct rendering
             'total_user_count': total_user_count,
             'total_clicks': get_total_clicks(),
-            'most_subscribed_stores': get_n_most_subscribed_stores()
+            'most_subscribed_stores': get_n_most_subscribed_stores(),
+            'unhandled_recommendations': get_unhandled_recommendations(),
+            'latest_business_requests': get_six_latest_business_requests(),
         }
         return render(request, 'admin_templates/dashboard.html', context)
     else:
         return redirect('account_view')
+
 
 

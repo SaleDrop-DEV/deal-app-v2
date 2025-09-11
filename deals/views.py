@@ -122,10 +122,14 @@ def public_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            s = "Er is een nieuwe deal beschikbaar!"
+            d = "Bekijk jouw nieuwe deal door op de knop te klikken."
             data_deal = {
+                'messageId': analysis.message.id,
                 'title': deal['title'],
-                'grabber': deal['grabber'],
-                'description': deal['description'],
+                'grabber': deal['grabber'] if deal['grabber'] != "N/A" else s,
+                'description': deal['description'] if deal['description'] != "N/A" else d,
+                'store': deal['store'],
                 'main_link': f"/deals/visit/{analysis.id}/{request.user.id}/",
                 'highlighted_products': None,#deal['highlighted_products'] if deal['store']['mayUseContent'] else None,
                 'store': {
@@ -169,11 +173,15 @@ def public_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            s = "Er is een nieuwe deal beschikbaar!"
+            d = "Bekijk jouw nieuwe deal door op de knop te klikken."
             data_deal = {
+                'messageId': analysis.message.id,
                 'title': deal['title'],
-                'grabber': deal['grabber'],
-                'description': deal['description'],
-                'main_link': f"/deals/{analysis.id}/{request.user.id}/",
+                'grabber': deal['grabber'] if deal['grabber'] != "N/A" else s,
+                'description': deal['description'] if deal['description'] != "N/A" else d,
+                'store': deal['store'],
+                'main_link': f"/deals/visit/{analysis.id}/{request.user.id}/",
                 'highlighted_products': None,#deal['highlighted_products'] if deal['store']['mayUseContent'] else None,
                 'store': {
                     'name': deal['store']['name'],
@@ -181,6 +189,7 @@ def public_deals_view(request, sales_per_page=9):
                 },
                 'date_received': deal['gmail_data']['received_date'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
+                'is_new_deal_better': analysis.is_new_deal_better,
             }
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)
@@ -245,10 +254,14 @@ def client_deals_view(request, sales_per_page=9):
         for analysis in page_obj:
             try:
                 deal = analysis.to_dict()
+                s = "Er is een nieuwe deal beschikbaar!"
+                d = "Bekijk jouw nieuwe deal door op de knop te klikken."
                 data_deal = {
+                    'messageId': analysis.message.id,
                     'title': deal['title'],
-                    'grabber': deal['grabber'],
-                    'description': deal['description'],
+                    'grabber': deal['grabber'] if deal['grabber'] != "N/A" else s,
+                    'description': deal['description'] if deal['description'] != "N/A" else d,
+                    'store': deal['store'],
                     'main_link': f"/deals/visit/{analysis.id}/{request.user.id}/",
                     'highlighted_products': None,#deal['highlighted_products'] if deal['store']['mayUseContent'] else None,
                     'store': {
@@ -257,6 +270,7 @@ def client_deals_view(request, sales_per_page=9):
                     },
                     'date_received': deal['gmail_data']['received_date'],
                     'parsed_date_received': parse_date_received(analysis.message.received_date),
+                    'is_new_deal_better': analysis.is_new_deal_better,
                 }
                 data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
                 data.append(data_deal)

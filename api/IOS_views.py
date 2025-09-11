@@ -285,13 +285,16 @@ def IOS_API_fetch_my_feed(request):
             for analysis in page_obj:
                 if hasattr(analysis, 'message'):
                     a: deals_models.GmailSaleAnalysis = analysis
+                    a: deals_models.GmailSaleAnalysis = analysis
+                    s = "Er is een nieuwe deal beschikbaar!"
+                    d = "Bekijk jouw nieuwe deal door op de knop te klikken."
                     data = {
                         'type': 'sale',
                         'title': a.title,
-                        'grabber': a.grabber,
+                        'grabber': a.grabber if a.grabber != "N/A" else s,
+                        'description': a.description if a.description != "N/A" else d,
                         'storeName': a.message.store.name,
                         'mainLink': f"deals/visit/{a.id}/{user.id}/",
-                        'description': a.description,
                         'messageId': a.message.id,
                         'dateReceived': a.message.received_date,
                         'parsedDateReceived': parse_date_received(a.message.received_date),
@@ -395,12 +398,14 @@ def IOS_API_fetch_my_sales(request):
             response = []
             for analysis in page_obj:
                 a: deals_models.GmailSaleAnalysis = analysis
+                s = "Er is een nieuwe deal beschikbaar!"
+                d = "Bekijk jouw nieuwe deal door op de knop te klikken."
                 data = {
                     'title': a.title,
-                    'grabber': a.grabber,
+                    'grabber': a.grabber if a.grabber != "N/A" else s,
                     'storeName': a.message.store.name,
                     'mainLink': f"deals/visit/{a.id}/{user.id}/",
-                    'description': a.description,
+                    'description': a.description if a.description != "N/A" else d,
                     'messageId': a.message.id,
                     'dateReceived': a.message.received_date,
                     'parsedDateReceived': parse_date_received(a.message.received_date),
@@ -732,11 +737,13 @@ def get_analysis_detail(request):
         )
         return JsonResponse({'error': str(e)}, status=500)
     
+    s = "Er is een nieuwe deal beschikbaar!"
+    d = "Bekijk jouw nieuwe deal door op de knop te klikken."
     return JsonResponse({
         'title': analysis.title,
-        'grabber': analysis.grabber,
+        'grabber': analysis.grabber if analysis.grabber != "N/A" else s,
         'storeName': analysis.message.store.name,
         'mainLink': f"deals/visit/{analysis.id}/{request.user.id}/",  # consider if request.user.id is needed here
-        'description': analysis.description,
+        'description': analysis.description if analysis.description != "N/A" else d,
         'messageId': analysis.message.id,
     })

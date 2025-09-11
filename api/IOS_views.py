@@ -224,7 +224,7 @@ def IOS_API_fetch_my_feed(request):
             user = request.user
 
             subscribed_stores = deals_models.Store.objects.filter(subscriptions=user)
-            three_months_ago = timezone.now() - timedelta(days=90)
+            three_weeks_ago = timezone.now() - timedelta(days=21)
 
             # --- GENDER FILTERING ---
             gender_of_user = getattr(user.extrauserinformation, 'gender', None)
@@ -242,7 +242,7 @@ def IOS_API_fetch_my_feed(request):
                 is_sale_mail=True,
                 is_personal_deal=False,
                 deal_probability__gt=0.925,
-                message__received_date__gte=three_months_ago,
+                message__received_date__gte=three_weeks_ago,
                 message__store__isnull=False
             ).filter(
                 message__store__in=subscribed_stores
@@ -356,7 +356,7 @@ def IOS_API_fetch_my_sales(request):
             user = request.user
 
             subscribed_stores = deals_models.Store.objects.filter(subscriptions=user)
-            three_months_ago = timezone.now() - timedelta(days=90)
+            three_weeks_ago = timezone.now() - timedelta(days=21)
 
             # --- GENDER FILTERING (same as website) ---
             gender_of_user = getattr(user.extrauserinformation, 'gender', None)
@@ -373,7 +373,7 @@ def IOS_API_fetch_my_sales(request):
                 is_sale_mail=True,
                 is_personal_deal=False,
                 deal_probability__gt=0.925,
-                message__received_date__gte=three_months_ago,
+                message__received_date__gte=three_weeks_ago,
                 message__store__isnull=False
             ).filter(
                 message__store__in=subscribed_stores

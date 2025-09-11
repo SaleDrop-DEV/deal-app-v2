@@ -71,7 +71,7 @@ def get_sale_page_url(store:Store, url:str):
 # Deals display views
 @login_required
 def public_deals_view(request, sales_per_page=9):
-    three_months_ago = timezone.now() - timedelta(days=90)
+    three_weeks_ago = timezone.now() - timedelta(days=21)
     user = request.user
 
     # The gender value should be an integer (0, 1, or 2)
@@ -83,7 +83,7 @@ def public_deals_view(request, sales_per_page=9):
         is_sale_mail=True,
         is_personal_deal=False,
         deal_probability__gt=0.925,
-        message__received_date__gt=three_months_ago,
+        message__received_date__gt=three_weeks_ago,
         message__store__isnull=False  # This is the key change to ensure stores exist
     )
 
@@ -193,7 +193,7 @@ def public_deals_view(request, sales_per_page=9):
 @login_required
 def client_deals_view(request, sales_per_page=9):
     user = request.user
-    three_months_ago = timezone.now() - timedelta(days=90)
+    three_weeks_ago = timezone.now() - timedelta(days=21)
     
     # Get the stores the user is subscribed to
     subscribed_stores = Store.objects.filter(subscriptions=user)
@@ -206,7 +206,7 @@ def client_deals_view(request, sales_per_page=9):
         is_sale_mail=True,
         is_personal_deal=False,
         deal_probability__gt=0.925,
-        message__received_date__gt=three_months_ago,
+        message__received_date__gt=three_weeks_ago,
         message__store__isnull=False,  # Ensure store exists
         message__store__in=subscribed_stores # Ensure store is in the user's subscriptions
     )

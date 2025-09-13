@@ -9,7 +9,6 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.saledrop.app/accounts/sign-up/">
 
-<!-- Open Graph -->
 <meta property="og:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta property="og:description" content="Maak gratis een account aan en ontvang meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
 <meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
@@ -17,13 +16,11 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
 <meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
 
-<!-- Structured Data (JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -34,184 +31,198 @@
 }
 </script>
 
-
 <style>
-.signup-card {
-    background-color: var(--color-white);
-    padding: 2rem;
-    border-radius: var(--border-radius-round);
-    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
-    max-width: 500px;
-    margin: 2rem auto;
-}
-
-.signup-card h3 {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 550;
-    color: var(--primary-text-color);
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--primary-text-color);
-}
-
-/* Updated selector to apply to text and password inputs only */
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"] {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-gray-medium);
-    border-radius: var(--border-radius-round);
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--color-white);
-}
-
-input:focus {
-    border-color: var(--color-accent);
-    outline: none;
-    box-shadow: 0 0 0 2px var(--color-accent-light);
-}
-
-.radio-group {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.radio-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-weight: 400;
-    font-size: 0.95rem;
-    color: var(--primary-text-color);
-}
-
-/* Custom styled radio buttons */
-.radio-group input[type="radio"] {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--color-gray-medium);
-    border-radius: 50%;
-    position: relative;
-    cursor: pointer;
-    transition: 0.2s;
-    padding: 0; 
-}
-
-.radio-group input[type="radio"]:checked {
-    border-color: var(--color-accent);
-    background-color: var(--color-accent);
-}
-
-/* Corrected centering for the inner dot */
-.radio-group input[type="radio"]:checked::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.error {
-    margin-top: 0.5rem;
-    color: var(--color-error);
-    font-size: 0.9rem;
-}
-
-.action-btn:hover {
-    transform: scale(1.05);
-}
-
-.login-link {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.95rem;
-}
-
-.login-link-a {
-    color: var(--color-accent);
-    transition: 0.3s;
-}
-.login-link-a:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
-}
-.action-btn-inactive{
-    background-color: var(--color-accent-light);
-    color: white;
-    width: fit-content;
-    display: block;
-    border: none;
-    border-radius: 50px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 0 auto;
-}
-.action-btn-inactive:hover{
-    color: white !important;
-}
-
-/* Pop-in animation */
-@keyframes popIn {
-    0% {
-        transform: scale(0.5);
-        opacity: 0;
+    /* --- Base Card & Form Styling --- */
+    .signup-card {
+        background-color: var(--color-white);
+        padding: 2.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        max-width: 500px;
+        margin: 2rem auto;
     }
-    60% {
-        transform: scale(1.1);
-        opacity: 1;
+    .signup-card h3 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
     }
-    100% {
-        transform: scale(1);
+    .error.non-field-errors {
+        background-color: var(--color-error-background);
+        color: var(--color-error);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-default);
+        margin-bottom: 1.5rem;
+        text-align: center;
     }
-}
 
-.pop-in {
-    animation: popIn 0.3s ease forwards;
-}
+    /* --- Floating Label & Validation Styling --- */
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .floating-label input {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid var(--color-gray-medium);
+        border-radius: var(--border-radius-default);
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        background-color: var(--color-white);
+    }
+    /* --- Fix for browser autofill background color --- */
+    .floating-label input:-webkit-autofill,
+    .floating-label input:-webkit-autofill:hover,
+    .floating-label input:-webkit-autofill:focus,
+    .floating-label input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-text-fill-color: var(--primary-text-color) !important;
+    }
+    .floating-label label {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        color: var(--secondary-text-color);
+        pointer-events: none;
+        transition: all 0.2s ease-out;
+    }
+    .floating-label input:focus + label,
+    .floating-label input:not(:placeholder-shown) + label {
+        top: -0.75rem;
+        left: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--color-accent);
+        background-color: var(--color-white);
+        padding: 0 0.25rem;
+    }
+    .floating-label input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+    .floating-label input.invalid { border-color: var(--color-error); }
+    .floating-label input.valid { border-color: var(--color-success); }
+    .floating-label input.invalid:focus { border-color: var(--color-error); }
+    .floating-label input.valid:focus { border-color: var(--color-success); }
+    .error-message-form {
+        color: var(--color-error);
+        font-size: 0.85rem;
+        padding-left: 0.5rem;
+        margin-top: 0.25rem;
+        min-height: 1.2em; /* Prevents layout shifts */
+        border: none;
+        background-color: white;
+    }
+
+    /* --- Password Visibility --- */
+    .password-toggle-icon {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z' /%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' /%3E%3C/svg%3E");
+        background-size: contain;
+        opacity: 0.6;
+    }
+    .password-toggle-icon.visible {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L6.228 6.228' /%3E%3C/svg%3E");
+    }
+
+    /* --- Gender and Privacy Styling --- */
+    .static-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    .radio-group { display: flex; gap: 1.5rem; margin-top: 0.5rem; }
+    .radio-group label { display: flex; align-items: center; gap: 0.4rem; font-weight: 400; cursor: pointer; }
+    .radio-group input[type="radio"] { appearance: none; width: 16px; height: 16px; border: 2px solid var(--color-gray-medium); border-radius: 50%; position: relative; cursor: pointer; transition: 0.2s; }
+    .radio-group input[type="radio"]:checked { border-color: var(--color-accent); background-color: var(--color-accent); }
+    .radio-group input[type="radio"]:checked::before { content: ''; display: block; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .privacy-group label { display: flex; align-items: center; gap: 0.5rem; justify-content: center; font-size: 0.9rem; }
+    .privacy-group input { width: auto; }
+    .privacy-group a { color: var(--color-accent); text-decoration: none; }
+    .privacy-group a:hover { text-decoration: underline; }
+
+    /* --- Button, Loader & Link Styling --- */
+    .action-btn-special {
+        position: relative; /* Needed for spinner positioning */
+        display: block;
+        min-height: 41px; /* Ensure button height doesn't change */
+        min-width: 140px; /* Give button a minimum width */
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: 0.3s ease;
+        margin: 0 auto;
+    }
+    .action-btn-special:hover:not(:disabled) {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    .action-btn-special:disabled { background-color: var(--color-accent-light); cursor: not-allowed; }
+    
+    .action-btn-special .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    .action-btn-special.loading .spinner {
+        display: block;
+    }
+    .action-btn-special.loading .btn-text {
+        visibility: hidden;
+    }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .login-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; }
+    .login-link-a { color: var(--color-accent); text-decoration: none; transition: 0.3s; }
+    .login-link-a:hover { text-decoration: underline; color: var(--color-accent);}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="signup-card">
-        <h3>Meld je nu aan</h3>
-        <form method="post" action="{% url 'signup_view' %}">
+        <h3>Maak je gratis account</h3>
+        <form id="signup-form" method="post" action="{% url 'signup_view' %}" novalidate>
             {% csrf_token %}
-            {{ form.non_field_errors }}
+
+            {% if form.non_field_errors %}
+                <div class="error non-field-errors">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
 
             {% for field in form %}
-                {% if field.name != 'gender' %}
-                    <div class="form-group">
-                        {{ field.label_tag }}
+                {% if field.name == 'gender' %}
+                    {# This field is rendered manually below #}
+                {% else %}
+                    <div class="form-group floating-label">
                         {{ field }}
-                        {% if field.errors %}
-                            <div class="error">{{ field.errors|striptags }}</div>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                        {% if field.name == 'password' or field.name == 'password2' %}
+                            <span class="password-toggle-icon"></span>
                         {% endif %}
+
+                        <div class="error-message-form" data-for="{{ field.name }}">
+                            {% if field.errors %}{{ field.errors|striptags }}{% endif %}
+                        </div>
                     </div>
                 {% endif %}
             {% endfor %}
 
             <div class="form-group">
-                <label>Geslacht:</label>
+                <label class="static-label">Geslacht:</label>
                 <div class="radio-group" id="id_gender">
                     {% for subwidget in form.gender %}
                         <label for="{{ subwidget.id_for_label }}">
@@ -219,44 +230,140 @@ input:focus {
                         </label>
                     {% endfor %}
                 </div>
-                {% if form.gender.errors %}
-                    <div class="error">{{ form.gender.errors|striptags }}</div>
-                {% endif %}
+                 <div class="error-message-form" data-for="gender">
+                    {% if form.gender.errors %}{{ form.gender.errors|striptags }}{% endif %}
+                </div>
             </div>
 
-            <!-- Privacy policy checkbox -->
-            <div class="form-group" style="text-align:center;">
-                <label style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
-                    <input type="checkbox" id="accept-privacy">
+            <div class="form-group privacy-group">
+                <label>
+                    <input type="checkbox" id="accept-privacy" name="accept_privacy">
                     Ik accepteer het <a href="{% url 'privacy_policy' %}" target="_blank">privacybeleid</a>
                 </label>
             </div>
 
-            <a id="privacy-policy" class="action-btn-inactive" href="#">Registreren</a>
-            <button style="display: none;" type="submit" class="action-btn">Registreren</button>
+            <button type="submit" class="action-btn-special" disabled>
+                <span class="btn-text" style="color: white;">Registreren</span>
+                <span class="spinner"></span>
+            </button>
         </form>
 
         <p class="login-link">Heb je al een account? <a class="login-link-a" href="{% url 'login' %}">Inloggen</a></p>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const privacyLink = document.getElementById("privacy-policy");
-    const hiddenSubmit = document.querySelector("button[type='submit']");
-    const checkbox = document.getElementById("accept-privacy");
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('signup-form');
+    const allInputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+    const passwordInput = document.getElementById('id_password');
+    const password2Input = document.getElementById('id_password2');
+    const privacyCheckbox = document.getElementById('accept-privacy');
+    const submitButton = form.querySelector('button[type="submit"]');
 
-    checkbox.addEventListener("change", function () {
-        if (checkbox.checked) {
-            privacyLink.style.display = "none";
-            hiddenSubmit.style.display = "block";
-            hiddenSubmit.classList.add("pop-in");
-        } else {
-            privacyLink.style.display = "block";
-            hiddenSubmit.style.display = "none";
-            hiddenSubmit.classList.remove("pop-in");
+    // --- 1. SETUP: Add placeholder for floating labels ---
+    allInputs.forEach(input => {
+        if (!input.placeholder) {
+            input.placeholder = ' '; // Required for the :not(:placeholder-shown) CSS selector
         }
     });
+
+    // --- 2. PASSWORD VISIBILITY TOGGLE ---
+    document.querySelectorAll('.password-toggle-icon').forEach(icon => {
+        const formGroup = icon.closest('.form-group');
+        const inputField = formGroup ? formGroup.querySelector('input') : null;
+        if (!inputField) return;
+
+        icon.setAttribute('role', 'button');
+        icon.setAttribute('tabindex', '0');
+        icon.setAttribute('aria-pressed', 'false');
+        icon.setAttribute('aria-label', 'Toon wachtwoord');
+
+        const toggle = () => {
+            const currentlyPassword = inputField.type === 'password';
+            inputField.type = currentlyPassword ? 'text' : 'password';
+            icon.classList.toggle('visible', currentlyPassword);
+            icon.setAttribute('aria-pressed', String(currentlyPassword));
+            icon.setAttribute('aria-label', currentlyPassword ? 'Verberg wachtwoord' : 'Toon wachtwoord');
+        };
+
+        icon.addEventListener('click', toggle);
+        icon.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    });
+
+    // --- 3. REAL-TIME VALIDATION LOGIC ---
+    const validationRules = {
+        username: (val) => val.length >= 3,
+        email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+        password: (val) => val.length >= 8,
+        password2: (val) => val.length > 0 && val === passwordInput.value
+    };
+    const errorMessages = {
+        username: "Gebruikersnaam moet minimaal 3 karakters bevatten.",
+        email: "Voer een geldig e-mailadres in.",
+        password: "Wachtwoord moet minimaal 8 karakters bevatten.",
+        password2: "Wachtwoorden komen niet overeen."
+    };
+
+    const validateField = (input) => {
+        const rule = validationRules[input.name];
+        const errorEl = form.querySelector(`.error-message-form[data-for="${input.name}"]`);
+        if (!rule) return true;
+
+        const isValid = rule(input.value);
+        if (input.value.trim() === '') {
+            input.classList.remove('valid', 'invalid');
+            if (errorEl) errorEl.textContent = '';
+        } else if (isValid) {
+            input.classList.add('valid');
+            input.classList.remove('invalid');
+            if (errorEl) errorEl.textContent = '';
+        } else {
+            input.classList.add('invalid');
+            input.classList.remove('valid');
+            if (errorEl) errorEl.textContent = errorMessages[input.name] || 'Dit veld is ongeldig.';
+        }
+        return isValid;
+    };
+
+    // --- 4. MASTER VALIDATION CHECK ---
+    const checkFormValidity = () => {
+        let isFormValid = true;
+        allInputs.forEach(input => {
+            if (input.required && !validateField(input)) {
+                isFormValid = false;
+            }
+        });
+
+        if (password2Input.value) validateField(password2Input);
+
+        const privacyAccepted = privacyCheckbox.checked;
+        submitButton.disabled = !(isFormValid && privacyAccepted);
+    };
+
+    // --- 5. ATTACH EVENT LISTENERS ---
+    allInputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+    });
+    privacyCheckbox.addEventListener('change', checkFormValidity);
+
+    // --- 6. HANDLE FORM SUBMISSION LOADER ---
+    form.addEventListener('submit', function() {
+        if (form.checkValidity()) {
+            submitButton.classList.add('loading');
+            submitButton.disabled = true;
+        }
+    });
+
+    // Initial check in case of browser autofill
+    checkFormValidity();
 });
 </script>
 {% endblock %}

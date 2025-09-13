@@ -9,122 +9,321 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.saledrop.app/for-business/">
 
-<!-- Open Graph / Facebook -->
 <meta property="og:title" content="Voor Bedrijven | Werk samen met SaleDrop">
 <meta property="og:description" content="Bereik meer klanten door uw beste sales en aanbiedingen te delen via de SaleDrop app.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.saledrop.app/for-business/">
 <meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Voor Bedrijven | Werk samen met SaleDrop">
 <meta name="twitter:description" content="Bereik meer klanten door uw beste sales en aanbiedingen te delen via de SaleDrop app.">
 <meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
 
-<!-- Extra technisch -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="SaleDrop">
 
 
-    <style>
-        /* Aangepaste styling om te matchen met de aanmeldpagina */
-        .for-business-card {
-            background-color: var(--color-white);
-            padding: 2rem;
-            border-radius: var(--border-radius-round);
-            box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
-            max-width: 500px; /* Gebruikt dezelfde max-breedte als de aanmeldkaart */
-            margin: 2rem auto;
-        }
+<style>
+    /* Aangepaste styling om te matchen met de aanmeldpagina */
+    .for-business-card {
+        background-color: var(--color-white);
+        padding: 2rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
+        max-width: 500px; /* Gebruikt dezelfde max-breedte als de aanmeldkaart */
+        margin: 2rem auto;
+    }
 
-        .for-business-card h3 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-weight: 550;
-            color: var(--primary-text-color);
-        }
+    .for-business-card h3 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 550;
+        color: var(--primary-text-color);
+    }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--primary-text-color);
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--primary-text-color);
+    }
 
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--color-gray-medium);
-            border-radius: var(--border-radius-round);
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-white); /* Standaard witte achtergrond */
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--color-gray-medium);
+        border-radius: var(--border-radius-round);
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-white); /* Standaard witte achtergrond */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 2px var(--color-accent-light);
-        }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 2px var(--color-accent-light);
+    }
 
-        .form-group textarea {
-            resize: vertical;
-        }
+    .form-group textarea {
+        resize: vertical;
+    }
 
-        .action-btn:hover {
-            transform: scale(1.05); /* Behoudt de schaal-animatie, maar iets subtieler */
-        }
+    /* Nieuwe stijlen voor de berichtcontainer */
+    #form-message-container {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-round);
+        text-align: center;
+        font-weight: 500;
+        display: none; /* Standaard verborgen */
+    }
+</style>
 
-        /* Nieuwe stijlen voor de berichtcontainer */
-        #form-message-container {
-            margin-top: 1rem;
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius-round);
-            text-align: center;
-            font-weight: 500;
-            display: none; /* Standaard verborgen */
-        }
-        
+<style>
+    :root {
+        --gradient-angle: 135deg;
+        /* A new, warm palette with yellowish tones */
+        --color-1: #ffd1bd; /* Your --color-accent-light */
+        --color-2: #fee8e0; /* Your --color-accent-lighter */
+        --color-3: #fff3b0; /* Soft Gold */
+        --color-4: #fff9de; /* Light Cream */
+    }
 
-    </style>
+    header{
+        background: linear-gradient(
+                var(--gradient-angle),
+                var(--color-1),
+                var(--color-2),
+                var(--color-3),
+                var(--color-4)
+            );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+        padding: 2.5rem 1.5rem !important;
+    }
+    header p{
+        color: var(--secondary-text-color);
+        font-weight: bold;
+    }
+
+    main{
+      min-height: calc(100vh - var(--navbar-height) - 186px - 64px) !important;
+    }
+
+    @keyframes animate-gradient-position {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
+</style>
+
+<style>
+.for-business-card {
+    background-color: var(--color-white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+    max-width: 500px;
+    margin: 2rem auto;
+    overflow: hidden; /* Prevents box-shadow from being cut off by animations */
+}
+
+.for-business-card h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 600; /* Slightly bolder */
+    color: var(--primary-text-color);
+}
+
+/* --- Floating Label Styling --- */
+.form-group.floating-label {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.floating-label input,
+.floating-label textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-gray-medium);
+    border-radius: var(--border-radius-default);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-white);
+    transition: border-color 0.3s ease;
+}
+
+/* --- Fix for browser autofill background color --- */
+.floating-label input:-webkit-autofill,
+.floating-label input:-webkit-autofill:hover,
+.floating-label input:-webkit-autofill:focus,
+.floating-label input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: var(--primary-text-color) !important;
+}
+
+.floating-label label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--secondary-text-color);
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+}
+
+/* The magic for floating the label */
+.floating-label input:focus + label,
+.floating-label input:not(:placeholder-shown) + label,
+.floating-label textarea:focus + label,
+.floating-label textarea:not(:placeholder-shown) + label {
+    top: -0.75rem;
+    left: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    background-color: var(--color-white);
+    padding: 0 0.25rem;
+}
+
+.floating-label input:focus,
+.floating-label textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+/* --- Real-time Validation Styling --- */
+.floating-label input.invalid,
+.floating-label textarea.invalid {
+    border-color: var(--color-error); /* Red for error */
+}
+
+.floating-label input.valid {
+    border-color: var(--color-succes); /* Green for success */
+}
+
+.floating-label input.invalid:focus,
+.floating-label textarea.invalid:focus {
+    border-color: var(--color-error);
+}
+
+.floating-label input.valid:focus {
+    border-color: var(--color-succes);
+}
+
+
+.action-btn-special {
+        display: block;
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: 0.3s ease;
+        margin: 0 auto;
+    }
+    .action-btn-special:hover:not(:disabled) {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    .action-btn-special:disabled { background-color: var(--color-accent-light); cursor: not-allowed; }
+
+.action-btn-special .spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--color-white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+.action-btn-special.loading .spinner {
+    display: block;
+}
+
+.action-btn-special.loading .btn-text {
+    visibility: hidden;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* --- Message Container Styling --- */
+#form-message-container {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-default);
+    text-align: center;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    visibility: hidden;
+}
+#form-message-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+.success-message {
+    background-color: var(--color-succes-background);
+    color: var(--color-succes);
+}
+.error-message {
+    background-color: var(--color-error-background);
+    color: var(--color-error);
+}
+</style>
 {% endblock %}
 
+{% block index_header %}
+<header style="padding-bottom: 1.5rem;" class="animated-header">
+    <h1>Contact voor bedrijven</h1>
+    <p>Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met u op.</p>
+</header>
+{% endblock%}
 {% block content %}
     <main>
-        <header class="text-center py-10">
-            <h1>Samenwerken met SaleDrop</h1>
-            <p>Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met u op.</p>
-        </header>
-
         <section class="for-business-card">
             <h3>Contactverzoek voor bedrijven</h3>
-            <form id="business-request-form" method="POST">
+            <form id="business-request-form" method="POST" novalidate>
                 {% csrf_token %}
-                <div class="form-group">
+                <div class="form-group floating-label">
+                    <input type="text" id="store_name" name="store_name" required placeholder=" ">
                     <label for="store_name">Winkelnaam</label>
-                    <input type="text" id="store_name" name="store_name" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group floating-label">
+                    <input type="email" id="store_email" name="store_email" required placeholder=" ">
                     <label for="store_email">E-mailadres van de winkel</label>
-                    <input type="email" id="store_email" name="store_email" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group floating-label">
+                    <input type="tel" id="store_phone_number" name="store_phone_number" required placeholder=" ">
                     <label for="store_phone_number">Telefoonnummer</label>
-                    <input type="tel" id="store_phone_number" name="store_phone_number" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group floating-label">
+                    <textarea id="message" name="message" rows="5" placeholder=" "></textarea>
                     <label for="message">Bericht (optioneel)</label>
-                    <textarea id="message" name="message" rows="5"></textarea>
                 </div>
-                <button type="submit" class="action-btn">Verzoek versturen</button>
+                <button type="submit" class="action-btn-special" disabled>
+                    <span class="btn-text" style="color: white;">Verzoek versturen</span>
+                    <span class="spinner"></span>
+                </button>
                 <div id="form-message-container"></div>
             </form>
         </section>
@@ -133,26 +332,63 @@
 
 {% block scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('business-request-form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const btnText = submitButton.querySelector('.btn-text');
     const formMessageContainer = document.getElementById('form-message-container');
+    const requiredInputs = form.querySelectorAll('[required]');
 
-    function displayMessage(message, type) {
-        formMessageContainer.textContent = message;
-        formMessageContainer.style.display = 'block';
-        formMessageContainer.className = ''; // Clear existing classes
-        if (type === 'success') {
-            formMessageContainer.classList.add('success-message');
-        } else if (type === 'error') {
-            formMessageContainer.classList.add('error-message');
+    // --- Real-time Validation ---
+    const validationRules = {
+        store_email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+        store_name: (value) => value.trim().length > 1,
+        store_phone_number: (value) => /^[0-9\s\-\+\(\)]{7,}$/.test(value), // Simple phone validation
+    };
+
+    const validateField = (input) => {
+        const rule = validationRules[input.id];
+        if (!rule) return true; // Not a field with a specific rule, just check if required
+
+        const isValid = rule(input.value);
+        if (input.value.trim() === '') {
+            input.classList.remove('valid', 'invalid');
+        } else if (isValid) {
+            input.classList.add('valid');
+            input.classList.remove('invalid');
+        } else {
+            input.classList.add('invalid');
+            input.classList.remove('valid');
         }
-    }
+        return isValid;
+    };
 
+    const checkFormValidity = () => {
+        let isFormValid = true;
+        requiredInputs.forEach(input => {
+            if (!validateField(input)) {
+                isFormValid = false;
+            }
+        });
+        submitButton.disabled = !isFormValid;
+    };
+
+    requiredInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            validateField(input);
+            checkFormValidity();
+        });
+    });
+
+    // --- Form Submission Handling ---
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        
-        // Show a loading spinner or an indication that the form is being submitted
-        document.body.style.cursor = 'wait';
-        formMessageContainer.style.display = 'none'; // Hide previous messages
+
+        // Activate loading state
+        submitButton.classList.add('loading');
+        btnText.textContent = 'Bezig met versturen...';
+        submitButton.disabled = true;
+        formMessageContainer.classList.remove('visible'); // Hide previous messages
 
         const formData = new FormData(form);
         const requestData = Object.fromEntries(formData.entries());
@@ -169,26 +405,25 @@
             });
 
             if (response.ok) {
-                window.displayMessage('success', "Bedankt! Uw verzoek is ontvangen en wordt zo snel mogelijk behandeld.")
+                window.displayMessage('success', "Bedankt! Uw verzoek is ontvangen en wordt zo snel mogelijk behandeld.");
                 form.reset();
+                requiredInputs.forEach(input => input.classList.remove('valid', 'invalid'));
             } else {
                 const errorData = await response.json();
-                let errorMessage = "Er is een onbekende fout opgetreden.";
-                if (errorData.message) {
-                    if (typeof errorData.message === 'string') {
-                        errorMessage = "Fout: " + errorData.message;
-                    } else if (typeof errorData.message === 'object') {
-                        errorMessage = "Fout bij het formulier: " + Object.values(errorData.message).map(err => err[0]).join(' ');
-                    }
-                }
-                window.displayMessage('error', errorMessage)
+                const errorMessage = "Er is een fout opgetreden. Controleer de ingevulde velden.";
+                // You can add more specific error parsing here if needed
+                window.displayMessage('error', errorMessage);
             }
         } catch (error) {
             console.error('Fout bij het versturen van het verzoek:', error);
-            displayMessage("Er is een netwerkfout opgetreden. Probeer het later opnieuw.", 'error');
+            window.displayMessage('error', "Er is een netwerkfout opgetreden. Probeer het later opnieuw.");
         } finally {
-            document.body.style.cursor = 'default';
+            // Deactivate loading state
+            submitButton.classList.remove('loading');
+            btnText.textContent = 'Verzoek versturen';
+            checkFormValidity(); // Re-check validity to set button state correctly
         }
     });
+});
 </script>
 {% endblock %}

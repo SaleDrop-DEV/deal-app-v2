@@ -9,7 +9,6 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.saledrop.app/accounts/log-in/">
 
-<!-- Open Graph -->
 <meta property="og:title" content="Inloggen bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta property="og:description" content="Log in en blijf op de hoogte van nieuwe aanbiedingen bij je favoriete winkels.">
 <meta property="og:image" content="{% static 'images/saledrop-preview.jpg' %}">
@@ -17,13 +16,11 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Inloggen bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta name="twitter:description" content="Log in en blijf op de hoogte van nieuwe aanbiedingen bij je favoriete winkels.">
 <meta name="twitter:image" content="{% static 'images/saledrop-preview.jpg' %}">
 
-<!-- Structured Data (JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -34,102 +31,160 @@
 }
 </script>
 
-
 <style>
-.login-card {
-    background-color: var(--color-white);
-    padding: 2rem;
-    border-radius: var(--border-radius-round);
-    box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
-    max-width: 500px;
-    margin: 2rem auto;
-}
+    /* --- Base Card & Form Styling --- */
+    .login-card {
+        background-color: var(--color-white);
+        padding: 2.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+    .login-card h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+    }
+    .error.non-field-errors {
+        background-color: var(--color-error-background);
+        color: var(--color-error);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-default);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
 
-.login-card h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 550;
-    color: var(--primary-text-color);
-}
+    /* --- Floating Label & Validation Styling --- */
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .floating-label input {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid var(--color-gray-medium);
+        border-radius: var(--border-radius-default);
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        background-color: var(--color-white);
+    }
+    /* --- Fix for browser autofill background color --- */
+    .floating-label input:-webkit-autofill,
+    .floating-label input:-webkit-autofill:hover,
+    .floating-label input:-webkit-autofill:focus,
+    .floating-label input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-text-fill-color: var(--primary-text-color) !important;
+    }
+    .floating-label label {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        color: var(--secondary-text-color);
+        pointer-events: none;
+        transition: all 0.2s ease-out;
+    }
+    .floating-label input:focus + label,
+    .floating-label input:not(:placeholder-shown) + label {
+        top: -0.75rem;
+        left: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--color-accent);
+        background-color: var(--color-white);
+        padding: 0 0.25rem;
+    }
+    .floating-label input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+    .error-message-form {
+        color: var(--color-error);
+        font-size: 0.85rem;
+        padding-left: 0.5rem;
+        margin-top: 0.25rem;
+        min-height: 1.2em;
+    }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
+    /* --- Password Visibility --- */
+    .password-toggle-icon {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z' /%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' /%3E%3C/svg%3E");
+        background-size: contain;
+        opacity: 0.6;
+    }
+    .password-toggle-icon.visible {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L6.228 6.228' /%3E%3C/svg%3E");
+    }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--primary-text-color);
-}
+    /* --- Button, Loader & Link Styling --- */
+    .action-btn-special {
+        position: relative; /* Needed for spinner positioning */
+        display: block;
+        margin: 0 auto;
+        min-height: 46px; /* Ensure button height doesn't change when text is hidden */
+        min-width: 120px; /* Give button a minimum width */
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: 0.3s ease;
+        margin-top: 1rem;
+    }
+    .action-btn-special:hover:not(:disabled) {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    .action-btn-special:disabled { background-color: var(--color-accent-light); cursor: not-allowed; }
+    
+    .action-btn-special .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    .action-btn-special.loading .spinner {
+        display: block;
+    }
+    .action-btn-special.loading .btn-text {
+        visibility: hidden;
+    }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"] {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-gray-medium);
-    border-radius: var(--border-radius-round);
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--color-white);
-}
-
-input:focus {
-    border-color: var(--color-accent);
-    outline: none;
-    box-shadow: 0 0 0 2px var(--color-accent-light);
-}
-
-input{
-    padding: 12px 16px;
-    /* width: calc(100% - 32px); */
-    width: 100%;
-    border-radius: var(--border-radius-round);
-    border: 1px solid var(--color-gray-medium);
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    font-weight: 400;
-}
-
-.form-group input[type="checkbox"] {
-    width: auto;
-    transform: scale(1.2);
-    margin-right: 0.5rem;
-    vertical-align: middle;
-}
-
-.error {
-    margin-top: 0.5rem;
-    color: var(--color-error);
-    font-size: 0.9rem;
-}
-
-.action-btn:hover {
-    transform: scale(1.05);
-}
-
-.password-reset-link,
-.signup-link {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.95rem;
-}
-
-.signup-link-a {
-    color: var(--color-accent);
-    transition: 0.3s;
-}
-
-.signup-link-a:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
-}
-
-.password-reset-link a {
-    color: var(--primary-text-color);
-    text-decoration: underline;
-}
+    .links-container {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+    }
+    .links-container p {
+        margin-bottom: 0.5rem;
+    }
+    .links-container a {
+        color: var(--color-accent);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .links-container a:hover {
+        text-decoration: underline;
+    }
 </style>
 {% endblock %}
 
@@ -137,29 +192,111 @@ input{
 <div class="container">
     <div class="login-card">
         <h2>Inloggen</h2>
-        <form method="post" action="{% url 'login' %}?next=/deals/my-sales/">
+        <form id="login-form" method="post" action="{% url 'login' %}?next=/deals/my-sales/" novalidate>
             {% csrf_token %}
-            {{ form.non_field_errors }}
+
+            {% if form.non_field_errors %}
+                <div class="error non-field-errors">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
 
             {% for field in form %}
-                <div class="form-group">
-                    {{ field.label_tag }}
+                <div class="form-group floating-label">
                     {{ field }}
-                    {% if field.errors %}
-                        <div class="error">{{ field.errors|striptags }}</div>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                    {% if field.name == 'password' %}
+                        <span class="password-toggle-icon"></span>
                     {% endif %}
+
+                    <div class="error-message-form" data-for="{{ field.name }}">
+                        {% if field.errors %}{{ field.errors|striptags }}{% endif %}
+                    </div>
                 </div>
             {% endfor %}
 
-            <button type="submit" class="action-btn">Login</button>
+            <button type="submit" class="action-btn-special" disabled>
+                <span class="btn-text" style="color: white;">Inloggen</span>
+                <span class="spinner"></span>
+            </button>
         </form>
 
-        <p class="password-reset-link">
-            <a href="{% url 'account_reset_password' %}">Wachtwoord vergeten?</a>
-        </p>
-        <p class="signup-link">
-            Nog geen account? <a class="signup-link-a" href="{% url 'signup_view' %}">Registreer</a>
-        </p>
+        <div class="links-container">
+            <p>
+                <a href="{% url 'account_reset_password' %}">Wachtwoord vergeten?</a>
+            </p>
+            <p>
+                Nog geen account? <a href="{% url 'signup_view' %}">Registreer</a>
+            </p>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('login-form');
+    const allInputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // --- 1. SETUP: Add placeholder for floating labels ---
+    allInputs.forEach(input => {
+        if (!input.placeholder) {
+            input.placeholder = ' '; // Required for the :not(:placeholder-shown) CSS selector
+        }
+    });
+
+    // --- 2. PASSWORD VISIBILITY TOGGLE ---
+    document.querySelectorAll('.password-toggle-icon').forEach(icon => {
+        const formGroup = icon.closest('.form-group');
+        const inputField = formGroup ? formGroup.querySelector('input') : null;
+        if (!inputField) return;
+
+        icon.setAttribute('role', 'button');
+        icon.setAttribute('tabindex', '0');
+
+        const toggle = () => {
+            const isPassword = inputField.type === 'password';
+            inputField.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('visible', isPassword);
+        };
+
+        icon.addEventListener('click', toggle);
+        icon.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    });
+
+    // --- 3. FORM VALIDITY CHECK ---
+    const checkFormValidity = () => {
+        let isFormValid = true;
+        allInputs.forEach(input => {
+            if (input.required && input.value.trim() === '') {
+                isFormValid = false;
+            }
+        });
+        submitButton.disabled = !isFormValid;
+    };
+
+    // --- 4. ATTACH EVENT LISTENERS ---
+    allInputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+    });
+    
+    // --- 5. HANDLE FORM SUBMISSION LOADER ---
+    form.addEventListener('submit', function() {
+        // Only show loader if the form is valid from a client-side perspective
+        if (form.checkValidity()) {
+            submitButton.classList.add('loading');
+            submitButton.disabled = true; // Prevent multiple submissions
+        }
+    });
+
+    // Initial check in case of browser autofill
+    checkFormValidity();
+});
+</script>
 {% endblock %}

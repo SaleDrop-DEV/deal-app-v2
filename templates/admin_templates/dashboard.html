@@ -7,6 +7,15 @@
 <link rel="stylesheet" href="{% static 'css/theme_v2_account.css' %}">
 
 <style>
+    /* --- FIX: Global Box Sizing --- */
+    /* This is a crucial rule for predictable layouts. It ensures that padding and
+       borders are included in the element's width and height, preventing overflow. */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
     /* Root variables for consistency */
     :root {
         --color-black: #000000;
@@ -23,20 +32,24 @@
         --border-radius-round: 6px;
     }
 
+
     /* Main Page Layout */
     .dashboard-layout {
         display: grid;
         gap: 1.5rem;
         padding: 2rem 1rem;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Mobile-first: single column */
     }
 
+    /* Tablet layout: 2 columns */
     @media (min-width: 768px) {
         .dashboard-layout {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
+
+    /* Desktop layout: 4 columns */
     @media (min-width: 1200px) {
         .dashboard-layout {
             grid-template-columns: repeat(4, 1fr);
@@ -59,21 +72,24 @@
         margin-bottom: 0.5rem;
     }
 
+    /* --- RESPONSIVE ENHANCEMENT: Fluid Font Size --- */
     .dashboard-card-value {
-        font-size: 2.5rem;
+        font-size: clamp(2rem, 6vw, 2.5rem); /* Scales between 2rem and 2.5rem */
         font-weight: 600;
         color: var(--primary-text-color);
     }
     
     .chart-card {
-        grid-column: 1 / -1; /* Span full width */
+        grid-column: 1 / -1; /* Span full width on mobile/tablet */
     }
 
+    /* --- RESPONSIVE ENHANCEMENT: Desktop Grid Layout --- */
     @media (min-width: 1200px) {
-        .chart-card {
-            grid-column: span 2; /* Span two columns on large screens */
-        }
-        .stores-card {
+        /* On large screens, specific cards will span 2 of the 4 columns */
+        .chart-card,
+        .stores-card,
+        .recommendations-card,
+        .business-requests-card {
             grid-column: span 2;
         }
     }
@@ -81,7 +97,7 @@
     .chart-container {
         position: relative;
         width: 100%;
-        height: 300px; /* Adjust height as needed */
+        height: 300px;
     }
 
     .stores-card .store-list {
@@ -118,9 +134,10 @@
         font-size: 0.85rem;
         color: var(--secondary-text-color);
     }
-    /* --- Recommendations Card --- */
-    .recommendations-card {
-        grid-column: 1 / -1; /* Span full width */
+
+    .recommendations-card,
+    .business-requests-card {
+        grid-column: 1 / -1; /* Span full width by default */
     }
 
     .recommendation-list {
@@ -137,18 +154,16 @@
         padding: 1rem;
         border: 1px solid var(--color-gray-light);
         border-radius: var(--border-radius-round);
-        overflow: hidden; /* Important for the height animation */
-        /* Animation properties */
+        overflow: hidden;
         transition: all 0.4s ease-in-out;
     }
 
-    /* Style for when an item is being removed */
     .recommendation-item.removing {
         height: 0;
         padding-top: 0;
         padding-bottom: 0;
         margin-top: 0;
-        margin-bottom: -1rem; /* Counteract gap */
+        margin-bottom: -1rem;
         opacity: 0;
         border-width: 0;
     }
@@ -164,7 +179,6 @@
         margin-top: 0.25rem;
     }
 
-    /* --- Check Button & Loader --- */
     .check-btn {
         display: flex;
         align-items: center;
@@ -189,9 +203,8 @@
         align-items: center;
     }
 
-    /* Loader Styles */
     .check-btn .loader {
-        display: none; /* Hidden by default */
+        display: none;
         width: 18px;
         height: 18px;
         border: 2px solid var(--color-accent-light);
@@ -219,23 +232,13 @@
         text-align: center;
     }
 
-
-    /* --- Business Requests Card --- */
-    .business-requests-card {
-        grid-column: 1 / -1; /* Span full width on mobile */
-    }
-
-    @media (min-width: 1200px) {
-        .business-requests-card {
-            grid-column: span 2; /* Span two columns on large screens */
-        }
-    }
-
     .request-list {
         margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+        display: grid;
+        /* --- FIX: Reduced min-width for mobile --- */
+        /* Changed from 350px to 300px to fit on smaller screens. */
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
     }
 
     .request-item {
@@ -291,23 +294,62 @@
         color: var(--color-gray-medium);
     }
 
-
     .gradient-card {
-
         background: linear-gradient(135deg, var(--color-white), var(--color-accent-light));
-        /* You can adjust the angle (e.g., to 45deg, 90deg, to top, to right)
-        and the colors (e.g., from a slightly off-white to the accent) */
     }
-
 
 </style>
 
+
+<style>
+    :root {
+        --gradient-angle: 135deg;
+        /* A new, warm palette with yellowish tones */
+        --color-1: #ffd1bd; /* Your --color-accent-light */
+        --color-2: #fee8e0; /* Your --color-accent-lighter */
+        --color-3: #fff3b0; /* Soft Gold */
+        --color-4: #fff9de; /* Light Cream */
+    }
+    main{
+      min-height: calc(100vh - var(--navbar-height) - 186px - 64px) !important;
+    }
+
+    header{
+        background: linear-gradient(
+                var(--gradient-angle),
+                var(--color-1),
+                var(--color-2),
+                var(--color-3),
+                var(--color-4)
+            );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+        padding: 2.5rem 1.5rem !important;
+    }
+
+    header button:hover{
+        transform: scale(1.05);
+    }
+
+    @keyframes animate-gradient-position {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
+</style>
 {% endblock %}
-{% block content %}
+
+{% block index_header %}
 <header>
     <h1>Dashboard</h1>
     <button class="action-btn" onclick="location.href='/admin-app/';">Administratie</button>
 </header>
+{% endblock %}
+
+{% block content %}
 
 <div class="container">
     <div class="dashboard-layout">
@@ -319,20 +361,6 @@
         <div class="dashboard-card gradient-card">
             <h3 class="dashboard-card-header">Totaal Aantal Kliks</h3>
             <p class="dashboard-card-value">{{ total_clicks }}</p>
-        </div>
-
-        <div class="dashboard-card chart-card">
-            <h3 class="dashboard-card-header">Google Search Clicks (Laatste 2 Weken)</h3>
-            <div class="chart-container">
-                <canvas id="gscChart"></canvas>
-            </div>
-        </div>
-        
-        <div class="dashboard-card chart-card">
-            <h3 class="dashboard-card-header">Bing Webmaster Clicks (Laatste 2 Weken)</h3>
-            <div class="chart-container">
-                <canvas id="bingChart"></canvas>
-            </div>
         </div>
 
         <div class="dashboard-card stores-card gradient-card">
@@ -352,6 +380,20 @@
             </div>
         </div>
 
+        <div class="dashboard-card chart-card">
+            <h3 class="dashboard-card-header">Google Search Clicks (Laatste 2 Weken)</h3>
+            <div class="chart-container">
+                <canvas id="gscChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card chart-card">
+            <h3 class="dashboard-card-header">Bing Webmaster Clicks (Laatste 2 Weken)</h3>
+            <div class="chart-container">
+                <canvas id="bingChart"></canvas>
+            </div>
+        </div>
+        
         <div class="dashboard-card recommendations-card">
             <h3 class="dashboard-card-header">Niet-afgehandelde Aanbevelingen</h3>
             <div id="recommendation-list" class="recommendation-list">
@@ -414,7 +456,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Helper function to create a chart ---
+    // --- Generic helper function (used for Bing chart) ---
     function createChart(canvasId, labels, data, label, color) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         new Chart(ctx, {
@@ -425,34 +467,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: label,
                     data: data,
                     borderColor: color,
-                    backgroundColor: `${color}33`, // Semi-transparent fill
+                    backgroundColor: `${color}33`,
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4 // Makes the line smooth
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
             }
         });
     }
 
-    // --- Process and render Google Search Console Chart ---
+    // --- Process and render Google Search Console Chart (ENHANCED) ---
     try {
         const gscRawData = JSON.parse(document.getElementById('gsc-data').textContent);
         if (gscRawData && gscRawData.length > 0) {
-            // Sort data by date just in case it's not ordered
             gscRawData.sort((a, b) => new Date(a.keys[0]) - new Date(b.keys[0]));
             
             const gscLabels = gscRawData.map(row => {
@@ -461,39 +494,106 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             const gscClicks = gscRawData.map(row => row.clicks);
             
-            createChart('gscChart', gscLabels, gscClicks, 'Google Clicks', 'var(--color-accent)');
+            // --- Custom Chart Implementation for GSC ---
+            const gscCanvas = document.getElementById('gscChart');
+            const gscCtx = gscCanvas.getContext('2d');
+
+            const gradient = gscCtx.createLinearGradient(0, 0, 0, gscCanvas.offsetHeight);
+            gradient.addColorStop(0, '#ff4d0099');
+            gradient.addColorStop(1, '#fee8e000');
+
+            new Chart(gscCtx, {
+                type: 'line',
+                data: {
+                    labels: gscLabels,
+                    datasets: [{
+                        label: 'Google Clicks',
+                        data: gscClicks,
+                        fill: true,
+                        backgroundColor: gradient,
+                        borderColor: '#FF4D00',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointBackgroundColor: '#FF4D00',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#FFFFFF',
+                        pointHoverBorderColor: '#ff6d2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f0f0f0', drawBorder: false, },
+                            ticks: { padding: 10, color: '#86868B' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { padding: 10, color: '#86868B' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#1D1D1F',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#FFFFFF',
+                            titleFont: { weight: 'bold' },
+                            padding: 12,
+                            cornerRadius: 6,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Kliks: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
     } catch (e) {
         console.error("Error processing GSC data:", e);
     }
 
-    // --- Process and render Bing Webmaster Chart ---
+    // --- Process and render Bing Webmaster Chart (Unchanged) ---
     try {
         const bingRawData = JSON.parse(document.getElementById('bing-data').textContent);
         if (bingRawData && bingRawData.length > 0) {
-            // Aggregate data by date, as the API gives a flat list of queries
             const aggregatedData = bingRawData.reduce((acc, item) => {
-                const date = item.Date.split('T')[0]; // Get only the date part
-                acc[date] = (acc[date] || 0) + item.Clicks;
+                const timestampMatch = item.Date.match(/\d+/);
+                if (timestampMatch) {
+                    const timestamp = parseInt(timestampMatch[0], 10);
+                    const dateObj = new Date(timestamp);
+                    const dateKey = dateObj.toISOString().split('T')[0]; 
+                    acc[dateKey] = (acc[dateKey] || 0) + item.Clicks;
+                }
                 return acc;
             }, {});
 
-            // Sort dates
-            const sortedDates = Object.keys(aggregatedData).sort((a, b) => new Date(a) - new Date(b));
-
+            const sortedDates = Object.keys( aggregatedData ).sort();
             const bingLabels = sortedDates.map(dateStr => {
                  const date = new Date(dateStr);
+                 date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
                  return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
             });
             const bingClicks = sortedDates.map(date => aggregatedData[date]);
 
-            createChart('bingChart', bingLabels, bingClicks, 'Bing Clicks', '#0078D4'); // Bing's brand color
+            createChart('bingChart', bingLabels, bingClicks, 'Bing Clicks', '#0078D4');
         }
     } catch (e) {
         console.error("Error processing Bing data:", e);
     }
 
-
+    // --- CSRF Token and Recommendation Logic (Unchanged) ---
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -512,28 +612,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const recommendationList = document.getElementById('recommendation-list');
 
-    // Use event delegation to handle clicks on buttons
     recommendationList.addEventListener('click', function(event) {
         const checkButton = event.target.closest('.check-btn');
-
-        // If the click was not on a check button, do nothing
-        if (!checkButton) {
-            return;
-        }
+        if (!checkButton) { return; }
 
         const recommendationId = checkButton.dataset.id;
         const itemElement = document.getElementById(`recommendation-${recommendationId}`);
 
-        // Prevent multiple clicks
-        if (checkButton.classList.contains('loading')) {
-            return;
-        }
+        if (checkButton.classList.contains('loading')) { return; }
 
-        // Show loader and disable button
         checkButton.classList.add('loading');
         checkButton.disabled = true;
 
-        // API call to mark the recommendation as handled
         fetch('/api/check-recommendation/', {
             method: 'POST',
             headers: {
@@ -543,56 +633,85 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify({ recommendation_id: recommendationId })
         })
         .then(response => {
-            // If the response is not OK (e.g., 404, 500), parse the error JSON and reject the promise
             if (!response.ok) {
                 return response.json().then(errorData => {
-                    // Throw an error to be caught by the .catch() block
-                    // This uses the specific error message from your Django view
                     throw new Error(errorData.error || 'Serverfout opgetreden.');
                 });
             }
-            // If response is OK, parse the success JSON
             return response.json();
         })
         .then(data => {
-
-            if (data.error) {
-                throw new Error(data.error);
-            }
+            if (data.error) { throw new Error(data.error); }
             
-            // Use your custom success message function
             window.displayMessage('success', 'Aanbeveling is succesvol afgehandeld.');
-
-            // Add the 'removing' class to start the CSS animation
             itemElement.classList.add('removing');
 
-            // After the animation finishes (400ms), remove the element from the DOM
             setTimeout(() => {
                 itemElement.remove();
-
-                // Check if the list is now empty
-                const remainingItems = recommendationList.querySelectorAll('.recommendation-item');
-                if (remainingItems.length === 0) {
-                    const emptyMessage = document.getElementById('no-recommendations-message');
-                    if (!emptyMessage) {
-                        recommendationList.innerHTML = '<p id="no-recommendations-message">Geen nieuwe aanbevelingen. ✨</p>';
-                    }
+                if (recommendationList.querySelectorAll('.recommendation-item').length === 0) {
+                    recommendationList.innerHTML = '<p id="no-recommendations-message">Geen nieuwe aanbevelingen. ✨</p>';
                 }
-            }, 400); // This duration must match the transition time in the CSS
+            }, 400);
         })
         .catch(error => {
-            // This block catches network errors and errors thrown from the .then() block
             console.error('Error:', error);
-            
-            // Use your custom error message function
             window.displayMessage('error', error.message || 'Er is iets misgegaan. Probeer het opnieuw.');
-
-            // On error, revert the button to its original state
             checkButton.classList.remove('loading');
             checkButton.disabled = false;
         });
     });
-
 });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.getElementById('gradient-card');
+        const root = document.documentElement;
+
+        // We will use HSL and an oscillating value to create a smooth,
+        // controlled color shift within a specific range.
+        let time = 0;
+        // Initialize the angle based on the CSS variable
+        let angle = 135;
+
+        // This function will be called on every animation frame.
+        function updateGradientColors() {
+            // Increment a time variable to drive the color animation
+            time += 0.01;
+
+            // --- Animate the gradient angle ---
+            // Slowly increment the angle, wrapping around at 360 degrees
+            angle = (angle + 0.15) % 360;
+
+            // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
+            const sinValue = Math.sin(time);
+
+            // Map the sine value to a warm, yellowish hue range.
+            // We'll oscillate between a peachy-orange (30) and a golden-yellow (60).
+            const baseHue = 45; // Midpoint (Golden Yellow)
+            const hueRange = 15;  // Oscillation range (45 +/- 15)
+            const dynamicHue = baseHue + sinValue * hueRange;
+
+            // Create a palette based on the oscillating hue and your theme colors
+            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+            const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
+            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+            const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
+
+            // Update the CSS variables on the root element
+            root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
+            root.style.setProperty('--color-1', color1);
+            root.style.setProperty('--color-2', color2);
+            root.style.setProperty('--color-3', color3);
+            root.style.setProperty('--color-4', color4);
+
+
+            // Request the next animation frame to create a smooth loop
+            requestAnimationFrame(updateGradientColors);
+        }
+
+        // Start the color animation loop
+        requestAnimationFrame(updateGradientColors);
+    });
 </script>
 {% endblock %}

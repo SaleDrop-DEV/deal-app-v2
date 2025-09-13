@@ -161,16 +161,56 @@ border: 1px solid #FF4D00;
 box-shadow: 0 0 0 3px #fee8e0;
 outline: none;
 }
+
+</style>
+
+<style>
+    :root {
+        --gradient-angle: 135deg;
+        /* A new, warm palette with yellowish tones */
+        --color-1: #ffd1bd; /* Your --color-accent-light */
+        --color-2: #fee8e0; /* Your --color-accent-lighter */
+        --color-3: #fff3b0; /* Soft Gold */
+        --color-4: #fff9de; /* Light Cream */
+    }
+
+    header{
+        background: linear-gradient(
+                var(--gradient-angle),
+                var(--color-1),
+                var(--color-2),
+                var(--color-3),
+                var(--color-4)
+            );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+        padding-bottom: 2.5rem !important;
+    }
+
+    header button:hover{
+        transform: scale(1.05);
+    }
+
+    @keyframes animate-gradient-position {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 100% 50%;
+        }
+    }
 </style>
 {% endblock %}
 
-{% block content %}
+{% block index_header %}
+<header>
+    <h1>Winkels beheren</h1>
+    <button id="updateSheetsBtn" class="action-btn">Sheets updaten</button>
+    <div id="updateSheetsLoader" style="display: none;" class="loader-spinner" aria-label="Loading..."></div>
+</header>
+{% endblock %}
 
-    <header>
-        <h1>Winkels beheren</h1>
-        <button id="updateSheetsBtn" class="action-btn">Sheets updaten</button>
-        <div id="updateSheetsLoader" style="display: none;" class="loader-spinner" aria-label="Loading..."></div>
-    </header>
+{% block content %}
 
     <div class="container">
 
@@ -311,6 +351,7 @@ outline: none;
                     <option value="notVerified">Niet geverifieerd</option>
                     <option value="mayUseContent">Mag content gebruiken</option>
                     <option value="mayNotUseContent">Mag geen content gebruiken</option>
+                    <option value="isWeirdDomain">Winkel mail heeft een raar domein</option>
                 </select>
             </div>
 
@@ -1269,5 +1310,57 @@ document.addEventListener("DOMContentLoaded", () => {
         return cookieValue;
     }
 
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.getElementById('gradient-card');
+        const root = document.documentElement;
+
+        // We will use HSL and an oscillating value to create a smooth,
+        // controlled color shift within a specific range.
+        let time = 0;
+        // Initialize the angle based on the CSS variable
+        let angle = 135;
+
+        // This function will be called on every animation frame.
+        function updateGradientColors() {
+            // Increment a time variable to drive the color animation
+            time += 0.01;
+
+            // --- Animate the gradient angle ---
+            // Slowly increment the angle, wrapping around at 360 degrees
+            angle = (angle + 0.15) % 360;
+
+            // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
+            const sinValue = Math.sin(time);
+
+            // Map the sine value to a warm, yellowish hue range.
+            // We'll oscillate between a peachy-orange (30) and a golden-yellow (60).
+            const baseHue = 45; // Midpoint (Golden Yellow)
+            const hueRange = 15;  // Oscillation range (45 +/- 15)
+            const dynamicHue = baseHue + sinValue * hueRange;
+
+            // Create a palette based on the oscillating hue and your theme colors
+            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+            const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
+            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+            const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
+
+            // Update the CSS variables on the root element
+            root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
+            root.style.setProperty('--color-1', color1);
+            root.style.setProperty('--color-2', color2);
+            root.style.setProperty('--color-3', color3);
+            root.style.setProperty('--color-4', color4);
+
+
+            // Request the next animation frame to create a smooth loop
+            requestAnimationFrame(updateGradientColors);
+        }
+
+        // Start the color animation loop
+        requestAnimationFrame(updateGradientColors);
+    });
 </script>
 {% endblock %}

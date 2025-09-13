@@ -347,7 +347,7 @@ def fetch_stores_for_admin(request):
                 search_name = data.get('search_name', None) # NEW: Get search term
 
                 # Option lists for validation
-                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', None]
+                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', 'isWeirdDomain', None]
                 options_order = ['dateIssued', 'dateIssuedReverse', 'name', 'subscriptions', 'subscriptionsReverse', None]
 
                 # Validate parameters
@@ -374,6 +374,8 @@ def fetch_stores_for_admin(request):
                     stores = stores.filter(mayUseContent=True)
                 elif sort_on == 'mayNotUseContent':
                     stores = stores.filter(mayUseContent=False)
+                elif sort_on == 'isWeirdDomain':
+                    stores = stores.filter(isWeirdDomain=True)
 
                 # ORDER
                 if order == 'subscriptions':

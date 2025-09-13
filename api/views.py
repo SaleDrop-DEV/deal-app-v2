@@ -322,11 +322,10 @@ def set_stores_in_sheets(request):
                     return JsonResponse({'error': 'Fout bij het uploaden naar Google Sheets.'}, status=500)
 
             except Exception as e:
-                # API_Errors_Site.objects.create(
-                #     task="Set stores in sheets",
-                #     error=str(e)
-                # )
-                print(str(e))
+                API_Errors_Site.objects.create(
+                    task="Set stores in sheets",
+                    error=str(e)
+                )
                 return JsonResponse({'error': 'Er is een interne serverfout opgetreden.'}, status=500)
         else:
             # Als het geen POST-verzoek is, geef een HTTP 405 Method Not Allowed terug
@@ -335,8 +334,29 @@ def set_stores_in_sheets(request):
         # Geen superuser, stuur een 403 Forbidden
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
+from deals.models import GmailMessage
+from django.utils import timezone
+
 @login_required
 def fetch_stores_for_admin(request):
+    def parse_date_received(date_received):
+        now = timezone.now()
+        delta = now - date_received
+
+        if delta.total_seconds() < 60:
+            seconds = int(delta.total_seconds())
+            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
+        elif delta.total_seconds() < 3600:
+            minutes = int(delta.total_seconds() / 60)
+            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
+        elif delta.total_seconds() < 86400:
+            hours = int(delta.total_seconds() / 3600)
+            return f"{hours} uur geleden"
+        else:
+            # Fallback for days or longer
+            days = int(delta.total_seconds() / 86400)
+            return f"{days} dag{'en' if days > 1 else ''} geleden"
+
     if request.user.is_superuser:
         try:
             if request.method == 'POST':
@@ -347,7 +367,7 @@ def fetch_stores_for_admin(request):
                 search_name = data.get('search_name', None) # NEW: Get search term
 
                 # Option lists for validation
-                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', 'isWeirdDomain', None]
+                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', 'isWeirdDomain', 'noEmailReceived', None]
                 options_order = ['dateIssued', 'dateIssuedReverse', 'name', 'subscriptions', 'subscriptionsReverse', None]
 
                 # Validate parameters
@@ -376,6 +396,8 @@ def fetch_stores_for_admin(request):
                     stores = stores.filter(mayUseContent=False)
                 elif sort_on == 'isWeirdDomain':
                     stores = stores.filter(isWeirdDomain=True)
+                elif sort_on == 'noEmailReceived':
+                    stores = stores.filter(gmailmessage__isnull=True)
 
                 # ORDER
                 if order == 'subscriptions':
@@ -401,6 +423,13 @@ def fetch_stores_for_admin(request):
                 
                 response = []
                 for store in page_obj:
+                    # get the parsed date of last email
+                    gmail_messages = GmailMessage.objects.filter(store=store).order_by('-received_date')
+                    last_received = "Er is nog geen mail ontvangen"
+                    if len(gmail_messages) > 1:
+                        latest_gmail = gmail_messages.first()
+                        last_received = parse_date_received(latest_gmail.received_date)
+                        last_received = f"Laatse mail: {last_received}"
                     response.append({
                         'id': store.id,
                         'name': store.name,
@@ -416,6 +445,7 @@ def fetch_stores_for_admin(request):
                         'image_url': store.image_url,
                         'subscriptions': store.subscriptions.count(), # Use .count() for efficiency
                         'is_weird_domain': store.isWeirdDomain,
+                        'last_received': last_received
                     })
 
                 return JsonResponse({
@@ -424,13 +454,17 @@ def fetch_stores_for_admin(request):
                     'hasNextPage': page_obj.has_next()
                 })
         except Exception as e:
-            print(str(e))
+            API_Errors_Site.objects.create(
+                task= "Fetch stores for admin",
+                error = str(e)
+            )
             return JsonResponse({'error': "Er ging iets mis."}, status=500)
 
     else:
         return JsonResponse({'error': 'Je hebt geen rechten om dit te doen.'}, status=403)
 
     return JsonResponse({'error': 'Invalid request method'})
+
 
 
 

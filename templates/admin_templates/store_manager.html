@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'js/store_manager.js' %}">
     {# Font Awesome CDN (make sure to use a recent version if you have one) #}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
     body.no-scroll {
         overflow: hidden;
@@ -199,6 +200,13 @@ outline: none;
             background-position: 100% 50%;
         }
     }
+
+
+.verified-badge {
+    width: 1em;   /* Scales with the parent font size */
+    height: 1em;
+    color: #3B82F6; /* A nice, standard 'verified' blue */
+}
 </style>
 {% endblock %}
 
@@ -352,6 +360,7 @@ outline: none;
                     <option value="mayUseContent">Mag content gebruiken</option>
                     <option value="mayNotUseContent">Mag geen content gebruiken</option>
                     <option value="isWeirdDomain">Winkel mail heeft een raar domein</option>
+                    <option value="noEmailReceived">Winkels zonder emails</option>
                 </select>
             </div>
 
@@ -1002,6 +1011,10 @@ let hasNextPage = true;
  */
 const createStoreCard = (store) => {
     const imageUrl = store.image_url || 'https://placehold.co/400x200/cccccc/333333?text=Geen+Banner';
+    const verifiedBadge = store.verified 
+        ? '<i class="fa-solid fa-certificate verified-badge"></i>'
+        : '';
+
     const domainLink = store.home_url && store.domain
         ? `<p class="domain-link"><a href="${store.home_url}" target="_blank" class="link">${store.domain}</a></p>`
         : '';
@@ -1028,12 +1041,13 @@ const createStoreCard = (store) => {
             data-isweirddomain="${isWeirdDomainValue}"
         >
             <div class="card-header">
-                ${store.name || 'Onbekende Winkel'}
+                ${store.name || 'Onbekende Winkel'} ${verifiedBadge}
             </div>
             <div class="card-body">
                 <img src="${imageUrl}" alt="Banner for ${store.name}" class="store-banner">
                 ${domainLink}
                 <p style="text-align: center;">${store.subscriptions} abonnees</p>
+                <p style="text-align: center;">${store.last_received}</p>
                 <button class="primary-btn" title="Winkel bewerken" style="margin: 0 auto; display: block;">
                     Bewerken
                 </button>

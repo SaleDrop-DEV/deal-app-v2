@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
+import os
 
 User = settings.AUTH_USER_MODEL 
 
@@ -56,4 +57,30 @@ class BusinessRequest(models.Model):
             'message': self.message,
             'date_sent': self.date_sent.strftime('%d %b %Y, %H:%M'),
             'date_sent_natural': naturaltime(self.date_sent)
+        }
+    
+
+class StaticContent(models.Model):
+    content_name = models.CharField(max_length=225, blank=False, null=False)
+    dimensions = models.CharField(max_length=225, blank=False, null=False)
+    image_url = models.CharField(max_length=255, blank=True, null=False)
+    date_modified = models.DateTimeField(auto_now_add=True, null=False)
+
+    def delete(self, *args, **kwargs):
+        if self.image_url:
+            # remove leading slash if present
+            relative_path = self.image_url.lstrip('/').replace('media/', '', 1)
+            old_image_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+            else:
+                print(f"File not found: {old_image_path}")
+        super().delete(*args, **kwargs)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content_name': self.content_name,
+            'image_url': self.image_url,
+            'date_modified': self.date_modified
         }

@@ -1,18 +1,25 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
+
 from collections import defaultdict, OrderedDict
+import json
+import os
+import uuid
 
 from deals.models import Store
-from .forms import BusinessRequestForm
-from .models import recommendation, Notification
+from .forms import BusinessRequestForm, StaticContentForm
+from .models import recommendation, Notification, StaticContent
 #import user model
 User = get_user_model()
 
-import json
+
+
+
 
 def index(request):
     notifications = Notification.objects.all()
@@ -102,3 +109,101 @@ def all_stores(request):
         'page': 'all_stores',
         'grouped_stores': grouped_stores
     })
+
+
+
+
+@login_required
+def static_content_manager(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = StaticContentForm(request.POST, request.FILES)
+            if form.is_valid():
+                content: StaticContent = form.save(commit=False)
+                if 'image_url' in request.FILES:
+                    image = request.FILES['image_url']
+                    ext = image.name.split('.')[-1].lower()
+                    allowed_extensions = ['jpg', 'jpeg', 'png', 'gif']
+
+                    if ext not in allowed_extensions:
+                        return JsonResponse({'error': 'Invalid extension: Only JPG, JPEG, PNG and GIF are allowed.'}, status=400)
+                    else:
+                        # Define the directory where images will be saved
+                        upload_dir = os.path.join(settings.MEDIA_ROOT, 'static_content')
+                        os.makedirs(upload_dir, exist_ok=True)
+
+                        filename = f"{uuid.uuid4()}.{ext}"
+                        full_path = os.path.join(upload_dir, filename)
+
+                        try:
+                            with open(full_path, 'wb+') as destination:
+                                for chunk in image.chunks():
+                                    destination.write(chunk)
+                            content.image_url = f"/media/static_content/{filename}"
+                        except IOError as e:
+                            return JsonResponse({'error': f'Error: {e}'}, status=405)
+                content.save()
+                return redirect('static_content_manager')
+        else:
+            static_content = StaticContent.objects.all()
+            form = StaticContentForm()
+        return render(request, 'admin_templates/static_content_manager.html', {'form': form, 'static_content': static_content, 'page': 'static-content-manager'})
+
+    else:
+        return redirect('account_view')
+
+
+@login_required
+def static_content_edit(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    if request.method == 'POST':
+        content_id = request.POST.get('content_id')
+        content = get_object_or_404(StaticContent, id=content_id)
+        
+        form = StaticContentForm(request.POST, request.FILES, instance=content)
+        if form.is_valid():
+            old_image_path = None
+            if 'image_url' in request.FILES:
+                old_image_path = content.image_url
+
+            edited_content = form.save(commit=False)
+
+            if 'image_url' in request.FILES:
+                image = request.FILES['image_url']
+                ext = image.name.split('.')[-1].lower()
+                allowed_extensions = ['jpg', 'jpeg', 'png', 'gif']
+
+                if ext not in allowed_extensions:
+                    return JsonResponse({'error': 'Invalid extension'}, status=400)
+
+                upload_dir = os.path.join(settings.MEDIA_ROOT, 'static_content')
+                os.makedirs(upload_dir, exist_ok=True)
+                filename = f"{uuid.uuid4()}.{ext}"
+                full_path = os.path.join(upload_dir, filename)
+
+                with open(full_path, 'wb+') as destination:
+                    for chunk in image.chunks():
+                        destination.write(chunk)
+                edited_content.image_url = f"/media/static_content/{filename}"
+
+                if old_image_path:
+                    # remove leading slash if present
+                    relative_path = old_image_path.lstrip('/').replace('media/', '', 1)
+                    absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+                    if os.path.exists(absolute_path):
+                        os.remove(absolute_path)
+
+            edited_content.save()
+            return redirect('static_content_manager')
+    return redirect('static_content_manager')
+
+@login_required
+def static_content_delete(request, content_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+    content = get_object_or_404(StaticContent, id=content_id)
+    content.delete()
+    return redirect('static_content_manager')
+

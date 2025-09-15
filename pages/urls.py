@@ -7,7 +7,11 @@ urlpatterns = [
     path('for-business/', views.for_business, name='for_business'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-of-service/', views.general_terms, name='general_terms'),
-    path('alle-winkels/', views.all_stores, name='all_stores')
+    path('alle-winkels/', views.all_stores, name='all_stores'),
+
+    path('admin/static-content/', views.static_content_manager, name='static_content_manager'),
+    path('admin/static-content/edit/', views.static_content_edit, name='static_content_edit'),
+    path('admin/static-content/delete/<int:content_id>/', views.static_content_delete, name='static_content_delete'),
     
 
 ]

@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Static Content Manager{% endblock %}
+
+{% block head %}
+<style>
+    /* --- Base Card & Form Styling (from signup.html) --- */
+    .form-section {
+        background-color: var(--color-white);
+        padding: 2.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    /* --- Floating Label Styling (from signup.html) --- */
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .floating-label input[type="text"] {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid var(--color-gray-medium);
+        border-radius: var(--border-radius-default);
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        background-color: var(--color-white);
+    }
+    .floating-label label {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        color: var(--secondary-text-color);
+        pointer-events: none;
+        transition: all 0.2s ease-out;
+    }
+    .floating-label input:focus + label,
+    .floating-label input:not(:placeholder-shown) + label {
+        top: -0.75rem;
+        left: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--color-accent);
+        background-color: var(--color-white);
+        padding: 0 0.25rem;
+    }
+    .floating-label input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+    }
+    /* Simple validation feedback */
+    .floating-label input.invalid { border-color: var(--color-error); }
+    .floating-label input.valid { border-color: var(--color-success); }
+
+
+    /* --- Button & Loader Styling (from signup.html) --- */
+    .btn-submit {
+        position: relative; /* Needed for spinner positioning */
+        display: block;
+        margin: 0 auto;
+        width: fit-content;
+        min-height: 44px; /* Ensure button height doesn't change */
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: 0.3s ease;
+        margin-top: 1rem;
+    }
+    .btn-submit:hover:not(:disabled) {
+        transform: scale(1.02);
+        cursor: pointer;
+    }
+    .btn-submit:disabled {
+        background-color: var(--color-accent-light);
+        cursor: not-allowed;
+    }
+    .btn-submit .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-text { visibility: hidden; }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+
+    /* --- NEW: Grid and Content Card Styling --- */
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+    .content-card {
+        background-color: var(--color-white);
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Ensures the image corners are rounded */
+    }
+    .content-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+    }
+    .content-card-body {
+        padding: 1.5rem;
+    }
+    .content-card-body h4 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+    .content-card-body p {
+        margin: 0.25rem 0;
+        color: var(--secondary-text-color);
+        font-size: 0.9rem;
+    }
+    .content-card-actions {
+        padding: 0 1.5rem 1.5rem;
+        margin-top: auto; /* Pushes actions to the bottom */
+        border-top: 1px solid var(--color-gray-light);
+        padding-top: 1.5rem;
+    }
+    .content-card-actions .form-group {
+        margin-bottom: 1rem; /* Tighter spacing for edit forms */
+    }
+    .content-card-actions .btn-submit { /* Smaller button for edit form */
+        font-size: 15px;
+        padding: 10px 20px;
+        min-height: 40px;
+    }
+    .btn-delete {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-top: 0.75rem;
+        padding: 8px;
+        background-color: transparent;
+        color: var(--color-error);
+        text-decoration: none;
+        border-radius: var(--border-radius-default);
+        transition: background-color 0.2s ease, color 0.2s ease;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    .btn-delete:hover {
+        background-color: var(--color-error-background);
+        color: var(--color-error);
+    }
+</style>
+{% endblock %}
+
+{% block index_header %}
+<header>
+    <h1>Static Content Manager</h1>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-section">
+        <h3 style="text-align: center; margin-bottom: 2rem;">Nieuwe content uploaden</h3>
+        <form id="add-content-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {# Manually render fields with floating labels #}
+            <div class="form-group floating-label">
+                {{ form.content_name }}
+                <label for="{{ form.content_name.id_for_label }}">Naam</label>
+            </div>
+            <div class="form-group floating-label">
+                {{ form.dimensions }}
+                <label for="{{ form.dimensions.id_for_label }}">Dimensies (bijvoorbeeld: 1200x400)</label>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.image_url.id_for_label }}">Foto</label>
+                {{ form.image_url }}
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <span class="btn-text" style="color: white;">Toevoegen</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+    </div>
+
+    <h3 style="text-align: center; margin-top: 3rem; margin-bottom: 1.5rem;">Content</h3>
+    <div class="content-grid">
+        {% for content in static_content %}
+        <div class="content-card">
+            <img src="{{ content.image_url }}" alt="{{ content.content_name }}">
+            <div class="content-card-body">
+                <h4>{{ content.content_name }}</h4>
+                <p>Dimensies: {{ content.dimensions }}</p>
+                <p>Aangepast op: {{ content.date_modified|date:"d M Y" }}</p>
+            </div>
+            <div class="content-card-actions">
+                <form class="edit-content-form" action="{% url 'static_content_edit' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="content_id" value="{{ content.id }}">
+                    <div class="form-group floating-label">
+                        <input type="text" name="content_name" value="{{ content.content_name }}" id="id_content_name_{{ content.id }}" required placeholder=" ">
+                        <label for="id_content_name_{{ content.id }}">Naam</label>
+                    </div>
+                    <div class="form-group floating-label">
+                        <input type="text" name="dimensions" value="{{ content.dimensions }}" id="id_dimensions_{{ content.id }}" required placeholder=" ">
+                        <label for="id_dimensions_{{ content.id }}">Dimensies</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_image_url_{{ content.id }}">Nieuwe foto (optioneel)</label>
+                        <input type="file" name="image_url" id="id_image_url_{{ content.id }}">
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <span class="btn-text">Opslaan</span>
+                        <span class="spinner"></span>
+                    </button>
+                </form>
+                <a href="{% url 'static_content_delete' content.id %}" class="btn-delete" onclick="return confirm('Weet je zeker dat je de content wil verwijderen?');">Verwijderen</a>
+            </div>
+        </div>
+        {% empty %}
+        <p>Nog geen content toegevoegd.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Select all forms that need styling and validation logic
+    const allForms = document.querySelectorAll('#add-content-form, .edit-content-form');
+
+    allForms.forEach(form => {
+        const textInputs = form.querySelectorAll('input[type="text"]');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        // --- 1. SETUP: Add placeholder for floating labels ---
+        textInputs.forEach(input => {
+            if (!input.placeholder) {
+                input.placeholder = ' '; // Required for the :not(:placeholder-shown) CSS selector
+            }
+        });
+
+        // --- 2. REAL-TIME VALIDATION LOGIC ---
+        const validateField = (input) => {
+            const isNotEmpty = input.value.trim() !== '';
+            
+            if (isNotEmpty) {
+                input.classList.add('valid');
+                input.classList.remove('invalid');
+            } else {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+            }
+            return isNotEmpty;
+        };
+
+        // --- 3. MASTER VALIDITY CHECK (for this specific form) ---
+        const checkFormValidity = () => {
+            let isFormValid = true;
+            form.querySelectorAll('input[required]').forEach(input => {
+                if (!validateField(input)) {
+                    isFormValid = false;
+                }
+            });
+
+            if (submitButton) {
+                submitButton.disabled = !isFormValid;
+            }
+        };
+
+        // --- 4. ATTACH EVENT LISTENERS ---
+        form.querySelectorAll('input[required]').forEach(input => {
+            input.addEventListener('input', checkFormValidity);
+        });
+
+        // --- 5. HANDLE FORM SUBMISSION LOADER ---
+        form.addEventListener('submit', function(event) {
+            // Re-validate before submission
+            checkFormValidity();
+            if (submitButton && submitButton.disabled) {
+                event.preventDefault(); // Stop submission if form is invalid
+                return;
+            }
+
+            if (submitButton) {
+                submitButton.classList.add('loading');
+                submitButton.disabled = true;
+            }
+        });
+
+        // --- Initial check for pre-filled forms (like the edit forms) ---
+        checkFormValidity();
+    });
+});
+</script>
+{% endblock %}

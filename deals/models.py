@@ -284,9 +284,9 @@ class ScrapeData(models.Model):
         }
     
 class Url(models.Model):
-    url_ctrk = models.URLField(unique=True, max_length=500)
-    redirected_url = models.URLField(max_length=500)
-    general_url = models.URLField(max_length=500)
+    url_ctrk = models.URLField(unique=True, max_length=2000)
+    redirected_url = models.URLField(max_length=2000)
+    general_url = models.URLField(max_length=2000)
     last_scraped = models.DateTimeField(null=True, blank=True)
 
     # NEW #

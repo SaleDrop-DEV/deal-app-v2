@@ -16,19 +16,8 @@ class BusinessRequestForm(forms.ModelForm):
 class StaticContentForm(forms.ModelForm):
     # Override image_url to use FileField (so you can upload an image)
     image_url = forms.ImageField(required=False)
+    required = forms.BooleanField(required=False)
 
     class Meta:
         model = StaticContent
-        fields = ['content_name', 'dimensions', 'image_url']
-
-    # def save(self, commit=True):
-    #     instance = super().save(commit=False)
-
-    #     # If a file was uploaded, update the image_url with the media path
-    #     uploaded_file = self.cleaned_data.get('image_url')
-    #     if uploaded_file:
-    #         instance.image_url = f"media/{uploaded_file.name}"
-
-    #     if commit:
-    #         instance.save()
-    #     return instance
+        fields = ['content_name', 'dimensions', 'image_url', 'required']

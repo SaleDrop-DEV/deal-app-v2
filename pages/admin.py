@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import recommendation, Notification, BusinessRequest
+from .models import recommendation, Notification, BusinessRequest, StaticContent
 
 
 # Create a ModelAdmin class to customize the admin interface
@@ -16,4 +16,5 @@ class RecommendationAdmin(admin.ModelAdmin):
 admin.site.register(recommendation, RecommendationAdmin)
 admin.site.register(Notification)
 admin.site.register(BusinessRequest)
+admin.site.register(StaticContent)
 

@@ -64,6 +64,7 @@ class StaticContent(models.Model):
     content_name = models.CharField(max_length=225, blank=False, null=False)
     dimensions = models.CharField(max_length=225, blank=False, null=False)
     image_url = models.CharField(max_length=255, blank=True, null=False)
+    required = models.BooleanField(default=False)
     date_modified = models.DateTimeField(auto_now_add=True, null=False)
 
     def delete(self, *args, **kwargs):

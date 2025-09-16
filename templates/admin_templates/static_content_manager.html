@@ -223,7 +223,6 @@
 {% block index_header %}
 <header>
     <h1>Static Content Manager</h1>
-    <p style="color: var(--color-error)">Namen Niet Aanpassen!!!</p>
 </header>
 {% endblock %}
 
@@ -246,6 +245,10 @@
             <div class="form-group">
                 <label for="{{ form.image_url.id_for_label }}">Foto</label>
                 {{ form.image_url }}
+            </div>
+            <div class="form-group">
+                {{ form.required }}
+                <label for="{{ form.required.id_for_label }}">Is vereist (kan niet gewijzigd worden)</label>
             </div>
 
             <button type="submit" class="btn-submit">
@@ -270,8 +273,13 @@
                     {% csrf_token %}
                     <input type="hidden" name="content_id" value="{{ content.id }}">
                     <div class="form-group floating-label">
-                        <input type="text" name="content_name" value="{{ content.content_name }}" id="id_content_name_{{ content.id }}" required placeholder=" ">
-                        <label for="id_content_name_{{ content.id }}">Naam</label>
+                        <input type="text" name="content_name" value="{{ content.content_name }}" id="id_content_name_{{ content.id }}" required placeholder=" " {% if content.required %}readonly style="background-color: #f3f4f6; cursor: not-allowed;"{% endif %}>
+                        <label for="id_content_name_{{ content.id }}">
+                            Naam 
+                            {% if content.required %}
+                                <span style="color: var(--color-error); font-size: 0.8rem;">(niet aanpasbaar)</span>
+                            {% endif %}
+                        </label>
                     </div>
                     <div class="form-group floating-label">
                         <input type="text" name="dimensions" value="{{ content.dimensions }}" id="id_dimensions_{{ content.id }}" required placeholder=" ">
@@ -286,7 +294,9 @@
                         <span class="spinner"></span>
                     </button>
                 </form>
-                <a href="{% url 'static_content_delete' content.id %}" class="btn-delete" onclick="return confirm('Weet je zeker dat je de content wil verwijderen?');">Verwijderen</a>
+                {% if not content.required %}
+                    <a href="{% url 'static_content_delete' content.id %}" class="btn-delete" onclick="return confirm('Weet je zeker dat je de content wil verwijderen?');">Verwijderen</a>
+                {% endif %}
             </div>
         </div>
         {% empty %}

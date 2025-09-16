@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-
+from django.utils import timezone
 
 from collections import defaultdict, OrderedDict
 import json
@@ -150,12 +150,12 @@ def static_content_manager(request):
                 return redirect('static_content_manager')
         else:
             static_content = StaticContent.objects.all()
+            [print(c.required) for c in static_content]
             form = StaticContentForm()
         return render(request, 'admin_templates/static_content_manager.html', {'form': form, 'static_content': static_content, 'page': 'static-content-manager'})
 
     else:
         return redirect('account_view')
-
 
 @login_required
 def static_content_edit(request):
@@ -165,6 +165,7 @@ def static_content_edit(request):
     if request.method == 'POST':
         content_id = request.POST.get('content_id')
         content = get_object_or_404(StaticContent, id=content_id)
+        required = content.required
         
         form = StaticContentForm(request.POST, request.FILES, instance=content)
         if form.is_valid():
@@ -172,9 +173,17 @@ def static_content_edit(request):
             if 'image_url' in request.FILES:
                 old_image_path = content.image_url
 
+            # Prevent changing the name if the content is required
+            if content.required and 'content_name' in request.POST and request.POST.get('content_name') != content.content_name:
+                # You might want to add a message here to inform the user
+                return redirect('static_content_manager')
+
             edited_content = form.save(commit=False)
+            edited_content.required = required
+            edited_content.date_modified = timezone.now()
 
             if 'image_url' in request.FILES:
+                print("Image is updated")
                 image = request.FILES['image_url']
                 ext = image.name.split('.')[-1].lower()
                 allowed_extensions = ['jpg', 'jpeg', 'png', 'gif']
@@ -195,6 +204,10 @@ def static_content_edit(request):
                 if old_image_path:
                     # remove leading slash if present
                     relative_path = old_image_path.lstrip('/').replace('media/', '', 1)
+                    # Handle absolute paths from the new image modal
+                    if 'saledrop.app' in relative_path:
+                        relative_path = relative_path.split('saledrop.app/media/', 1)[-1]
+
                     absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
                     if os.path.exists(absolute_path):
                         os.remove(absolute_path)
@@ -208,6 +221,12 @@ def static_content_delete(request, content_id):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'Forbidden'}, status=403)
     content = get_object_or_404(StaticContent, id=content_id)
+
+    # Prevent deletion if the content is marked as required
+    if content.required:
+        # You can add a Django message here to inform the admin
+        return redirect('static_content_manager')
+
     content.delete()
     return redirect('static_content_manager')
 

@@ -421,8 +421,6 @@ def all_deals_view(request, sales_per_page=9):
 
             data.append(obj)
 
-            data.append(deal)
-
         return JsonResponse({
             'deals': data,
             'has_next_page': page_obj.has_next(),

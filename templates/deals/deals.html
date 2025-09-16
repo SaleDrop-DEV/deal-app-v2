@@ -34,6 +34,34 @@
     }
 
 </style>
+
+<style>
+    .sales-item{
+        position: relative;
+    }
+    .probanility-badge{
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        padding: 0.4rem;
+        border-radius: 100px;
+    }
+
+    .high{
+        /* border: 2px solid var(--color-succes); */
+        color: var(--color-succes);
+        background-color: rgba(216, 252, 216, 0.65); /* 65% dekkend */
+    }
+    .low{
+        /* border: 2px solid var(--color-error); */
+        color: var(--color-error);
+        background-color: rgba(255, 203, 203, 0.65);
+    }
+
+    .active-loader{
+        display: block !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -47,18 +75,34 @@
             <div class="sales-item {% if deal.personal == True %}personal-sale{% endif %}">
                 <h3 class="sale-title">{{ deal.title }}</h3>
                 <p class="sale-grabber">{{ deal.grabber }}
-                    {% if request.user.is_staff %}
-                        {% if deal.is_new_deal_better %}
-                            <span class="new-badge">NIEUW</span>
-                        {% endif %}
+                {% if request.user.is_staff %}
+                    {% if deal.is_new_deal_better %}
+                        <span class="new-badge">NIEUW</span>
                     {% endif %}
+                {% endif %}
                 </p>
                 <p class="store-name accent-color">{{ deal.store.name }}</p>
+                {% if request.user.is_staff %}
+                    {% if deal.deal_probability %}
+                        <!-- <span class="deal-probability">
+                            Kans op sale: <span class="accent-color {{ deal.deal_probability }}">{{ deal.deal_probability }}</span>
+                        </span> -->
+                        <!-- <span class="probanility-badge {{ deal.deal_probability }}">{{ deal.deal_probability }}</span> -->
+                    {% endif %}
+                {% endif %}
                 <button class="primary-btn view-details-btn">Bekijk</button>
                 <p class="sale-date-received">{{ deal.parsed_date_received }}</p>
                 <script class="sale-data" type="application/json">
                     {{ deal.deal_json|safe }}
                 </script>
+                {% if request.user.is_staff %}
+                    {% if deal.deal_probability %}
+                        <!-- <span class="deal-probability">
+                            Kans op sale: <span class="accent-color {{ deal.deal_probability }}">{{ deal.deal_probability }}</span>
+                        </span> -->
+                        <span class="probanility-badge {{ deal.noDisplay }}">{{ deal.deal_probability }}</span>
+                    {% endif %}
+                {% endif %}
             </div>
         {% empty %}
         <p style="text-align: center;">Er zijn nog geen sales gevonden.</p>
@@ -118,9 +162,6 @@
             <button class="pagination-btn" disabled>Volgende</button>
         {% endif %}
     </div>
-
-
-
 
 
 
@@ -192,7 +233,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
 
-</script>
 {% endblock %}

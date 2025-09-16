@@ -140,7 +140,8 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
     # e.g., 'your_app/static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = Path('/var/www/deal_app_project/staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = Path('/var/www/media_uploads')

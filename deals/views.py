@@ -756,37 +756,35 @@ def edit_store_view(request, store_id):
 
 
 #Store views
+@login_required
 def stores_view(request):
-    if request.user.is_authenticated:
-        all_stores = Store.objects.all().order_by('name')
-        try:
-            subscription_obj = request.user.subscription_data
-            current_subscriptions = subscription_obj.stores
-        except SubscriptionData.DoesNotExist:
-            current_subscriptions = []
-        except Exception as e:
-            raise ValueError(f"Error fetching subscription data: {e}")
-        stores_with_subscription_status = []
-        extra_info = request.user.extrauserinformation
-        for store in all_stores:
-            is_subscribed = store.is_subscribed(request.user)
-            if is_subscribed:
-                stores_with_subscription_status.append({
-                    'id': store.id,
-                    'name': store.name,
-                    'domain': store.domain,
-                    'home_url': store.home_url,
-                    'sale_url': store.sale_url,
-                    'image_url': store.image_url if store.mayUseContent else get_store_logo(store.name),
-                    'is_subscribed': is_subscribed,
-                })
-        return render(request, 'deals/subscribed_stores.html', {
-            'stores': stores_with_subscription_status,
-            'page': 'subscribed_stores',
-            'gender': extra_info.gender
-        })
-    else:
-        return redirect('account_login')
+    all_stores = Store.objects.all().order_by('name')
+    try:
+        subscription_obj = request.user.subscription_data
+        current_subscriptions = subscription_obj.stores
+    except SubscriptionData.DoesNotExist:
+        current_subscriptions = []
+    except Exception as e:
+        raise ValueError(f"Error fetching subscription data: {e}")
+    stores_with_subscription_status = []
+    extra_info = request.user.extrauserinformation
+    for store in all_stores:
+        is_subscribed = store.is_subscribed(request.user)
+        if is_subscribed:
+            stores_with_subscription_status.append({
+                'id': store.id,
+                'name': store.name,
+                'domain': store.domain,
+                'home_url': store.home_url,
+                'sale_url': store.sale_url,
+                'image_url': store.image_url if store.mayUseContent else get_store_logo(store.name),
+                'is_subscribed': is_subscribed,
+            })
+    return render(request, 'deals/subscribed_stores.html', {
+        'stores': stores_with_subscription_status,
+        'page': 'subscribed_stores',
+        'gender': extra_info.gender
+    })
 
 @login_required
 def toggle_subscription(request):

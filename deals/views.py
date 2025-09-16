@@ -358,6 +358,12 @@ def all_deals_view(request, sales_per_page=9):
 
         data = []
         for analysis in page_obj:
+            if not deal.get('store'):
+                deal['store'] = {
+                    'name': 'Unmatched store',
+                    'image_url': get_store_logo(None),
+                    'mayUseContent': False, # Add default for safety
+                }
             deal = analysis.to_dict()
             obj = {
                 'title': deal['title'],
@@ -408,6 +414,12 @@ def all_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            if not deal.get('store'):
+                deal['store'] = {
+                    'name': 'Unmatched store',
+                    'image_url': get_store_logo(None),
+                    'mayUseContent': False, # Add default for safety
+                }
             obj = {
                 'title': deal['title'],
                 'grabber': deal['grabber'],
@@ -454,6 +466,12 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            if not deal.get('store'):
+                deal['store'] = {
+                    'name': 'Unmatched store',
+                    'image_url': get_store_logo(None),
+                    'mayUseContent': False, # Add default for safety
+                }
             obj = {
                 'title': deal['title'],
                 'grabber': deal['grabber'],
@@ -502,6 +520,12 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            if not deal.get('store'):
+                deal['store'] = {
+                    'name': 'Unmatched store',
+                    'image_url': get_store_logo(None),
+                    'mayUseContent': False, # Add default for safety
+                }
             obj = {
                 'title': deal['title'],
                 'grabber': deal['grabber'],

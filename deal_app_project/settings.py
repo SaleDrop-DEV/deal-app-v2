@@ -129,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-LOGIN_URL = '/log-in/'
+LOGIN_URL = '/accounts/log-in/'
 LANGUAGE_CODE = 'nl'
 TIME_ZONE = 'UTC'
 USE_I18N = True

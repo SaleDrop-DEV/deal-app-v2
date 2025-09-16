@@ -107,6 +107,111 @@ function displaySales(data) {
     });
 }
 
+function showProductDetails(dealData) {
+    // Populate content for all instances (overlay and modal)
+    productTitleElements.forEach(el => el.textContent = dealData.title || 'No Title');
+    productGrabberElements.forEach(el => el.textContent = dealData.grabber || 'No Grabber');
+    productDescriptionElements.forEach(el => el.textContent = dealData.description || 'No Description');
+    storeNameDetailElements.forEach(el => el.textContent = dealData.store ? dealData.store.name : 'Unknown Store');
+    productMainLinkElements.forEach(el => {
+        el.href = dealData.main_link || '#';
+        el.style.display = dealData.main_link ? 'inline-block' : 'none'; // Hide button if no link
+    });
+    storeLogoElements.forEach(el => {
+        el.src = dealData.store && dealData.store.image_url ? dealData.store.image_url : 'https://placehold.co/50x50/F5F5F7/86868B?text=Store';
+        el.alt = dealData.store && dealData.store.name ? `${dealData.store.name} Logo` : 'Store Logo';
+    });
+
+    // Populate highlighted products slider
+    highlightedProductsSliderElements.forEach(slider => {
+        slider.innerHTML = ''; // Clear previous products
+        if (dealData.highlighted_products && Array.isArray(dealData.highlighted_products) && dealData.highlighted_products.length > 0) {
+            dealData.highlighted_products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.classList.add('highlighted-product-item');
+                const old_price = product.old_price;
+                const new_price = product.new_price;
+                let price_p = ''
+                if (old_price && new_price) {
+                    price_p = `<p class="product-item-price">${product.new_price && product.new_price !== 'N/A' ? `€${parseFloat(product.new_price).toFixed(2)}` : (product.old_price && product.old_price !== 'N/A' ? `€${parseFloat(product.old_price).toFixed(2)}` : '')}</p>`
+                }
+
+                productDiv.innerHTML = `
+                    <img src="${product.product_image_url || 'https://placehold.co/100x100/F5F5F7/86868B?text=Product'}" alt="${product.title || 'Product'} Image">
+                    <p class="product-item-name">${product.title || 'Onbekend'}</p>
+                    ${price_p}
+                `;
+                slider.appendChild(productDiv);
+            });
+            document.getElementsByClassName('highlighted-products-section')[0].style.display = 'block';
+            document.getElementsByClassName('highlighted-products-section')[1].style.display = 'block';
+        } else {
+            document.getElementsByClassName('highlighted-products-section')[0].style.display = 'none';
+            document.getElementsByClassName('highlighted-products-section')[1].style.display = 'none';
+            slider.innerHTML = '<p class="no-products-message">Geen uitgelichte producten gevonden.</p>';
+        }
+    });
+
+    // Determine screen size and show appropriate view
+    if (window.matchMedia('(max-width: 767px)').matches) {
+        // Small screen: slide-up overlay
+        productOverlay.classList.add('show');
+        action_btn_for_small_screens.classList.remove('hide-action-btn')
+        action_btn_for_small_screens.classList.add('show-action-btn');
+        action_btn_for_small_screens.onclick = () => {
+            go_to_sale(dealData.main_link);
+        }
+        document.body.style.overflow = 'hidden'; // Prevent scrolling body
+        // Reset transform in case it was moved by a previous failed swipe
+        productContentWrapper.style.transform = 'translateY(0)';
+        productContentWrapper.style.transition = 'transform 0.3s ease-out'; // Ensure transition is active
+    } else {
+        // Large screen: modal pop-up
+        modalBackdrop.classList.add('show');
+        document.getElementById("action-btn-large-screens").onclick = () => {
+            go_to_sale(dealData.main_link);
+        }
+        // document.getElementById("action-btn-large-screens").style.top = top_offset - (60 - 32) + "px";
+        document.body.style.overflow = 'hidden'; // Prevent scrolling body
+        // Reset transform for modal as well
+        productModal.style.transform = 'scale(1)';
+        productModal.style.transition = 'transform 0.3s ease-out'; // Ensure transition is active
+    }
+}
+
+function addClickToDetailBtn(){
+    const viewDetailsButtons = document.querySelectorAll('.view-details-btn');
+    viewDetailsButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const salesItem = event.target.closest('.sales-item');
+            const scriptTag = salesItem.querySelector('.sale-data[type="application/json"]');
+
+            if (scriptTag) {
+                let dealData;
+                try {
+                    dealData = JSON.parse(scriptTag.textContent);
+
+                    // Ensure store data is directly available or handle its absence
+                    if (!dealData.store && dealData.gmail_data && dealData.gmail_data.domain) {
+                        dealData.store = {
+                            name: dealData.gmail_data.domain,
+                            image_url: `https://placehold.co/50x50/F5F5F7/86868B?text=${dealData.gmail_data.domain.charAt(0).toUpperCase()}`
+                        };
+                    }
+
+                    showProductDetails(dealData);
+                } catch (e) {
+                    console.error('Error parsing JSON data for sale item:', e);
+                    window.displayMessage('error', 'Kon de sale niet laden. Bekijk de console voor meer.');
+                }
+            } else {
+                console.warn('No JSON data found for this sale item.');
+                window.displayMessage('error', 'Geen gegevens gevonden.');
+            }
+        });
+    });
+}
+
 // 3. Call the function when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     let currentObserver = null; // To keep track of the active observer
@@ -175,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data_1 = await response.json();
                 displaySales(data_1);
+                addClickToDetailBtn();
                 container.setAttribute('data-currentPage', currentPage + 1);
                 container.setAttribute('data-hasNextPage', data_1.has_next_page ? 'True' : 'False');
                 if (!data_1.has_next_page){

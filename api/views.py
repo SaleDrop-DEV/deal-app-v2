@@ -337,6 +337,7 @@ def set_stores_in_sheets(request):
 from deals.models import GmailMessage
 from django.utils import timezone
 
+from django.conf import settings
 @login_required
 def fetch_stores_for_admin(request):
     def parse_date_received(date_received):
@@ -425,6 +426,7 @@ def fetch_stores_for_admin(request):
                 for store in page_obj:
                     # get the parsed date of last email
                     gmail_messages = GmailMessage.objects.filter(store=store).order_by('-received_date')
+                    sales = gmail_messages.filter(analysis__is_sale_mail=True, analysis__deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY)
                     last_received = "Er is nog geen mail ontvangen"
                     if len(gmail_messages) > 1:
                         latest_gmail = gmail_messages.first()
@@ -445,7 +447,8 @@ def fetch_stores_for_admin(request):
                         'image_url': store.image_url,
                         'subscriptions': store.subscriptions.count(), # Use .count() for efficiency
                         'is_weird_domain': store.isWeirdDomain,
-                        'last_received': last_received
+                        'last_received': last_received,
+                        'amount_sales': len(sales)
                     })
 
                 return JsonResponse({

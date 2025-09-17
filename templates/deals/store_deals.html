@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Deals for {{ store.name }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/theme_v2_deals.css' %}">
+<script src="{% static 'js/sale_cards_modal_logic.js' %}"></script>
+<script src="{% static 'js/load_more_sales.js' %}"></script>
+<style>
+
+    .product-overlay{
+        margin-bottom: calc(env(safe-area-inset-bottom));
+    }
+    #small-screen-action-btn{
+        top: 0 !important;
+        left: 0 !important;
+        position: relative !important;
+        transform: none !important;
+    }
+
+    .new-badge{
+        color: var(--color-accent);
+        font-size: 0.65rem !important;
+        padding: 0.15rem 0.4rem;
+        font-weight: bold;
+        background-color: var(--color-accent-light);
+        border-radius: 20px;
+    }
+    .sale-grabber {
+        display: flex;         /* Make the <p> a flex container */
+        align-items: center;   /* Vertically center all items inside it */
+        gap: 0.5rem;           /* Optional: Adds a nice space between the badge and other text */
+    }
+
+</style>
+
+<style>
+    .sales-item{
+        position: relative;
+    }
+    .probanility-badge{
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        padding: 0.4rem;
+        border-radius: 100px;
+    }
+
+    .high{
+        /* border: 2px solid var(--color-succes); */
+        color: var(--color-succes);
+        background-color: rgba(216, 252, 216, 0.65); /* 65% dekkend */
+    }
+    .low{
+        /* border: 2px solid var(--color-error); */
+        color: var(--color-error);
+        background-color: rgba(255, 203, 203, 0.65);
+    }
+
+    .active-loader{
+        display: block !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+    <header style="display: none;" data-slug="store/{{ store.id }}"></header>
+    <h1 style="margin: 1rem 0; text-align: center;">{{ title }}</h1>
+
+    <div id="sales-container" class="sales-container" data-hasNextPage="{{ page_obj.has_next }}" data-currentPage="{{ current_page }}">
+        {% for deal in deals %}
+            <div class="sales-item {% if deal.personal == True %}personal-sale{% endif %}">
+                <h3 class="sale-title">{{ deal.title }}</h3>
+                <p class="sale-grabber">{{ deal.grabber }}
+                {% if request.user.is_staff %}
+                    {% if deal.is_new_deal_better %}
+                        <span class="new-badge">NIEUW</span>
+                    {% endif %}
+                {% endif %}
+                </p>
+                <p class="store-name accent-color">{{ deal.store.name }}</p>
+                {% if request.user.is_staff %}
+                    {% if deal.deal_probability %}
+                        <!-- <span class="deal-probability">
+                            Kans op sale: <span class="accent-color {{ deal.deal_probability }}">{{ deal.deal_probability }}</span>
+                        </span> -->
+                        <!-- <span class="probanility-badge {{ deal.deal_probability }}">{{ deal.deal_probability }}</span> -->
+                    {% endif %}
+                {% endif %}
+                <button class="primary-btn view-details-btn">Bekijk</button>
+                <p class="sale-date-received">{{ deal.parsed_date_received }}</p>
+                <script class="sale-data" type="application/json">
+                    {{ deal.deal_json|safe }}
+                </script>
+                {% if request.user.is_staff %}
+                    {% if deal.deal_probability %}
+                        <!-- <span class="deal-probability">
+                            Kans op sale: <span class="accent-color {{ deal.deal_probability }}">{{ deal.deal_probability }}</span>
+                        </span> -->
+                        <span class="probanility-badge {{ deal.noDisplay }}">{{ deal.deal_probability }}</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% empty %}
+        <p style="text-align: center;">Er zijn nog geen sales gevonden voor deze winkel.</p>
+        {% endfor %}
+        {% if deals|length == 1 %}
+            {# invisible if only 1 card #}
+            <div class="sales-item" style="visibility: hidden;">
+                <h3 class="sale-title">{{ deals.0.title }}</h3>
+                <p class="sale-grabber">{{ deals.0.grabber }}</p>
+                <p class="store-name accent-color">{{ deals.0.store.name }}</p>
+                <button class="primary-btn view-details-btn">Bekijk</button>
+            </div>
+            <div class="sales-item" style="visibility: hidden;">
+                <h3 class="sale-title">{{ deals.0.title }}</h3>
+                <p class="sale-grabber">{{ deals.0.grabber }}</p>
+                <p class="store-name accent-color">{{ deals.0.store.name }}</p>
+                <button class="primary-btn view-details-btn">Bekijk</button>
+            </div>
+        {% endif %}
+        {% if deals|length == 2 %}
+            {# invisible if only two cards #}
+            <div class="sales-item" style="visibility: hidden;">
+                <h3 class="sale-title">{{ deals.0.title }}</h3>
+                <p class="sale-grabber">{{ deals.0.grabber }}</p>
+                <p class="store-name accent-color">{{ deals.0.store.name }}</p>
+                <button class="primary-btn view-details-btn">Bekijk</button>
+            </div>
+        {% endif %}
+    </div>
+
+
+    <div id="newSalesLoader" style="display: none;" class="loader-spinner" aria-label="Loading..."></div>
+    <div id="finalMessage" style="display: none;" class="final-message"></div>
+
+    <!-- Only include pagination for larger screens
+     Use automatic new loading for small screens (from 935px) -->
+    <div class="pagination-logic">
+        {% if page_obj.has_previous %}
+            <button class="pagination-btn"
+                    onclick="window.location='?page={{ page_obj.previous_page_number }}'">
+                Vorige
+            </button>
+        {% else %}
+            <button class="pagination-btn" disabled>Vorige</button>
+        {% endif %}
+
+        <span class="pagination-page-indicator">
+            Pagina {{ page_obj.number }} van {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <button class="pagination-btn"
+                    onclick="window.location='?page={{ page_obj.next_page_number }}'">
+                Volgende
+            </button>
+        {% else %}
+            <button class="pagination-btn" disabled>Volgende</button>
+        {% endif %}
+    </div>
+
+
+
+{% endblock %}
+
+
+{% block overlay_content %}
+    <!-- Product Overlay (for small screens) -->
+    <div class="product-overlay" id="productOverlay">
+        <div class="product-content-wrapper">
+            <span class="product-close-btn material-icons">&times;</span>
+            <div class="product-header">
+                <h2 class="product-title"></h2>
+                <div class="store-info">
+                    <img src="" alt="Store Logo" class="store-logo">
+                    <p class="store-name-detail"></p>
+                </div>
+                <p class="product-grabber"></p>
+            </div>
+            <div class="product-details">
+                <p class="product-description"></p>
+                <div class="highlighted-products-section">
+                    <h3>Uitgelichte producten</h3>
+                    <div class="highlighted-products-slider">
+                        <!-- Products will be injected here -->
+                    </div>
+                </div>
+                <div class="product-actions">
+                    <!-- <a href="#" class="primary-btn product-main-link" target="_blank">Go to Deal</a> -->
+                    <!-- <button id="small-screen-action-btn" class="action-btn">Naar sale</button> -->
+                </div>
+            </div>
+            <div style="position: relative;">
+                <button id="small-screen-action-btn" class="action-btn" onclick="">Naar sale</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pop_up_content %}
+    <!-- Pop-up (for large screens) -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="product-modal">
+            <span class="product-close-btn material-icons">&times;</span>
+            <div class="product-header">
+                <h2 class="product-title"></h2>
+                <div class="store-info">
+                    <img src="" alt="Store Logo" class="store-logo">
+                    <p class="store-name-detail"></p>
+                </div>
+                <p class="product-grabber"></p>
+            </div>
+            <div class="product-scroll-area">
+                <div class="product-details">
+                    <p class="product-description"></p>
+                    <div class="highlighted-products-section">
+                        <h3>Highlighted Products</h3>
+                        <div class="highlighted-products-slider">
+                            <!-- Products will be injected here -->
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                    </div>
+                </div>
+            </div>
+            <button id="action-btn-large-screens" class="action-btn action-btn-pop-up">Naar sale</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+</script>
+{% endblock %}

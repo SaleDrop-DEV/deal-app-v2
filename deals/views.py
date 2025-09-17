@@ -957,6 +957,99 @@ def send_simple_html_email(request, gender):
 
 
 
+#test phase, for admins only
+@login_required
+def store_sales_view(request, store_id, sales_per_page=9):
+    # --- Authorization ---
+    if not request.user.is_superuser:
+        return redirect('public_deals')
+
+    # --- Data Retrieval ---
+    # Get the store object or return a 404 Not Found error if it doesn't exist.
+    store = get_object_or_404(Store, pk=store_id)
+
+    # Correctly filter analyses for the specific store.
+    # The lookup `message__store` traverses the relationship from
+    # GmailSaleAnalysis -> GmailMessage -> Store.
+    analyses_query = GmailSaleAnalysis.objects.filter(
+        is_sale_mail=True,
+        message__store=store
+    ).order_by('-message__received_date')
+
+    # --- Pagination (Unified for GET and POST/AJAX) ---
+    # Determine the page number from the request type.
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            page_number = data.get('page', 1)
+        except (json.JSONDecodeError, AttributeError):
+            page_number = 1
+    else:  # GET request
+        page_number = request.GET.get('page', 1)
+
+    paginator = Paginator(analyses_query, sales_per_page)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except (PageNotAnInteger, ValueError):
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # For an AJAX request expecting more content, return an empty list.
+        if request.method == 'POST':
+            return JsonResponse({'deals': [], 'has_next_page': False})
+        # For a GET request, show the last page.
+        page_obj = paginator.page(paginator.num_pages)
+
+    # --- Data Preparation ---
+    # This logic is now shared for both GET and POST requests.
+    deals_data = []
+    for analysis in page_obj:
+        deal = analysis.to_dict()
+        # Fallback for an unmatched store (though unlikely with the corrected query).
+        if not deal.get('store'):
+            deal['store'] = {
+                'name': 'Unmatched Store',
+                'image_url': get_store_logo(None),
+                'mayUseContent': False,
+            }
+        
+        obj = {
+            'title': deal['title'],
+            'grabber': deal['grabber'],
+            'description': deal['description'],
+            'main_link': f"/deals/visit/{analysis.id}/{request.user.id}/",
+            'personal': analysis.is_personal_deal,
+            'store': deal['store'],
+            'parsed_date_received': parse_date_received(analysis.message.received_date),
+        }
+        # Add the JSON representation if the template relies on it.
+        obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
+        deals_data.append(obj)
+
+    # --- Response ---
+    # Return JSON for POST (assumed to be AJAX for infinite scroll).
+    if request.method == 'POST':
+        return JsonResponse({
+            'deals': deals_data,
+            'has_next_page': page_obj.has_next(),
+        })
+
+    # Return a full page render for GET requests.
+    context = {
+        'title': f"Deals from {store.name}",
+        'store': store,  # Pass the store object to use in the template.
+        'deals': deals_data,
+        'page': 'store-deals',
+        'url': f'store-deals/{store.id}',
+        'page_obj': page_obj,
+        'has_next_page': page_obj.has_next(),
+        'has_previous_page': page_obj.has_previous(),
+        'current_page': page_obj.number,
+        'total_pages': paginator.num_pages,
+    }
+    return render(request, 'deals/store_deals.html', context)
+
+
 
 
  

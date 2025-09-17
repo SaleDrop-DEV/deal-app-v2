@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 from django.utils import timezone
+from django.conf import settings
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -241,7 +242,7 @@ def IOS_API_fetch_my_feed(request):
             sales = list(deals_models.GmailSaleAnalysis.objects.filter(
                 is_sale_mail=True,
                 is_personal_deal=False,
-                deal_probability__gt=0.925,
+                deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
                 message__received_date__gte=three_weeks_ago,
                 message__store__isnull=False
             ).filter(
@@ -375,7 +376,7 @@ def IOS_API_fetch_my_sales(request):
             analyses = deals_models.GmailSaleAnalysis.objects.filter(
                 is_sale_mail=True,
                 is_personal_deal=False,
-                deal_probability__gt=0.925,
+                deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
                 message__received_date__gte=three_weeks_ago,
                 message__store__isnull=False
             ).filter(

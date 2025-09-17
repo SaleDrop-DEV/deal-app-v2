@@ -82,7 +82,7 @@ def public_deals_view(request, sales_per_page=9):
     base_filters = Q(
         is_sale_mail=True,
         is_personal_deal=False,
-        deal_probability__gt=0.925,
+        deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
         message__received_date__gt=three_weeks_ago,
         message__store__isnull=False  # This is the key change to ensure stores exist
     )
@@ -214,7 +214,7 @@ def client_deals_view(request, sales_per_page=9):
     base_filters = Q(
         is_sale_mail=True,
         is_personal_deal=False,
-        deal_probability__gt=0.925,
+        deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
         message__received_date__gt=three_weeks_ago,
         message__store__isnull=False,  # Ensure store exists
         message__store__in=subscribed_stores # Ensure store is in the user's subscriptions

@@ -238,7 +238,7 @@ def scrape_and_save_url(url: str):
             execution_date=timezone.now()
         )
 
-def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=0.925):
+def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=settings.THRESHOLD_DEAL_PROBABILITY):
     """
     This function sends push notifications to users who have subscribed to the store,
     respecting the store's gender preference settings.
@@ -427,7 +427,7 @@ def analyze_gmail_messages(max_analyses=10):
             for old_message in gmailMessages:
                 if old_message.analysis:
                     if hasattr(old_message, 'analysis') and old_message.analysis.is_sale_mail:
-                        if not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > 0.925:
+                        if not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > settings.THRESHOLD_DEAL_PROBABILITY:
                             prompt_part = f"Titel: {old_message.analysis.title}\n"
                             prompt_part += f"Grabber: {old_message.analysis.grabber}\n"
                             prompts.append(prompt_part)

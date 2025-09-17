@@ -276,3 +276,7 @@ LOGGING = {
         },
     },
 }
+
+
+# VARIABLES #
+THRESHOLD_DEAL_PROBABILITY = 0.925

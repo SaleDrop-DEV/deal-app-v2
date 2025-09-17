@@ -16,4 +16,6 @@ urlpatterns = [
     path('stores-subscriptions/', views.stores_view, name='stores'),
     path('toggle-subscription/', views.toggle_subscription, name='toggle_subscription'),
 
+    path('store/<int:store_id>/', views.store_sales_view, name='store_sales'),
+
 ]

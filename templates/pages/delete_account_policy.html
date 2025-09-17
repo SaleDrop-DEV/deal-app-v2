@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Verwijderen{% endblock %}
+
+{% block head %}
+<meta name="description" content="Instructies voor het verwijderen van je SaleDrop-account. Leer hoe je je gegevens permanent kunt verwijderen via de app.">
+<link rel="canonical" href="https://www.saledrop.app/delete-account-policy/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Account Verwijderen - SaleDrop">
+<meta property="og:description" content="Stapsgewijze instructies voor het permanent verwijderen van je SaleDrop-account en gegevens.">
+<meta property="og:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+<meta property="og:url" content="https://www.saledrop.app/delete-account-policy/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Account Verwijderen - SaleDrop">
+<meta name="twitter:description" content="Instructies voor het verwijderen van je SaleDrop-account en bijbehorende gegevens.">
+<meta name="twitter:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Hoe verwijder je je SaleDrop-account?",
+  "description": "Volg deze stappen om je SaleDrop-account en al je persoonlijke gegevens permanent te verwijderen via de mobiele app.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "name": "Open de SaleDrop App",
+      "text": "Start de SaleDrop-app op je mobiele apparaat."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Ga naar je Account",
+      "text": "Navigeer naar het 'Account' tabblad in de app."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Vind de Verwijderknop",
+      "text": "Scrol naar de onderkant van de accountpagina. Daar vind je een knop met de tekst 'Account Verwijderen'."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Bevestig de Verwijdering",
+      "text": "Tik op de knop en volg de instructies om de verwijdering van je account definitief te bevestigen."
+    }
+  ],
+   "publisher": {
+    "@type": "Organization",
+    "name": "SaleDrop",
+    "url": "https://www.saledrop.app/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png"
+    }
+  }
+}
+</script>
+
+    <style>
+        .content-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 1.5rem;
+        }
+        .content-container h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary-text-color);
+        }
+        .content-container h3 {
+            font-size: 1.5rem;
+            font-weight: 550;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-text-color);
+        }
+        .content-container p, .content-container li {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--secondary-text-color);
+        }
+        .content-container strong {
+            font-weight: 600;
+            color: var(--primary-text-color);
+        }
+        .content-container ol {
+            list-style-type: decimal;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .content-container {
+                margin: 20px auto;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1>Account Verwijderen</h1>
+        <p>We vinden het jammer je te zien gaan. Als je zeker weet dat je je SaleDrop-account wilt verwijderen, kun je dit eenvoudig doen via de app. Houd er rekening mee dat het verwijderen van je account een <strong>permanente actie</strong> is. Al je gegevens, inclusief je accountinformatie en winkelabonnementen, worden definitief verwijderd en kunnen niet worden hersteld.</p>
+
+        <h3>Hoe verwijder je je account?</h3>
+        <p>Volg de onderstaande stappen om je account te verwijderen:</p>
+        <ol>
+            <li>Open de SaleDrop-app op je mobiele apparaat.</li>
+            <li>Navigeer naar het <strong>'Account'</strong> tabblad.</li>
+            <li>Scrol naar de onderkant van de pagina.</li>
+            <li>Tik op de knop <strong>'Account Verwijderen'</strong>.</li>
+            <li>Volg de instructies op het scherm om de verwijdering te bevestigen.</li>
+        </ol>
+
+        <h3>Vragen?</h3>
+        <p>Als je problemen ondervindt of vragen hebt over het verwijderen van je account, neem dan contact met ons op via: <strong>{{ email }}</strong></p>
+    </div>
+{% endblock %}

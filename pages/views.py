@@ -53,6 +53,12 @@ def contact(request):
         'instagram': settings.INSTA_URL
     })
 
+def delete_account_policy(request):
+    return render(request, 'pages/delete_account_policy.html', {
+        'page': 'delete_account_policy',
+        'email': settings.EMAIL_HOST_USER
+    })
+
 @csrf_exempt
 def for_business(request):
     """

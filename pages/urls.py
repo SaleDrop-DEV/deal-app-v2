@@ -8,6 +8,7 @@ urlpatterns = [
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-of-service/', views.general_terms, name='general_terms'),
     path('alle-winkels/', views.all_stores, name='all_stores'),
+    path('delete-account-policy/', views.delete_account_policy, name='delete_account_policy'),
 
     path('admin/static-content/', views.static_content_manager, name='static_content_manager'),
     path('admin/static-content/edit/', views.static_content_edit, name='static_content_edit'),

@@ -426,7 +426,7 @@ def fetch_stores_for_admin(request):
                 for store in page_obj:
                     # get the parsed date of last email
                     gmail_messages = GmailMessage.objects.filter(store=store).order_by('-received_date')
-                    sales = gmail_messages.filter(analysis__is_sale_mail=True, analysis__deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY)
+                    sales = gmail_messages.filter(analysis__is_sale_mail=True)
                     last_received = "Er is nog geen mail ontvangen"
                     if len(gmail_messages) > 1:
                         latest_gmail = gmail_messages.first()

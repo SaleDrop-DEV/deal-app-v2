@@ -138,8 +138,11 @@ def public_deals_view(request, sales_per_page=9):
                 },
                 'date_received': deal['gmail_data']['received_date'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
-                'is_new_deal_better': analysis.is_new_deal_better,
             }
+            if request.user.is_superuser:
+                data_deal['deal_probability'] = analysis.deal_probability
+                data_deal['is_new_deal_better'] = analysis.is_new_deal_better
+                data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)
 
@@ -189,8 +192,11 @@ def public_deals_view(request, sales_per_page=9):
                 },
                 'date_received': deal['gmail_data']['received_date'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
-                'is_new_deal_better': analysis.is_new_deal_better,
             }
+            if request.user.is_superuser:
+                data_deal['deal_probability'] = analysis.deal_probability
+                data_deal['is_new_deal_better'] = analysis.is_new_deal_better
+                data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)
 
@@ -270,8 +276,11 @@ def client_deals_view(request, sales_per_page=9):
                     },
                     'date_received': deal['gmail_data']['received_date'],
                     'parsed_date_received': parse_date_received(analysis.message.received_date),
-                    'is_new_deal_better': analysis.is_new_deal_better,
                 }
+                if request.user.is_superuser:
+                    data_deal['deal_probability'] = analysis.deal_probability
+                    data_deal['is_new_deal_better'] = analysis.is_new_deal_better
+                    data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
                 data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
                 data.append(data_deal)
             except:
@@ -310,10 +319,14 @@ def client_deals_view(request, sales_per_page=9):
         deals_data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            s = "Er is een nieuwe deal beschikbaar!"
+            d = "Bekijk jouw nieuwe deal door op de knop te klikken."
             data_deal = {
+                'messageId': analysis.message.id,
                 'title': deal['title'],
-                'grabber': deal['grabber'],
-                'description': deal['description'],
+                'grabber': deal['grabber'] if deal['grabber'] != "N/A" else s,
+                'description': deal['description'] if deal['description'] != "N/A" else d,
+                'store': deal['store'],
                 'main_link': f"/deals/visit/{analysis.id}/{request.user.id}/",
                 'highlighted_products': None,#deal['highlighted_products'] if deal['store']['mayUseContent'] else None,
                 'store': {
@@ -323,6 +336,10 @@ def client_deals_view(request, sales_per_page=9):
                 'date_received': deal['gmail_data']['received_date'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
             }
+            if request.user.is_superuser:
+                data_deal['deal_probability'] = analysis.deal_probability
+                data_deal['is_new_deal_better'] = analysis.is_new_deal_better
+                data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             deals_data.append(data_deal)
 
@@ -374,6 +391,10 @@ def all_deals_view(request, sales_per_page=9):
                 'store': deal['store'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
             }
+            if request.user.is_superuser:
+                obj['deal_probability'] = analysis.deal_probability
+                obj['is_new_deal_better'] = analysis.is_new_deal_better
+                obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
 
             data.append(obj)
@@ -429,6 +450,10 @@ def all_deals_view(request, sales_per_page=9):
                 'store': deal['store'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
             }
+            if request.user.is_superuser:
+                obj['deal_probability'] = analysis.deal_probability
+                obj['is_new_deal_better'] = analysis.is_new_deal_better
+                obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
 
             data.append(obj)
@@ -466,12 +491,14 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
+            # Ensure deal.store is never null to prevent JS errors
             if not deal.get('store'):
                 deal['store'] = {
                     'name': 'Unmatched store',
                     'image_url': get_store_logo(None),
                     'mayUseContent': False, # Add default for safety
                 }
+
             obj = {
                 'title': deal['title'],
                 'grabber': deal['grabber'],
@@ -481,6 +508,10 @@ def personal_deals_view(request, sales_per_page=9):
                 'store': deal['store'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
             }
+            if request.user.is_superuser:
+                obj['deal_probability'] = analysis.deal_probability
+                obj['is_new_deal_better'] = analysis.is_new_deal_better
+                obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
             data.append(obj)
 
@@ -520,11 +551,11 @@ def personal_deals_view(request, sales_per_page=9):
         data = []
         for analysis in page_obj:
             deal = analysis.to_dict()
-            if not deal.get('store'):
+            store = deal['store']
+            if not store:
                 deal['store'] = {
                     'name': 'Unmatched store',
                     'image_url': get_store_logo(None),
-                    'mayUseContent': False, # Add default for safety
                 }
             obj = {
                 'title': deal['title'],
@@ -535,6 +566,10 @@ def personal_deals_view(request, sales_per_page=9):
                 'store': deal['store'],
                 'parsed_date_received': parse_date_received(analysis.message.received_date),
             }
+            if request.user.is_superuser:
+                obj['deal_probability'] = analysis.deal_probability
+                obj['is_new_deal_better'] = analysis.is_new_deal_better
+                obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
             data.append(obj)
 

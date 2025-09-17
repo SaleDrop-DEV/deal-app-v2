@@ -85,6 +85,22 @@ function displaySales(data) {
         const personal = deal.personal;
         const json_data = JSON.stringify(deal.deal_json); // Ensure json_data is a proper JSON string
 
+        // Conditional elements for deals.html-like cards
+        let newBadgeHtml = '';
+        // The template checks for request.user.is_staff, but for dynamically loaded content,
+        // we assume if the backend sends is_new_deal_better, it should be displayed.
+        if (deal.is_new_deal_better) {
+            newBadgeHtml = '<span class="new-badge">NIEUW</span>';
+        } else{
+            console.log(deal.noDisplay)
+        }
+        console.log(newBadgeHtml)
+
+        let probabilityBadgeHtml = '';
+        if (deal.deal_probability && deal.noDisplay) {
+            probabilityBadgeHtml = `<span class="probanility-badge ${deal.noDisplay}">${deal.deal_probability}</span>`;
+        }
+
         // Create a new div element to hold the card content
         const cardDiv = document.createElement('div');
         cardDiv.classList.add('sales-item'); // Add the class to the div
@@ -95,14 +111,16 @@ function displaySales(data) {
         // Use innerHTML to set the content of the card
         cardDiv.innerHTML = `
             <h3 class="sale-title">${title}</h3>
-            <p class="sale-grabber">${grabber}</p>
+            <p class="sale-grabber">${grabber}
+                ${newBadgeHtml}
+            </p>
             <p class="store-name accent-color">${storeName}</p>
             <button class="primary-btn view-details-btn">Bekijk</button>
             <p class="sale-date-received">${dateParsed}</p>
             <script class="sale-data" type="application/json">
                 ${json_data}
-            </script>`;
-
+            </script>
+            ${probabilityBadgeHtml}`;
         salesContainer.appendChild(cardDiv);
     });
 }

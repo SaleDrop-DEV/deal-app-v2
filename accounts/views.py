@@ -328,7 +328,9 @@ def admin_dashboard(request):
         return [data.to_dict() for data in recommendation.objects.filter(handled=False).order_by('date_sent').all()]
 
     def get_six_latest_business_requests():
-        return [data.to_dict() for data in BusinessRequest.objects.order_by('-date_sent').all()[:6]]
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        recent_requests = BusinessRequest.objects.filter(date_sent__gte=seven_days_ago).order_by('-date_sent').all()[:6]
+        return [data.to_dict() for data in recent_requests]
 
     if request.user.is_staff:
         gsc_data = get_google_search_console_data()
@@ -350,6 +352,3 @@ def admin_dashboard(request):
         return render(request, 'admin_templates/dashboard.html', context)
     else:
         return redirect('account_view')
-
-
-

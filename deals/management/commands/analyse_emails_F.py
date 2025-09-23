@@ -54,7 +54,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
         f"Negeer welkomsmails en algemene reclame. "
         f"Extraheer de volgende velden nauwkeurig:\n\n"
         f"- is_sale_mail: true/false\n"
-        f"- is_personal_deal: true/false\n"
+        f"- is_personal_deal: true/false een persoonlijke sale is ook wanneer er een rare code in staat die niet universeel is.\n"
         f"- title: string (Een **zeer korte titel** van maximaal 7 woorden, bijv. 'SALE MANGO' of 'Nieuwe collectie'. Gebruik geen kortingspercentages hier.)\n"
         f"- grabber: string (Een **korte, pakkende kortingszin**, zoals '-70% korting' of 'Tot 50% korting'. Dit is de belangrijkste promotiezin.)\n"
         f"- description: string (Een **neutrale, redactionele beschrijving** van de aanbieding. Dit mag langere details bevatten. \
@@ -318,7 +318,7 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
                 .values_list('extrauserinformation__expoToken', flat=True)
             )
 
-            if expo_tokens:
+            if expo_tokens and analysis.is_new_deal_better:
                 title = f"{store.name}: {analysis.title}"
                 grabber = analysis.grabber if analysis.grabber != 'N/A' else "Nieuwe deal beschikbaar!"
                 body = grabber

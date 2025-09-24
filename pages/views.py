@@ -20,17 +20,19 @@ User = get_user_model()
 
 
 
-
 def index(request):
     notifications = Notification.objects.all()
     notifications = [n.to_dict() for n in notifications]
     search_stores_image = StaticContent.objects.get(content_name="Home: Zoek je favoriete winkels")
     example_sale_image = StaticContent.objects.get(content_name="Home: Voorbeeld sale")
+    appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+
     return render(request, 'pages/index.html', {
         'page': 'index',
         'notifications': json.dumps(notifications),
         'search_stores_image': search_stores_image.to_dict(),
         'example_sale_image': example_sale_image.to_dict(),
+        'appStoreImage': appStoreImage.to_dict(),
     })
 
 

@@ -20,6 +20,7 @@ import json
 import tldextract
 import time
 from datetime import timedelta
+from slugify import slugify
 
 
 from api.models import API_Errors_Site
@@ -752,7 +753,7 @@ def stores_manager_view(request):
 
                 new_domain_list = [d.lower() for d in list(domain_set)]
                 store.domain_list = new_domain_list
-
+                store.slug = slugify(store.name)
                 store.save()
                 return JsonResponse({'success': True, 'message' : 'Winkel toegevoegd!'})
             else:
@@ -845,7 +846,7 @@ def edit_store_view(request, store_id):
                             os.remove(old_absolute_path)
                         except OSError as e:
                             print(f"Error deleting old image file {old_absolute_path}: {e}")
-
+            store.slug = slugify(store.name)
             store.save()
             return JsonResponse({'success': True, 'message': 'Winkel succesvol bijgewerkt!'})
         else:

@@ -368,8 +368,8 @@ def fetch_stores_for_admin(request):
                 search_name = data.get('search_name', None) # NEW: Get search term
 
                 # Option lists for validation
-                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', 'isWeirdDomain', 'noEmailReceived', None]
-                options_order = ['dateIssued', 'dateIssuedReverse', 'name', 'subscriptions', 'subscriptionsReverse', None]
+                options_sort = ['verified', 'notVerified', 'mayUseContent', 'mayNotUseContent', 'isWeirdDomain', 'noEmailReceived', None, '']
+                options_order = ['dateIssued', 'dateIssuedReverse', 'name', 'subscriptions', 'subscriptionsReverse', 'mostSales', 'mostSalesReverse', None, '']
 
                 # Validate parameters
                 if sort_on not in options_sort:
@@ -413,8 +413,19 @@ def fetch_stores_for_admin(request):
                     stores = stores.order_by('-dateIssued')
                 elif order == 'dateIssuedReverse':
                     stores = stores.order_by('dateIssued')
+                elif order == 'mostSales':
+                    stores = stores.annotate(sale_count=Count(
+                        'gmailmessage__analysis', 
+                        filter=Q(gmailmessage__analysis__is_sale_mail=True)
+                    )).order_by('-sale_count')
+                elif order == 'mostSalesReverse':
+                    stores = stores.annotate(sale_count=Count(
+                        'gmailmessage__analysis', 
+                        filter=Q(gmailmessage__analysis__is_sale_mail=True)
+                    )).order_by('sale_count')
                 else: # Default order by name if no other order is specified
                      stores = stores.order_by('name')
+
 
 
                 totalFound = stores.count()

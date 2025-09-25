@@ -143,6 +143,14 @@ def public_deals_view(request, sales_per_page=9):
                 data_deal['deal_probability'] = analysis.deal_probability
                 data_deal['is_new_deal_better'] = analysis.is_new_deal_better
                 data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                data_deal['gender'] = gender
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)
 
@@ -197,6 +205,14 @@ def public_deals_view(request, sales_per_page=9):
                 data_deal['deal_probability'] = analysis.deal_probability
                 data_deal['is_new_deal_better'] = analysis.is_new_deal_better
                 data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                data_deal['gender'] = gender
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             data.append(data_deal)
 
@@ -281,6 +297,14 @@ def client_deals_view(request, sales_per_page=9):
                     data_deal['deal_probability'] = analysis.deal_probability
                     data_deal['is_new_deal_better'] = analysis.is_new_deal_better
                     data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                    email_to = analysis.message.email_to
+                    gender =  'B'
+                    if analysis.message.store.genderPreferenceSet:
+                        if email_to == "gijsgprojects@gmail.com":
+                            gender = 'M'
+                        elif email_to == "donnapatrona79@gmail.com":
+                            gender = 'F'
+                    data_deal['gender'] = gender
                 data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
                 data.append(data_deal)
             except:
@@ -340,6 +364,14 @@ def client_deals_view(request, sales_per_page=9):
                 data_deal['deal_probability'] = analysis.deal_probability
                 data_deal['is_new_deal_better'] = analysis.is_new_deal_better
                 data_deal['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                data_deal['gender'] = gender
             data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
             deals_data.append(data_deal)
 
@@ -395,6 +427,14 @@ def all_deals_view(request, sales_per_page=9):
                 obj['deal_probability'] = analysis.deal_probability
                 obj['is_new_deal_better'] = analysis.is_new_deal_better
                 obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                obj['gender'] = gender
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
 
             data.append(obj)
@@ -454,6 +494,14 @@ def all_deals_view(request, sales_per_page=9):
                 obj['deal_probability'] = analysis.deal_probability
                 obj['is_new_deal_better'] = analysis.is_new_deal_better
                 obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                obj['gender'] = gender
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
 
             data.append(obj)
@@ -512,6 +560,14 @@ def personal_deals_view(request, sales_per_page=9):
                 obj['deal_probability'] = analysis.deal_probability
                 obj['is_new_deal_better'] = analysis.is_new_deal_better
                 obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                obj['gender'] = gender
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
             data.append(obj)
 
@@ -570,6 +626,14 @@ def personal_deals_view(request, sales_per_page=9):
                 obj['deal_probability'] = analysis.deal_probability
                 obj['is_new_deal_better'] = analysis.is_new_deal_better
                 obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+                email_to = analysis.message.email_to
+                gender =  'B'
+                if analysis.message.store.genderPreferenceSet:
+                    if email_to == "gijsgprojects@gmail.com":
+                        gender = 'M'
+                    elif email_to == "donnapatrona79@gmail.com":
+                        gender = 'F'
+                obj['gender'] = gender
             obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
             data.append(obj)
 
@@ -1057,6 +1121,17 @@ def store_sales_view(request, store_id, sales_per_page=9):
             'store': deal['store'],
             'parsed_date_received': parse_date_received(analysis.message.received_date),
         }
+        obj['deal_probability'] = analysis.deal_probability
+        obj['is_new_deal_better'] = analysis.is_new_deal_better
+        obj['noDisplay'] = 'high' if analysis.deal_probability >= settings.THRESHOLD_DEAL_PROBABILITY else 'low'
+        email_to = analysis.message.email_to
+        gender =  'B'
+        if analysis.message.store.genderPreferenceSet:
+            if email_to == "gijsgprojects@gmail.com":
+                gender = 'M'
+            elif email_to == "donnapatrona79@gmail.com":
+                gender = 'F'
+        obj['gender'] = gender
         # Add the JSON representation if the template relies on it.
         obj['deal_json'] = json.dumps(obj, cls=DjangoJSONEncoder)
         deals_data.append(obj)

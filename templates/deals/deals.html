@@ -62,6 +62,7 @@
         display: block !important;
     }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endblock %}
 
 {% block content %}
@@ -81,15 +82,19 @@
                     {% endif %}
                 {% endif %}
                 </p>
-                <p class="store-name accent-color">{{ deal.store.name }}</p>
-                {% if request.user.is_staff %}
-                    {% if deal.deal_probability %}
-                        <!-- <span class="deal-probability">
-                            Kans op sale: <span class="accent-color {{ deal.deal_probability }}">{{ deal.deal_probability }}</span>
-                        </span> -->
-                        <!-- <span class="probanility-badge {{ deal.deal_probability }}">{{ deal.deal_probability }}</span> -->
+                <p class="store-name accent-color">{{ deal.store.name }}
+                    {% if request.user.is_staff %}
+                        {% if deal.gender %}
+                            {% if deal.gender == 'B' %}
+                                <i style="color: #FFF430;" class="gender-icon fa-solid fa-mars-and-venus"></i>
+                            {% elif deal.gender == 'F' %}
+                                <i style="color: #ff69B4;" class="gender-icon fa-solid fa-mars"></i>
+                            {% elif deal.gender == 'M' %}
+                                <i style="color: #6CA0DC;" class="gender-icon fa-solid fa-venus"></i>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
-                {% endif %}
+                </p>
                 <button class="primary-btn view-details-btn">Bekijk</button>
                 <p class="sale-date-received">{{ deal.parsed_date_received }}</p>
                 <script class="sale-data" type="application/json">

@@ -150,6 +150,15 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
     if not parts:
         return {'success': False, 'error': "Gemini analysis returned no 'parts' in the content."}
 
+    # Helper function to decode Unicode escape sequences
+    def decode_unicode_escapes(text):
+        if isinstance(text, str):
+            # Encode to bytes using 'latin-1' to preserve the original byte values,
+            # then decode using 'unicode-escape' to correctly interpret sequences like \u20ac.
+            return text.encode('latin-1').decode('unicode-escape')
+        return text
+
+
     json_text = parts[0].get('text', '{}')
     parsed = json.loads(json_text)
     data = {
@@ -157,7 +166,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
         "is_personal_deal": parsed.get("is_personal_deal", False),
         "title": parsed.get("title"),
         "grabber": parsed.get("grabber"),
-        "description": parsed.get("description"),
+        "description": decode_unicode_escapes(parsed.get("description")), # Apply decoding here
         "main_link": parsed.get("main_link"),
         "highlighted_products": parsed.get("highlighted_products", []),
         "deal_probability": float(parsed.get("deal_probability", 0.0)),

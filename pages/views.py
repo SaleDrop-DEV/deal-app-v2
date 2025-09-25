@@ -238,3 +238,129 @@ def static_content_delete(request, content_id):
     content.delete()
     return redirect('static_content_manager')
 
+
+import requests
+import time # Needed for synchronous delay
+
+# --- Configuration ---
+EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
+EXPO_RECEIPTS_URL = 'https://exp.host/--/api/v2/push/getReceipts'
+RECEIPT_CHECK_DELAY_SECONDS = 5 # Recommended minimum delay
+
+@login_required
+def test_notification(request):
+
+    def send_batch_notifications(token, title, body, data):
+        """
+        Sends notifications to the Expo Push API and returns the ticket response.
+        """
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        messages = [{'to': token, 'title': title, 'body': body, 'data': data}]
+        
+        try:
+            response = requests.post(EXPO_PUSH_URL, json=messages, headers=headers)
+            response.raise_for_status()
+            return True, response.json()
+        except requests.exceptions.RequestException as e:
+            try:
+                error_details = e.response.json()
+            except (AttributeError, ValueError):
+                error_details = {'detail': str(e)}
+            return False, error_details
+
+
+    def check_receipts(ticket_ids):
+        """
+        Polls the Expo API for the final receipt status.
+        """
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        payload = {'ids': ticket_ids}
+
+        try:
+            # Wait a few seconds for Expo to process the tickets into receipts
+            time.sleep(RECEIPT_CHECK_DELAY_SECONDS) 
+            
+            response = requests.post(EXPO_RECEIPTS_URL, json=payload, headers=headers)
+            response.raise_for_status()
+            return True, response.json()
+        except requests.exceptions.RequestException as e:
+            try:
+                error_details = e.response.json()
+            except (AttributeError, ValueError):
+                error_details = {'detail': str(e)}
+            return False, error_details
+
+
+    if request.user.is_superuser:
+        user = request.user
+        try:
+            push_token = user.extrauserinformation.expoToken
+        except AttributeError:
+            return JsonResponse({'error': 'User model or related object structure is incorrect.'}, status=500)
+            
+        if not push_token:
+            return JsonResponse({'error': 'No push token found'}, status=400)
+        
+        
+        # 1. SEND NOTIFICATION AND GET TICKET
+        success, ticket_response = send_batch_notifications(
+            token=push_token, 
+            title="Test Notificatie", 
+            body="Dit is een test notificatie van SaleDrop!", 
+            data={"test": "data"}
+        )
+        
+        if not success:
+            return JsonResponse({'status': 'Ticket Request Failed', 'error_details': ticket_response}, status=500)
+
+        
+        # 2. EXTRACT TICKET ID(S)
+        ticket_ids = []
+        for ticket in ticket_response.get('data', []):
+            if ticket.get('status') == 'ok' and 'id' in ticket:
+                ticket_ids.append(ticket['id'])
+
+        if not ticket_ids:
+             # This means the ticket request succeeded but all tickets immediately failed (status: error)
+             return JsonResponse({'status': 'Tickets sent but all failed immediately', 'tickets': ticket_response['data']}, status=500)
+
+
+        # 3. CHECK RECEIPT STATUS
+        receipt_success, receipt_response = check_receipts(ticket_ids)
+
+        if not receipt_success:
+            return JsonResponse({'status': 'Receipt Check Failed', 'error_details': receipt_response}, status=500)
+            
+        
+        # 4. PARSE AND RETURN FINAL RESULT
+        
+        # Extract the detailed receipt for the single token we sent
+        receipt_details = receipt_response.get('data', {}).get(ticket_ids[0]) if ticket_ids else None
+        
+        if receipt_details and receipt_details.get('status') == 'error':
+            # This is the crucial information! The error from Apple.
+            return JsonResponse({
+                'status': 'Final Receipt Error', 
+                'token': push_token,
+                'receipt': receipt_details,
+                'message': f"Notification failed delivery to APNs. Reason: {receipt_details.get('details', {}).get('error', 'Unknown Error')}"
+            }, status=200)
+
+        return JsonResponse({
+            'status': 'Notification Check Complete', 
+            'token': push_token,
+            'ticket_id': ticket_ids[0] if ticket_ids else 'N/A',
+            'receipt_status': receipt_details.get('status') if receipt_details else 'Pending/Unknown',
+            'full_receipt': receipt_details,
+            'advice': 'If receipt status is "ok" but the notification was not received on the App Store version, the problem is usually a local device issue (settings, connectivity) or a race condition where the token was invalid at the moment of send, or a build/entitlement mismatch on the device itself.'
+        })
+
+    else:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+

@@ -13,6 +13,8 @@ urlpatterns = [
     path('admin/static-content/', views.static_content_manager, name='static_content_manager'),
     path('admin/static-content/edit/', views.static_content_edit, name='static_content_edit'),
     path('admin/static-content/delete/<int:content_id>/', views.static_content_delete, name='static_content_delete'),
+
+    path('test-notification/', views.test_notification, name='test_notification')
     
 
 ]

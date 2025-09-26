@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ store.name }} Sale & Korting - Recente Deals | SaleDrop{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/theme_v2_deals.css' %}">
+
+{# SEO Meta Tags #}
+<meta name="description" content="Vind de laatste sales, kortingen en aanbiedingen van {{ store.name }} op SaleDrop. Mis geen enkele deal en bespaar direct.">
+<meta name="keywords" content="{{ store.name }}, sale, korting, aanbieding, deals, kortingscode, uitverkoop, SaleDrop">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ canonical_url }}">
+
+{# Open Graph / Facebook Meta Tags #}
+<meta property="og:title" content="{{ store.name }} Sale & Korting - Recente Deals | SaleDrop">
+<meta property="og:description" content="Vind de laatste sales, kortingen en aanbiedingen van {{ store.name }} op SaleDrop.">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ image_url }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+
+<style>
+    /* ---- Search Bar ---- */
+    .search-bar-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 0 1rem;
+        position: relative; /* Make this the positioning context for the dropdown */
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        background-color: var(--color-gray-lighter);
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-bar input {
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        background-color: transparent;
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+        color: var(--primary-text-color);
+    }
+
+    .search-bar input::placeholder {
+        color: var(--secondary-text-color);
+    }
+
+    .search-bar button {
+        background-color: var(--color-accent);
+        border: none;
+        color: white;
+        padding: 0.5rem 0.75rem;
+        margin-left: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+        display: flex;
+        justify-content: center; /* Center content horizontally */
+        align-items: center;     /* Center content vertically */
+        height: 100%;
+        aspect-ratio: 1 / 1; 
+    }
+
+    /* ---- Search Results Dropdown ---- */
+    .search-section {
+        position: sticky;
+        top: var(--navbar-height);
+        z-index: 999;
+        background-color: var(--background-color);
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        position: -webkit-sticky; /* For Safari */
+    }
+
+    #searchResults {
+        display: none; /* Hidden by default */
+        position: absolute;
+        top: 100%; /* Position directly below the search bar container */
+        left: 50%;
+        width: 100%;
+        transform: translateX(-50%);
+        transform: translateX(-50%) scaleY(0); /* Start scaled to 0 height */
+        transform-origin: top; /* Animate from the top edge */
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        max-width: 500px; /* Match the search bar width */
+        background-color: white;
+        border: 1px solid var(--color-gray-light);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000; /* Ensure it's on top */
+    }
+    
+    #searchResults.show {
+        transform: translateX(-50%) scaleY(1); /* Scale to full height */
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #searchResults a {
+        text-decoration: none;
+        color: var(--primary-text-color);
+        display: block;
+    }
+
+    .store-result {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        gap: 1rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .store-result:hover {
+        background-color: var(--color-gray-lighter);
+    }
+
+    .store-result img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        border-radius: 50%;
+    }
+
+    /* ---- Loader for Search Button ---- */
+    .search-bar .loader {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid white;
+        width: 24px;  /* Increased size to match icon */
+        height: 24px; /* Increased size to match icon */
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+
+
+
+    /* ---- Marquee / Scrolling Brands ---- */
+    .marquee-section {
+        padding: 2rem 0;
+        overflow: hidden; 
+        position: relative; /* Context for fade overlay */
+    }
+
+    /* FADE OVERLAY EFFECT */
+    .marquee-section::before,
+    .marquee-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 100px; /* Breedte van de fade */
+        z-index: 10;
+        pointer-events: none; /* Zorgt dat clicks door de overlay gaan */
+    }
+
+    /* Linker fade */
+    .marquee-section::before {
+        left: 0;
+        background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
+    }
+
+    /* Rechter fade */
+    .marquee-section::after {
+        right: 0;
+        background: linear-gradient(to left, white, rgba(255, 255, 255, 0));
+    }
+    
+    .marquee {
+        width: 100%;
+        margin: 0.5rem 0;
+        white-space: nowrap; 
+    }
+
+    .marquee-content {
+        display: inline-block;
+        padding-right: 100%; 
+        /* Animation duration will be set by JavaScript */
+    }
+
+    .marquee-content span {
+        display: inline-block;
+        padding: 0 1.5rem; 
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--secondary-text-color);
+    }
+
+    /* Keyframes blijven hetzelfde, maar de duur wordt dynamisch door JS */
+    .left-to-right {
+        animation-name: scroll-left;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes scroll-left {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); } 
+    }
+
+    .right-to-left {
+        animation-name: scroll-right;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes scroll-right {
+        from { transform: translateX(-50%); } 
+        to { transform: translateX(0); }
+    }
+
+    .marquee:hover .marquee-content {
+        animation-play-state: paused;
+    }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&icon_names=search" />
+
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+    <div class="search-section">
+        <div id="searchBarWrapper" class="search-bar-container">
+            <div class="search-bar">
+                <input id="searchInput" type="text" placeholder="Zoek winkels..." />
+                <button id="searchButton" aria-label="Search">
+                    <span style="color:white;" class="material-symbols-outlined search-icon">
+                        search
+                    </span>
+                    <div class="loader" style="display: none;"></div>
+                </button>
+            </div>
+            <div id="searchResults">
+                <!-- This will be filled with results -->
+                <a href="#">
+                    <div class="store-result">
+                        <img src="https://placehold.co/50x50/F5F5F7/86868B?text=Store" alt="">
+                        <p>Store Name</p>
+                    </div>
+                </a>
+                <a href="#">
+                    <div class="store-result">
+                        <img src="https://placehold.co/50x50/F5F5F7/86868B?text=Store" alt="">
+                        <p>Store Name2</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="marquee-section">
+        <div class="marquee">
+            <div class="marquee-content left-to-right">
+                {% for store in other_stores %}<span>{{ store.name }}</span>{% endfor %}
+                {# Duplicate for seamless loop #}
+                {% for store in other_stores %}<span>{{ store.name }}</span>{% endfor %}
+            </div>
+        </div>
+        <div class="marquee">
+            <div class="marquee-content right-to-left">
+                {% for store in females_stores %}<span>{{ store.name }}</span>{% endfor %}
+                {# Duplicate for seamless loop #}
+                {% for store in females_stores %}<span>{{ store.name }}</span>{% endfor %}
+            </div>
+        </div>
+        <div class="marquee">
+            <div class="marquee-content left-to-right">
+                {% for store in males_stores %}<span>{{ store.name }}</span>{% endfor %}
+                {# Duplicate for seamless loop #}
+                {% for store in males_stores %}<span>{{ store.name }}</span>{% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block pop_up_content %}
+
+    <!-- Pop-up for non-authenticated users -->
+    <div class="modal-backdrop" id="authRequiredModalBackdrop">
+        <div class="product-modal" style="text-align: center; padding: 2rem;">
+            <span class="product-close-btn material-icons" onclick="document.getElementById('authRequiredModalBackdrop').classList.remove('show'); document.body.style.overflow = 'auto';">&times;</span>
+            <h2 style="margin-bottom: 1rem;">Krijg toegang tot alle details</h2>
+            <p style="margin-bottom: 2rem; color: var(--secondary-text-color);">
+                Maak een gratis account aan om de volledige beschrijving en de directe link naar deze en vele andere sales te zien.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="{% url 'signup_view' %}" class="primary-btn" style="text-decoration: none; display: block; padding: 0.8rem;">Maak een account aan</a>
+                <a href="https://apps.apple.com/nl/app/saledrop/id6479835973" class="secondary-btn" style="text-decoration: none; display: block; padding: 0.8rem;">Download in de App Store</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+ 
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Search Bar Functionality ---
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsContainer = document.getElementById('searchResults');
+        const searchButton = document.getElementById('searchButton');
+        const searchBarWrapper = document.getElementById('searchBarWrapper');
+
+        let searchTimeout;
+
+        // Function to show the search results with the transition
+        function showSearchResults() {
+            // Check if results are already showing to prevent interrupting the transition
+            if (searchResultsContainer.classList.contains('show')) return; 
+
+            searchResultsContainer.style.display = 'block'; 
+            setTimeout(() => {
+                searchResultsContainer.classList.add('show');
+            }, 10);
+        }
+
+        // Function to hide the search results with the transition
+        function hideSearchResults() {
+            searchResultsContainer.classList.remove('show');
+            // Wait for the CSS transition (0.2s) to finish before setting display: none
+            setTimeout(() => {
+                searchResultsContainer.style.display = 'none';
+            }, 200);
+        }
+
+        // --- NEW: Re-open on focus ---
+        searchInput.addEventListener('focus', () => {
+            const query = searchInput.value.trim();
+            // Show the container
+            showSearchResults();
+            
+            // If there's enough text, refresh the results instantly
+            if (query.length >= 2) {
+                fetchStoreResults(query);
+            } else {
+                // If there's no query, ensure the container is clear (if it had previous results)
+                searchResultsContainer.innerHTML = '';
+            }
+        });
+
+        searchInput.addEventListener('input', () => {
+            // Clear the previous timeout to debounce
+            clearTimeout(searchTimeout);
+
+            const query = searchInput.value.trim();
+
+            if (query.length < 2) {
+                hideSearchResults(); 
+                searchResultsContainer.innerHTML = '';
+                return;
+            }
+
+            // Set a new timeout
+            searchTimeout = setTimeout(() => {
+                fetchStoreResults(query);
+            }, 300); // 300ms delay
+        });
+
+        searchButton.addEventListener('click', () => {
+            // Re-fetch on button click
+            const query = searchInput.value.trim();
+            if (query.length >= 1) {
+                fetchStoreResults(query);
+            }
+        });
+
+        // --- Global click listener to hide results ---
+        document.addEventListener('click', (event) => {
+            const isClickInsideSearchBar = searchBarWrapper.contains(event.target);
+            const isResultsShowing = searchResultsContainer.classList.contains('show');
+
+            // If the results are showing AND the click is NOT inside the search bar wrapper
+            if (isResultsShowing && !isClickInsideSearchBar) {
+                hideSearchResults();
+            }
+        });
+
+        async function fetchStoreResults(query) {
+            const searchIcon = searchButton.querySelector('.search-icon');
+            const loader = searchButton.querySelector('.loader');
+            searchIcon.style.display = 'none';
+            loader.style.display = 'block';
+            try {
+                const response = await fetch('/api/search-stores/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ query: query, page: 1 }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+
+                const data = await response.json();
+                renderSearchResults(data.stores);
+
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+                searchResultsContainer.innerHTML = '<div class="store-result"><p>Er is een fout opgetreden.</p></div>';
+                showSearchResults();
+            } finally {
+                searchIcon.style.display = 'inline-block';
+                loader.style.display = 'none';
+            }
+        }
+
+        function renderSearchResults(stores) {
+            searchResultsContainer.innerHTML = ''; // Clear previous results
+
+            if (!stores || stores.length === 0) {
+                searchResultsContainer.innerHTML = '<div class="store-result"><p>Geen winkels gevonden.</p></div>';
+            } else {
+                stores.forEach(store => {
+                    if (store.store_links && store.store_links.length > 1) {
+                        // Create a result for "Mannen" (Men)
+                        const storeElementM = document.createElement('a');
+                        storeElementM.href = store.store_links[0];
+                        storeElementM.innerHTML = `
+                            <div class="store-result">
+                                <img src="${store.image_url}" alt="${store.name} logo">
+                                <p>${store.name} (Mannen)</p>
+                            </div>`;
+                        searchResultsContainer.appendChild(storeElementM);
+
+                        // Create a result for "Vrouwen" (Women)
+                        const storeElementF = document.createElement('a');
+                        storeElementF.href = store.store_links[1];
+                        storeElementF.innerHTML = `
+                            <div class="store-result">
+                                <img src="${store.image_url}" alt="${store.name} logo">
+                                <p>${store.name} (Vrouwen)</p>
+                            </div>`;
+                        searchResultsContainer.appendChild(storeElementF);
+                    } else {
+                        // Default behavior for stores with one link
+                        const storeLink = store.store_links[0] || '#';
+                        const storeElement = document.createElement('a');
+                        storeElement.href = storeLink;
+                        storeElement.innerHTML = `
+                            <div class="store-result">
+                                <img src="${store.image_url}" alt="${store.name} logo">
+                                <p>${store.name}</p>
+                            </div>`;
+                        searchResultsContainer.appendChild(storeElement);
+                    }
+                });
+            }
+            showSearchResults();
+        }
+
+
+    });
+
+// Functie om de CSS-animatieduur dynamisch aan te passen op basis van contentbreedte.
+function adjustMarqueeSpeed() {
+    const marquees = document.querySelectorAll('.marquee-content');
+    
+    // Nieuwe snelheidsfactoren: [langzaam, medium, snel]
+    // Kleinere factor = kortere duur = sneller scrollen
+    const speedFactors = [35, 50, 70]; 
+
+    marquees.forEach((marquee, index) => {
+        // Gebruik de factor uit de array, val terug op de langzaamste als er meer dan 3 marquees zijn
+        const speedFactor = speedFactors[index] || speedFactors[0];
+        
+        // Stop als de speed al is ingesteld (voorkomt meervoudige runs)
+        // Verwijder deze controle NIET, anders verbruik je veel resources bij resize.
+        // Als je wilt dat de resize de snelheid OPNIEUW berekent, verwijder dan de 'if' en de 'return' hierboven.
+        if (marquee.dataset.speedAdjusted) return;
+
+        // Bepaal de totale breedte van de content (inclusief de duplicaat)
+        const contentWidth = marquee.scrollWidth / 2;
+
+        // Bepaal de snelheid: (grotere breedte / lagere factor) = snellere animatie
+        let duration = contentWidth / speedFactor;
+
+        // Zorgt ervoor dat de snelheid binnen redelijke grenzen blijft
+        const minDuration = 15;
+        if (duration < minDuration) {
+            duration = minDuration;
+        }
+
+        // Pas de CSS-stijl toe
+        marquee.style.animationDuration = `${duration}s`;
+        marquee.dataset.speedAdjusted = 'true';
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Marquee Initialisatie ---
+    // De functie wordt hier één keer aangeroepen bij het laden
+    adjustMarqueeSpeed();
+    
+    // Pas de snelheid aan als het venster wordt verkleind/vergroot
+    window.addEventListener('resize', adjustMarqueeSpeed); 
+});
+</script>
+{% endblock %}

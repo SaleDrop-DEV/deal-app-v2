@@ -22,6 +22,7 @@ import tldextract
 import time
 from datetime import timedelta
 from slugify import slugify
+import random
 
 
 from api.models import API_Errors_Site
@@ -1263,6 +1264,25 @@ def search_store_sales_view(request, store_id, gender, slug):
     return render(request, 'deals/public_search.html', context)
 
 
+
+def search_store_sales_home_view(request):
+    # Fetch and convert to list to allow shuffling
+    males_stores = list(Store.objects.filter(gender='M'))
+    females_stores = list(Store.objects.filter(gender='F'))
+    other_stores = list(Store.objects.filter(Q(gender='B') | Q(gender__isnull=True)))
+
+    # Shuffle each list randomly in-place
+    random.shuffle(males_stores)
+    random.shuffle(females_stores)
+    random.shuffle(other_stores)
+
+    context = {
+        'males_stores': males_stores,
+        'females_stores': females_stores,
+        'other_stores': other_stores,
+        'page': 'public_deals',
+    }
+    return render(request, 'deals/public_search_home.html', context)
 
  
 

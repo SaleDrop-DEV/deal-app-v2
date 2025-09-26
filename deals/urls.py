@@ -20,4 +20,6 @@ urlpatterns = [
 
     path('<int:store_id>/<str:gender>/<str:slug>/', views.search_store_sales_view, name='search_stores_sale'),
 
+    path('search/', views.search_store_sales_home_view, name='search_stores_sale_home')
+
 ]

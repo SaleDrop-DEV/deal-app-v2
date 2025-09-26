@@ -28,6 +28,7 @@ import random
 from api.models import API_Errors_Site
 from deals.models import GmailSaleAnalysis, Store, SubscriptionData, GmailMessage, Url, ScrapeData
 from .forms import StoreForm
+from pages.models import StaticContent
 from .tasks import fetch_and_process_gmail_messages_task_general, fetch_and_process_gmail_messages_task_female
 
 User = get_user_model()

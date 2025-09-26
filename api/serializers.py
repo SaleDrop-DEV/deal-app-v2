@@ -27,6 +27,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         email = attrs.get("email")
         password = attrs.get("password")
 
+        user = User.objects.filter(email=email).first()
+        if not user.is_active:
+            raise serializers.ValidationError({"error": "Account is niet geactiveerd, check je e-mail of spam."})
+
         if email and password:
             user = authenticate(request=self.context.get('request'),
                                 username=email, password=password)

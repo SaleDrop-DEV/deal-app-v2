@@ -103,6 +103,11 @@
         overflow-y: auto;
         z-index: 1000; /* Ensure it's on top */
     }
+    @media(max-width: 520px) {
+        #searchResults{
+            width: calc(100% - 2rem);
+        }
+    }
     
     #searchResults.show {
         transform: translateX(-50%) scaleY(1); /* Scale to full height */

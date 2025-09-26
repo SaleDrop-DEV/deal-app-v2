@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.conf import settings
 from urllib.parse import urlparse
 from django.db.models import Q
-from django.http import JsonResponse, JsonResponse, HttpResponseBadRequest, HttpResponse, Http404
+from django.http import JsonResponse, JsonResponse, HttpResponseBadRequest, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+
 
 import os
 import base64
@@ -1160,6 +1161,106 @@ def store_sales_view(request, store_id, sales_per_page=9):
     }
     return render(request, 'deals/store_deals.html', context)
 
+
+
+
+
+
+def search_store_sales_view(request, store_id, gender, slug):
+    store = get_object_or_404(Store, id=store_id) 
+    if store.slug != slug:
+            # Redirect Permanent (301) naar de juiste, canonieke URL.
+            # Dit is ESSENTIEEL voor SEO.
+            return redirect(store.get_absolute_url(store_id, gender), permanent=True)
+    
+    if gender not in ['mannen', 'vrouwen', 'beide']:
+        return redirect('public_deals')
+    if not store.genderPreferenceSet:
+        if store.gender == 'M' and gender != 'mannen':
+            return HttpResponseNotFound("404 - Pagina niet gevonden.")
+        elif store.gender == 'F' and gender != 'vrouwen':
+            return HttpResponseNotFound("404 - Pagina niet gevonden.")
+        elif store.gender == 'B' and gender != 'beide':
+            return HttpResponseNotFound("404 - Pagina niet gevonden.")
+    else:
+        if gender == 'beide':
+            return HttpResponseNotFound("404 - Pagina niet gevonden.")
+    
+    last_30_days = timezone.now() - timedelta(days=7)
+
+
+    base_filters = Q(
+        is_sale_mail=True,
+        is_personal_deal=False,
+        deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
+        message__received_date__gt=last_30_days,
+        message__store=store,
+        is_new_deal_better=True
+    )
+
+    if gender == 'mannen':
+        # User is male
+        gender_filters = Q(message__email_to="gijsgprojects@gmail.com") | Q(message__store__genderPreferenceSet=False)
+    elif gender == 'vrouwen':
+        # User is female
+        gender_filters = Q(message__email_to="donnapatrona79@gmail.com") | Q(message__store__genderPreferenceSet=False)
+    else:
+        gender_filters = Q(message__store__genderPreferenceSet=False)
+
+
+    # Combine all filters to create the final queryset
+    analyses = GmailSaleAnalysis.objects.filter(base_filters & gender_filters).select_related('message').order_by('-message__received_date')
+    last_nine_sales = analyses.all()[:9]
+    results = []
+    for analysis in last_nine_sales:
+        deal = analysis.to_dict()
+        s = "Er is een nieuwe deal beschikbaar!"
+        d = "Bekijk jouw nieuwe deal door op de knop te klikken."
+        data_deal = {
+            'messageId': analysis.message.id,
+            'title': deal['title'],
+            'grabber': deal['grabber'] if deal['grabber'] != "N/A" else s,
+            # 'description': deal['description'] if deal['description'] != "N/A" else d,
+            'store': deal['store'],
+            'highlighted_products': None,#deal['highlighted_products'] if deal['store']['mayUseContent'] else None,
+            'store': {
+                'name': deal['store']['name'],
+                'image_url': deal['store']['image_url'] if deal['store']['mayUseContent'] else get_store_logo(deal['store']['name']),
+            },
+            'date_received': deal['gmail_data']['received_date'],
+            'parsed_date_received': parse_date_received(analysis.message.received_date),
+        }
+
+        # Only add sensitive info if the user is logged in
+        if request.user.is_authenticated:
+            data_deal['main_link'] = f"/deals/visit/{analysis.id}/{request.user.id}/"
+            data_deal['description'] = deal['description'] if deal['description'] != "N/A" else d
+
+        data_deal['deal_json'] = json.dumps(data_deal, cls=DjangoJSONEncoder)
+        results.append(data_deal)
+    appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+    canonical_url = request.build_absolute_uri(store.get_absolute_url(store_id, gender))
+
+    context = {
+        'results': results , 
+        'page': 'search_stores_sale',
+        'appStoreImage': appStoreImage,
+        'store': store,
+        'image_url': store.image_url if store.mayUseContent else get_store_logo(store.name),
+        'storeName': store.name, # Kept for convenience
+        'canonical_url': canonical_url,
+    }
+
+    if gender == 'beide':
+        store_gender_recommendation = 'mannen en vrouwen'
+    else:
+        other_gender = 'mannen' if gender == 'vrouwen' else 'vrouwen'
+        store_gender_recommendation = gender
+        context['other_gender'] = other_gender
+        context['other_gender_link'] = f"/deals/{store_id}/{other_gender}/{slug}/"
+    context['store_gender_recommendation'] = store_gender_recommendation
+
+    return render(request, 'deals/public_search.html', context)
 
 
 

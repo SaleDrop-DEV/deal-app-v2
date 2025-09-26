@@ -203,6 +203,9 @@ class Store(models.Model):
             Q(name__icontains=query) | Q(description__icontains=query)
         )
     
+    def get_absolute_url(self, store_id, gender_value):
+        return f"/deals/{store_id}/{gender_value}/{self.slug}/"
+    
     def is_subscribed(self, user):
         return self.subscriptions.filter(id=user.id).exists()
     

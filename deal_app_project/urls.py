@@ -1,11 +1,18 @@
 from django.contrib import admin
 from django.urls import path, include
-from deals import views as deals_views
-from pages import views as pages_views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.contrib.sitemaps.views import sitemap
 
+from deals.sitemaps import StoreSitemap
+from deals import views as deals_views
+from pages import views as pages_views
+
+sitemaps = {
+    'stores': StoreSitemap,
+    # U kunt hier meer sitemaps toevoegen voor andere content (bv. BlogSitemap)
+}
 
 urlpatterns = [
     path('admin-app/', admin.site.urls, name='admin'),
@@ -18,6 +25,9 @@ urlpatterns = [
         template_name="robots.txt",
         content_type="text/plain"
     )),
+
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, 
+         name='django.contrib.sitemaps.views.sitemap'),
 
     path('webhooks/gmail/', deals_views.gmail_webhook, name='gmail_webhook'),
     #path('test/<int:gender>/', deals_views.send_simple_html_email, name='test')

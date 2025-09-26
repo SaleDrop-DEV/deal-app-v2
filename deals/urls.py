@@ -18,4 +18,6 @@ urlpatterns = [
 
     path('store/<int:store_id>/', views.store_sales_view, name='store_sales'),
 
+    path('<int:store_id>/<str:gender>/<str:slug>/', views.search_store_sales_view, name='search_stores_sale'),
+
 ]

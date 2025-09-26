@@ -56,29 +56,18 @@ def search_stores_api_view(request, results_per_page=10):
                     # Pass request.user to is_subscribed method
                     'is_subscribed': store.is_subscribed(request.user) if request.user.is_authenticated else False,
                 }
-                if request.user.is_authenticated:
-                    gender_preference = request.user.extrauserinformation.gender
-                    if gender_preference == 0:
-                        gender_slug = 'mannen'
-                    elif gender_preference == 1:
-                        gender_slug = 'vrouwen'
-                    store_link = f"/deals/{store.id}/{gender_slug}/{store.slug}/"
-                    data['userIsAuthenticated'] = False
-                    data['store_links'] = [store_link]
+                if store.genderPreferenceSet:
+                    #there are two different sections (male and female)
+                    store_link_M = f"/deals/{store.id}/mannen/{store.slug}/"
+                    store_link_F = f"/deals/{store.id}/vrouwen/{store.slug}/"
+                    data['store_links'] = [store_link_M, store_link_F]
                 else:
-                    data['userIsAuthenticated'] = False
-                    if store.genderPreferenceSet:
-                        #there are two different sections (male and female)
-                        store_link_M = f"/deals/{store.id}/mannen/{store.slug}/"
-                        store_link_F = f"/deals/{store.id}/vrouwen/{store.slug}/"
-                        data['store_links'] = [store_link_M, store_link_F]
+                    if store.gender == 'M':
+                        data['store_links'] = [f"/deals/{store.id}/mannen/{store.slug}/"]
+                    elif store.gender == 'F':
+                        data['store_links'] = [f"/deals/{store.id}/vrouwen/{store.slug}/"]
                     else:
-                        if store.gender == 'M':
-                            data['store_links'] = [f"/deals/{store.id}/mannen/{store.slug}/"]
-                        elif store.gender == 'F':
-                            data['store_links'] = [f"/deals/{store.id}/vrouwen/{store.slug}/"]
-                        else:
-                            data['store_links'] = [f"/deals/{store.id}/beide/{store.slug}/"]
+                        data['store_links'] = [f"/deals/{store.id}/beide/{store.slug}/"]
 
                 stores.append(data)
 

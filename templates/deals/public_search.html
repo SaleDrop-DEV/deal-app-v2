@@ -114,7 +114,7 @@
     .search-section {
         position: sticky;
         top: var(--navbar-height);
-        z-index: 999;
+        z-index: 800;
         background-color: var(--background-color);
         padding-top: 1rem;
         padding-bottom: 1rem;
@@ -142,7 +142,7 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         max-height: 300px;
         overflow-y: auto;
-        z-index: 1000; /* Ensure it's on top */
+        z-index: 801; /* Ensure it's on top */
     }
     @media(max-width: 520px) {
         #searchResults{
@@ -241,14 +241,17 @@
             </div>
         </div>
     </div>
-    <h1 style="margin: 1rem 0; text-align: center;">{{ storeName }}</h1>
-    <p style="text-align: center; max-width: 600px; margin-left: auto; margin-right: auto; color: black;">
-        Hieronder vind je de meest recente sales en deals van {{ storeName }}. 
-        De sales en deals zijn bedoeld voor {{ store_gender_recommendation }}.
-        {% if other_gender_link %}
-            Bekijk ook deals voor <a class="other_gender_link" href="{{ other_gender_link }}">{{ other_gender }}</a>.
-        {% endif %}
-    </p>
+    
+    <div class="info-section" style="padding: 0.5rem;">
+        <h1 style="margin: 1rem 0; text-align: center;">{{ storeName }}</h1>
+        <p style="text-align: center; max-width: 600px; margin-left: auto; margin-right: auto; color: black;">
+            Hieronder vind je de meest recente sales en deals van {{ storeName }}. 
+            De sales en deals zijn bedoeld voor {{ store_gender_recommendation }}.
+            {% if other_gender_link %}
+                Bekijk ook deals voor <a class="other_gender_link" href="{{ other_gender_link }}">{{ other_gender }}</a>.
+            {% endif %}
+        </p>
+    </div>
 
     <div id="sales-container" class="sales-container">
         {% for deal in results %}

@@ -83,7 +83,7 @@ function displaySales(data) {
         const dateParsed = deal.parsed_date_received;
         const storeName = deal.store.name;
         const personal = deal.personal;
-        const json_data = JSON.stringify(deal.deal_json); // Ensure json_data is a proper JSON string
+        const json_data = deal.deal_json; // This is already a JSON string from the backend
 
         // Conditional elements for deals.html-like cards
         let newBadgeHtml = '';
@@ -118,7 +118,7 @@ function displaySales(data) {
             <button class="primary-btn view-details-btn">Bekijk</button>
             <p class="sale-date-received">${dateParsed}</p>
             <script class="sale-data" type="application/json">
-                ${json_data}
+                ${json_data} 
             </script>
             ${probabilityBadgeHtml}`;
         salesContainer.appendChild(cardDiv);
@@ -126,6 +126,22 @@ function displaySales(data) {
 }
 
 function showProductDetails(dealData) {
+    const productTitleElements = document.querySelectorAll('.product-title');
+    const productGrabberElements = document.querySelectorAll('.product-grabber');
+    const productDescriptionElements = document.querySelectorAll('.product-description');
+    const highlightedProductsSliderElements = document.querySelectorAll('.highlighted-products-slider');
+    const storeNameDetailElements = document.querySelectorAll('.store-name-detail');
+    const storeLogoElements = document.querySelectorAll('.store-logo');
+    const productMainLinkElements = document.querySelectorAll('.product-main-link');
+
+    const action_btn_for_small_screens = document.getElementById('small-screen-action-btn');
+
+    const productOverlay = document.getElementById('productOverlay');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const productContentWrapper = productOverlay.querySelector('.product-content-wrapper'); // Get the mobile slide-up panel
+    const productModal = modalBackdrop.querySelector('.product-modal'); // Get the desktop modal
+
+
     // Populate content for all instances (overlay and modal)
     productTitleElements.forEach(el => el.textContent = dealData.title || 'No Title');
     productGrabberElements.forEach(el => el.textContent = dealData.grabber || 'No Grabber');

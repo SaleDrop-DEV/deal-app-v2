@@ -8,6 +8,65 @@
 <link rel="stylesheet" href="{% static 'css/theme_v2_subscribed_stores.css' %}">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&icon_names=search" />
 <!-- <script src="{% static 'js/subscribed_stores.js' %}"></script> -->
+ <style>
+    /* --- Modal Backdrop (The dark overlay) --- */
+.modal-backdrop {
+    /* 1. Hide by default */
+    display: none; 
+    
+    /* 2. Positioning */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000; /* Ensure it's on top of all other content */
+    
+    /* 3. Appearance (Semi-transparent black) */
+    background-color: rgba(0, 0, 0, 0.6); 
+}
+
+/* --- State Change: When JS adds the 'show' class --- */
+.modal-backdrop.show {
+    /* 1. Show the backdrop */
+    display: flex; 
+    
+    /* 2. Center the content (the product-modal) */
+    justify-content: center; /* horizontal center */
+    align-items: center;    /* vertical center */
+}
+
+
+/* --- Inner Modal (The white box with content) --- */
+.product-modal {
+    /* 1. Appearance */
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 90%; /* Max width 450px, but responsive on small screens */
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    
+    /* 2. Z-index higher than backdrop, though not strictly necessary since the backdrop is the container */
+    z-index: 1001; 
+    position: relative; /* Needed if you want to position children absolutely (like the close button) */
+}
+
+/* --- Close Button --- */
+.product-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1; /* Ensure the symbol is not too tall */
+}
+
+.product-close-btn:hover {
+    color: #555;
+}
+ </style>
 {% endblock %}
 
 {% block content %}
@@ -59,6 +118,21 @@
             <div id="newStoresLoader" style="display: none;" class="loader-spinner" aria-label="Loading..."></div>
         </div>
     </div>    
+
+    <!-- NEW: Modal to prompt user to open the app after account activation -->
+    <div class="modal-backdrop" id="appRedirectModal">
+        <div class="product-modal" style="text-align: center; padding: 2rem; max-width: 450px;">
+            <span class="product-close-btn material-icons" onclick="closeAppRedirectModal()">&times;</span>
+            <h2 style="margin-bottom: 1rem;">Account Geactiveerd!</h2>
+            <p style="margin-bottom: 2rem; color: var(--secondary-text-color);">
+                Ga verder in de SaleDrop app voor de beste ervaring.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button onclick="openApp()" class="primary-btn" style="text-decoration: none; display: block; padding: 0.8rem;">Open in App</button>
+                <a href="https://apps.apple.com/nl/app/saledrop/id6479835973" class="secondary-btn" style="text-decoration: none; display: block; padding: 0.8rem;">Download in de App Store</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block pop_up_content %}
@@ -77,6 +151,64 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const go_to_app = urlParams.get('go_to_app');
+    const successActivated = urlParams.get('succesfuly_activated');
+
+    if (go_to_app === '1') {
+        console.log("jaaaaa")
+        // Show the "Open in App" modal
+        const appModal = document.getElementById('appRedirectModal');
+        if (appModal) {
+            appModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        urlParams.delete('go_to_app');
+    }
+
+    if (successActivated && typeof window.displayMessage === 'function') {
+      // Show the message
+      window.displayMessage('success', 'Uw account is succesvol geactiveerd.');
+      urlParams.delete('succesfuly_activated');
+    }
+
+    // Clean the URL so the modal doesn't show up on refresh
+    const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    window.history.replaceState({}, document.title, newUrl);
+});
+
+function openApp() {
+    // The App Store URL
+    const appStoreUrl = 'https://apps.apple.com/nl/app/saledrop/id6479835973';
+
+    // Try to open the app via its custom URL scheme
+    window.location.href = 'saledrop://';
+
+    // Set a timeout. If the user is still on this page after 2 seconds,
+    // it means the app did not open, so we redirect to the App Store.
+    setTimeout(() => {
+        // Check if the page is still visible. If the app opened, the browser
+        // tab would become hidden.
+        if (!document.hidden) {
+            window.location.href = appStoreUrl;
+        }
+    }, 2000); // 2-second delay
+}
+
+function closeAppRedirectModal() {
+    const appModal = document.getElementById('appRedirectModal');
+    if (appModal) {
+        appModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+</script>
+
+
+
+
 <script>
 function getCSRFToken() {
     let name = 'csrftoken';
@@ -587,22 +719,4 @@ function submitForm() {
 
 
 </script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const successActivated = urlParams.get('succesfuly_activated');
-
-    if (successActivated && typeof window.displayMessage === 'function') {
-      // Show the message
-      window.displayMessage('success', 'Uw account is succesvol geactiveerd.');
-
-      // Remove the query parameter from the URL
-      urlParams.delete('succesfuly_activated');
-      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-      window.history.replaceState({}, '', newUrl);
-    }
-  });
-</script>
 {% endblock %}
-

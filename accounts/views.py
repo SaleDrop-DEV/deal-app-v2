@@ -195,7 +195,8 @@ def complete_profile(request):
             extra_info.save()
             
             # Redirect to the main page after successful submission
-            return redirect(f"{reverse('stores')}?succesfuly_activated=1&go_to_app=1")
+            # return redirect(f"{reverse('stores')}?succesfuly_activated=1&go_to_app=1")
+            return redirect(f"{reverse('stores')}?succesfuly_activated=1&go_to_app=0")
         else:
             # If the submission is invalid, show an error.
             error = "Selecteer een geldige optie."

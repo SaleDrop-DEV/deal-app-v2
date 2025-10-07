@@ -1,13 +1,40 @@
 from django.contrib import admin
+from django.db.models import Q
 
 from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken, User, Click
 
 # Register other models without custom admin
 admin.site.register(GmailSaleAnalysis)
-admin.site.register(Store)
 admin.site.register(SubscriptionData)
 admin.site.register(GmailToken)
 admin.site.register(Click)
+
+# --- Store Admin Configuration ---
+class HasNoDescriptionFilter(admin.SimpleListFilter):
+    title = 'description status'
+    parameter_name = 'has_description'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('no', 'Without Description'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'no':
+            return queryset.filter(Q(description__isnull=True) | Q(description=''))
+        return queryset
+
+@admin.register(Store)
+class StoreAdmin(admin.ModelAdmin):
+    list_display = ('name', 'domain', 'isVerified', 'mayUseContent', 'gender', 'dateIssued')
+    search_fields = ('name', 'domain', 'home_url', 'email_addresses')
+    list_filter = ('isVerified', 'mayUseContent', 'gender', 'genderPreferenceSet', HasNoDescriptionFilter)
+    readonly_fields = ('dateIssued', 'slug')
+    fieldsets = (
+        (None, {'fields': ('name', 'slug', 'description', 'home_url', 'sale_url', 'email_addresses')}),
+        ('Configuration', {'fields': ('isVerified', 'genderPreferenceSet', 'gender', 'mayUseContent', 'isWeirdDomain')}),
+        ('Media & Domain', {'fields': ('image_url', 'domain', 'domain_list', 'dateIssued')}),
+    )
 
 # --- GmailMessage Admin Configuration ---
 class HasStoreFilter(admin.SimpleListFilter):

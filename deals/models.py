@@ -190,6 +190,7 @@ class Store(models.Model):
     dateIssued = models.DateTimeField(default=timezone.now, null=False)
     isWeirdDomain = models.BooleanField(default=False, null=False, blank=False)
     slug = models.SlugField(max_length=255, unique=False, null=True, blank=True)
+    description = models.TextField(blank=True, null=True, default=None)
 
 
 

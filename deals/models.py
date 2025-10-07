@@ -187,7 +187,7 @@ class Store(models.Model):
     genderPreferenceSet = models.BooleanField(default=False) # False: Newsletter didn't ask for gender
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True) # only filled in if gender preference is not set
     mayUseContent = models.BooleanField(default=False)
-    dateIssued = models.DateTimeField(default=timezone.now(), null=False)
+    dateIssued = models.DateTimeField(default=timezone.now, null=False)
     isWeirdDomain = models.BooleanField(default=False, null=False, blank=False)
     slug = models.SlugField(max_length=255, unique=False, null=True, blank=True)
 

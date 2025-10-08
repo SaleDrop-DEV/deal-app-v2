@@ -54,7 +54,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
         f"Negeer welkomsmails en algemene reclame. "
         f"Extraheer de volgende velden nauwkeurig:\n\n"
         f"- is_sale_mail: true/false\n"
-        f"- is_personal_deal: true/false een persoonlijke sale is ook wanneer er een rare code in staat die niet universeel is.\n"
+        f"- is_personal_deal: true/false een persoonlijke sale is die niet uitsluitend aan 1 persoon is gericht en niet voor alle consumenten, dus ook wanneer er een kortings/promotie code in staat die eenmalig te gebruiken is.\n"
         f"- title: string (Een **zeer korte titel** van maximaal 7 woorden, bijv. 'SALE MANGO' of 'Nieuwe collectie'. Gebruik geen kortingspercentages hier.)\n"
         f"- grabber: string (Een **korte, pakkende kortingszin**, zoals '-70% korting' of 'Tot 50% korting'. Dit is de belangrijkste promotiezin.)\n"
         f"- description: string (Een **neutrale, redactionele beschrijving** van de aanbieding. Dit mag langere details bevatten. \

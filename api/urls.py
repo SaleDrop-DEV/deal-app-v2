@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, IOS_views
+from . import views, IOS_views, IOS_v2_views
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
@@ -39,7 +39,26 @@ urlpatterns = [
     path('save-token/', IOS_views.IOS_API_save_expo_push_token, name='save-expo-push-token'),
     path('sale-details/', IOS_views.get_analysis_detail, name='get_analysis_detail'),
     path('delete-expo-push-token/', IOS_views.IOS_API_delete_expo_push_token, name='delete-expo-push-token'),
-    path('delete-account/', IOS_views.IOS_API_delete_account, name='delete-account')
+    path('delete-account/', IOS_views.IOS_API_delete_account, name='delete-account'),
+
+     # VERSION 2 API endpoints for IOS app #
+    path('v2/fetch-my-feed/', IOS_v2_views.IOS_API_fetch_my_feed, name='v2_API_fetch_my_feed'),
+    path('v2/fetch-feed-no-auth/', IOS_v2_views.IOS_API_fetch_feed_no_auth, name='v2_API_fetch_feed_no_auth'),
+
+    path('v2/fetch-public-sales/', IOS_v2_views.IOS_API_fetch_public_sales, name='v2_API_fetch_public_sales'),
+
+    path('v2/search-stores/', IOS_v2_views.IOS_API_fetch_stores, name='v2_API_fetch_stores'),
+    path('v2/search-stores-no-auth/', IOS_v2_views.IOS_API_fetch_stores_no_auth, name='v2_API_fetch_stores_no_auth'),
+
+    path('v2/fetch-account-details/', IOS_v2_views.IOS_API_fetch_account_details, name='v2_API_fetch_account_details'),
+
+    path('v2/fetch-all-subscribed-store-ids/', IOS_v2_views.IOS_API_fetch_all_subscribed_store_ids, name='v2_API_fetch_all_subscribed_store_ids'),
+
+    path('v2/fetch-store-data/', IOS_v2_views.IOS_API_fetch_store_data, name='v2_API_fetch_store_data'),
+    path('v2/fetch-store-data-no-auth/', IOS_v2_views.IOS_API_fetch_store_data_no_auth, name='v2_API_fetch_store_data_no_auth'),
+
+    path('v2/save-token/', IOS_v2_views.IOS_API_save_expo_token, name='v2_save-expo-push-token'),
+    path('v2/delete-expo-push-token/', IOS_v2_views.IOS_API_delete_expo_token, name='v2_delete-expo-push-token'),
 
 
 ]

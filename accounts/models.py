@@ -10,7 +10,8 @@ class ExtraUserInformation(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='extrauserinformation')
     gender = models.IntegerField(choices=GENDER_CHOICES)#{'0': 'MALE', '1': 'FEMALE', '2': 'OTHER'}
     isPayedUser = models.BooleanField(default=False)
-    expoToken = models.TextField(blank=True, null=True)
+    expoToken = models.TextField(blank=True, null=True) # Single token for push notifications
+    expoTokens = models.JSONField(blank=True, null=True, default=list) # New model field to store multiple tokens
 
     def __str__(self):
         gender_map = {

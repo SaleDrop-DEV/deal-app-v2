@@ -379,6 +379,48 @@ def generate_analysis_from_gemini_data(message, data):
 
     return analysis
 
+def get_previous_deals_prompt(store, email_to):
+    """
+    Fetches the last two relevant sale analyses for a given store and inbox
+    to generate a prompt for the Gemini API.
+    """
+    def parse_date_received(date_received):
+        now = timezone.now()
+        delta = now - date_received
+
+        if delta.total_seconds() < 60:
+            seconds = int(delta.total_seconds())
+            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
+        elif delta.total_seconds() < 3600:
+            minutes = int(delta.total_seconds() / 60)
+            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
+        elif delta.total_seconds() < 86400:
+            hours = int(delta.total_seconds() / 3600)
+            return f"{hours} uur geleden"
+        else:
+            # Fallback for days or longer
+            days = int(delta.total_seconds() / 86400)
+            return f"{days} dag{'en' if days > 1 else ''} geleden"
+    # This query is more efficient as it filters in the database.
+    # It directly fetches the analyses that meet the criteria.
+    previous_analyses = GmailSaleAnalysis.objects.filter(
+        message__store=store,
+        message__email_to=email_to,
+        is_sale_mail=True,
+        is_personal_deal=False,
+        deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
+        is_new_deal_better=True
+    ).order_by('-message__received_date')[:2]
+
+    if not previous_analyses:
+        return "Er zijn nog geen eerdere analyses gemaakt dus graag is_new_deal_better True zetten."
+
+    prompts = []
+    for analysis in previous_analyses:
+        prompts.append(f"{parse_date_received(analysis.message.received_date)}Titel: {analysis.title}\nGrabber: {analysis.grabber}\n------------\n")
+
+    return f"De vorige analyses van dezelfde winkel zijn geweest:\n{''.join(prompts)}. Geef aan of in deze mail een nieuwe of een betere deal staat d.m.v. is_new_deal_better = True"
+
 def analyze_gmail_messages(max_analyses=10):
 
     def shorten_email_html(full_html: str) -> str:
@@ -428,24 +470,7 @@ def analyze_gmail_messages(max_analyses=10):
             # Get a prompt addition: introduce the last two 'deals' in the same inbox
             # This will be used to determine if the deal is new 
             
-            store = message.store
-            email_to = message.email_to
-            # only get analyses with the same store and inbox
-            gmailMessages = GmailMessage.objects.filter(store=store, email_to=email_to, analysis__isnull=False).order_by('-received_date')
-            prompts = []
-            for old_message in gmailMessages:
-                if old_message.analysis:
-                    if hasattr(old_message, 'analysis') and old_message.analysis.is_sale_mail:
-                        if not old_message.analysis.is_personal_deal and old_message.analysis.deal_probability > settings.THRESHOLD_DEAL_PROBABILITY:
-                            prompt_part = f"Titel: {old_message.analysis.title}\n"
-                            prompt_part += f"Grabber: {old_message.analysis.grabber}\n"
-                            prompts.append(prompt_part)
-                            if len(prompts) >= 2:
-                                break
-            if len(prompts) == 0:
-                prompt_addition = f"Er zijn nog geen eerdere analyses gemaakt dus graag is_new_deal_better True zetten."
-            else:
-                prompt_addition = f"De vorige analyses van dezelfde winkel zijn geweest:\n{''.join(prompts)}. Geef aan of in deze mail een nieuwe of een betere deal staat d.m.v. is_new_deal_better = True"
+            prompt_addition = get_previous_deals_prompt(message.store, message.email_to)
             
             cleaned_html_body = shorten_email_html(message.body)
 

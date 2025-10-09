@@ -537,8 +537,11 @@ def IOS_API_fetch_stores_no_auth(request):
         )
 
         # 2. Annotate the count onto every store in the queryset
+        # We count the distinct dates of the sales messages to ensure "one sale per day" logic.
         queryset = queryset.annotate(
-            active_sales_count=Count('gmailmessage', filter=active_sales_filter, distinct=True)
+            active_sales_count=Count(
+                TruncDate('gmailmessage__received_date'), filter=active_sales_filter, distinct=True
+            )
         )
 
         # Apply sorting

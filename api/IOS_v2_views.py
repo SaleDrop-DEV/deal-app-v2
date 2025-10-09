@@ -27,6 +27,7 @@ from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer
 from .models import API_Errors
 from deals import models as deals_models
 from pages import models as pages_models
+from accounts.models import OneTimeLoginToken
 
 SLEEP_TIME = 0
 ITEMS_PER_PAGE = 15
@@ -968,6 +969,22 @@ def IOS_API_delete_expo_token(request):
         )
         return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
 
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def generate_auto_login_token(request):
+    """
+    Generates a short-lived, one-time token for a user to log into the web app.
+    """
+    user = request.user
+    # Optional: Delete old tokens for this user to keep the table clean
+    OneTimeLoginToken.objects.filter(user=user).delete()
+    
+    # Create a new token
+    new_token = OneTimeLoginToken.objects.create(user=user)
+    
+    return Response({'token': str(new_token.token)})
 
 
 # END OF FILE #

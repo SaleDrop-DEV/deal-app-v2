@@ -60,5 +60,7 @@ urlpatterns = [
     path('v2/save-token/', IOS_v2_views.IOS_API_save_expo_token, name='v2_save-expo-push-token'),
     path('v2/delete-expo-push-token/', IOS_v2_views.IOS_API_delete_expo_token, name='v2_delete-expo-push-token'),
 
+    path('v2/create-auto-login-token/', IOS_v2_views.generate_auto_login_token, name='v2_generate_auto_login_token'),
+
 
 ]

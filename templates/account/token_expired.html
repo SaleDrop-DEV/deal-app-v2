@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Link Verlopen{% endblock %}
+
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+
+<style>
+    /* --- Base Card & Shared Styling (copied from signup) --- */
+    .signup-card {
+        background-color: var(--color-white);
+        padding: 2.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        max-width: 500px;
+        margin: 2rem auto;
+        text-align: center; /* Center content */
+    }
+    .signup-card h3 {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+    }
+    .signup-card p {
+        color: var(--secondary-text-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    .action-btn-special {
+        display: inline-block; /* Changed from block for better centering */
+        text-decoration: none;
+        position: relative;
+        min-height: 41px;
+        min-width: 140px;
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: 0.3s ease;
+        margin: 0 auto;
+    }
+    .action-btn-special:hover:not(:disabled) {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    /* --- Icon Styling --- */
+    .status-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1.5rem auto;
+        color: var(--color-accent);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="signup-card">
+        <div class="status-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <h3>Link Verlopen</h3>
+        
+        <p>
+            Voor je veiligheid was deze inloglink maar een korte tijd geldig en is nu verlopen.
+        </p>
+
+        <p>
+            Ga alsjeblieft terug naar de app om een nieuwe link aan te vragen.
+        </p>
+
+        <a href="{% url 'login' %}" class="action-btn-special" style="color: white;">Ga naar Inloggen</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{# No scripts needed for this static page #}
+{% endblock %}

@@ -353,3 +353,39 @@ def admin_dashboard(request):
         return render(request, 'admin_templates/dashboard.html', context)
     else:
         return redirect('account_view')
+
+
+
+
+from .models import OneTimeLoginToken
+from django.utils import timezone
+def auto_login_with_token(request, token):
+    """
+    Logs a user in using a one-time token and redirects them.
+    """
+    try:
+        # Define how long the token is valid for
+        TOKEN_VALIDITY_SECONDS = 60 
+        
+        login_token = OneTimeLoginToken.objects.get(token=token)
+        
+        # 1. Check if token is expired
+        if login_token.created_at < timezone.now() - timedelta(seconds=TOKEN_VALIDITY_SECONDS):
+            # Handle expired token (e.g., show an error page)
+            login_token.delete() # Clean up
+            return render(request, 'account/token_expired.html')
+
+        # 2. If valid, log the user in
+        user = login_token.user
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+        # 3. Invalidate the token by deleting it
+        login_token.delete()
+
+        # 4. Redirect to the password change page
+        return redirect('password_change') # Assumes you have a named URL 'password_change'
+
+    except OneTimeLoginToken.DoesNotExist:
+        # Handle invalid token
+        return render(request, 'account/token_invalid.html')
+

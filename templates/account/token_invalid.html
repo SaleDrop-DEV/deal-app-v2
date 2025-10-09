@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Ongeldige Link{% endblock %}
+
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+
+<style>
+    /* --- Base Card & Shared Styling (copied from signup) --- */
+    .signup-card {
+        background-color: var(--color-white);
+        padding: 2.5rem;
+        border-radius: var(--border-radius-round);
+        box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+        max-width: 500px;
+        margin: 2rem auto;
+        text-align: center; /* Center content */
+    }
+    .signup-card h3 {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+    }
+    .signup-card p {
+        color: var(--secondary-text-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    .action-btn-special {
+        display: inline-block; /* Changed from block for better centering */
+        text-decoration: none;
+        position: relative;
+        min-height: 41px;
+        min-width: 140px;
+        background-color: var(--color-accent);
+        color: var(--color-white);
+        border: none;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: 0.3s ease;
+        margin: 0 auto;
+    }
+    .action-btn-special:hover:not(:disabled) {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    /* --- Icon Styling --- */
+    .status-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1.5rem auto;
+        color: var(--color-error);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="signup-card">
+        <div class="status-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+        </div>
+
+        <h3>Ongeldige of Gebruikte Link</h3>
+        
+        <p>
+            Deze link is niet geldig of is al een keer gebruikt. Een inloglink kan maar één keer worden gebruikt voor de veiligheid.
+        </p>
+
+        <p>
+            Ga terug naar de app en probeer het opnieuw.
+        </p>
+
+        <a href="{% url 'login' %}" class="action-btn-special" style="color: white;">Ga naar Inloggen</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{# No scripts needed for this static page #}
+{% endblock %}

@@ -14,4 +14,5 @@ urlpatterns = [
         template_name='registration/password_change_done.html'
     ), name='password_change_done'),
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('auto-login/<token>/', views.auto_login_with_token, name='auto_login'),
 ]

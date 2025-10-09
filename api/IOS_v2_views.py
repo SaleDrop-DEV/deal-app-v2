@@ -149,7 +149,7 @@ def serialize_feed_item(item, user):
             'grabber': a.grabber if a.grabber != "N/A" else s,
             'description': a.description if a.description != "N/A" else d,
             'storeName': a.message.store.name,
-            'mainLink': f"deals/visit/{a.id}/{user.id}/",
+            'mainLink': f"deals/visit/{a.id}/{user.id}/" if user else f"deals/visit/{a.id}/0/",
             'messageId': a.message.id,
             'dateReceived': a.message.received_date,
             'parsedDateReceived': parse_date_received(a.message.received_date),
@@ -161,7 +161,7 @@ def serialize_feed_item(item, user):
             'id': a.id,
             'name': a.name,
             'image_url': a.image_url if a.mayUseContent else get_store_logo(a.name),
-            'is_subscribed': a.is_subscribed(user),
+            'is_subscribed': a.is_subscribed(user) if user else False,
         }
 
 
@@ -288,132 +288,96 @@ def IOS_API_fetch_my_feed(request):
 
 
 # NEEDS MODIFY LIKE ABOVE #
+# --- MODIFIED AND IMPROVED FUNCTION USING INJECTION LOGIC --- #
 @api_view(['POST'])
 @csrf_exempt
 def IOS_API_fetch_feed_no_auth(request, max_preview_pages=2):
-    def parse_date_received(date_received):
-        now = timezone.now()
-        delta = now - date_received
+    """
+    Returns a generic feed for non-authenticated users.
+    This version now paginates only sales and then injects new stores,
+    mirroring the structure of the authenticated feed.
+    """
 
-        if delta.total_seconds() < 60:
-            seconds = int(delta.total_seconds())
-            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
-        elif delta.total_seconds() < 3600:
-            minutes = int(delta.total_seconds() / 60)
-            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
-        elif delta.total_seconds() < 86400:
-            hours = int(delta.total_seconds() / 3600)
-            return f"{hours} uur geleden"
-        else:
-            days = int(delta.total_seconds() / 86400)
-            return f"{days} dag{'en' if days > 1 else ''} geleden"
-
-    sleep(SLEEP_TIME)
     try:
-        if request.method == 'POST':
-            data = json.loads(request.body)
-            page_number = int(data.get('page', 1))
-            if page_number > max_preview_pages:
-                return JsonResponse({
-                    'success': True,
-                    'items': [],
-                    'has_next_page': False,
-                    'page': page_number,
-                    'total_pages': None,
-                })
+        data = json.loads(request.body)
+        page_number = int(data.get('page', 1))
 
-            three_weeks_ago = timezone.now() - timedelta(days=21)
-
-            # Get all GmailMessages related to those stores
-            sales = list(deals_models.GmailSaleAnalysis.objects.filter(
-                is_sale_mail=True,
-                is_personal_deal=False,
-                deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
-                message__received_date__gte=three_weeks_ago,
-                message__store__isnull=False,
-                is_new_deal_better=True
-            ).select_related('message', 'message__store').order_by('-message__received_date'))
-            
-            # Also include new stores added to the database in the last 3 days
-            three_days_ago = timezone.now() - timedelta(days=3)
-            new_stores = list(deals_models.Store.objects.filter(
-                isVerified=True,
-                dateIssued__gte=three_days_ago
-            ))
-            
-            # Filter to one sale per store per day. Since it's ordered by date descending,
-            # the first one we see for a store on a given day is the latest one.
-            unique_sales = []
-            seen_store_days = set()
-            for sale in sales:
-                # This check is important because message.store could be None if the store was deleted
-                if sale.message and sale.message.store:
-                    store_id = sale.message.store.id
-                    sale_date = sale.message.received_date.date()
-                    if (store_id, sale_date) not in seen_store_days:
-                        unique_sales.append(sale)
-                        seen_store_days.add((store_id, sale_date))
-            
-            feed_items = unique_sales + new_stores
-            feed_items.sort(
-                key=lambda item: item.message.received_date if hasattr(item, 'message') else item.dateIssued,
-                reverse=True
-            )
-            paginator = Paginator(feed_items, ITEMS_PER_PAGE)
-
-            try:
-                page_obj = paginator.page(page_number)
-            except PageNotAnInteger:
-                page_obj = paginator.page(1)
-                page_number = 1
-            except EmptyPage:
-                page_obj = paginator.page(paginator.num_pages)
-                page_number = paginator.num_pages
-
-            response = []
-            for analysis in page_obj:
-                if hasattr(analysis, 'message'):
-                    a: deals_models.GmailSaleAnalysis = analysis
-                    s = "Er is een nieuwe deal beschikbaar!"
-                    d = "Bekijk jouw nieuwe deal door op de knop te klikken."
-                    data = {
-                        'type': 'sale',
-                        'title': a.title,
-                        'grabber': a.grabber if a.grabber != "N/A" else s,
-                        'description': a.description if a.description != "N/A" else d,
-                        'storeName': a.message.store.name,
-                        'mainLink': f"deals/visit/{a.id}/0/", # Using 0 as a placeholder for user_id
-                        'messageId': a.message.id,
-                        'dateReceived': a.message.received_date,
-                        'parsedDateReceived': parse_date_received(a.message.received_date),
-                    }
-                    response.append(data)
-                else:
-                    a: deals_models.Store = analysis
-                    data = {
-                        'type': 'new_store',
-                        'id': a.id,
-                        'name': a.name,
-                        'image_url': a.image_url if a.mayUseContent else get_store_logo(a.name),
-                        'is_subscribed': False, # Always false for non-authenticated users
-                    }
-                    response.append(data)
-
-            return JsonResponse({
+        if page_number > max_preview_pages:
+            return Response({
                 'success': True,
-                'items': response,
-                'has_next_page': page_obj.has_next(),
+                'items': [],
+                'has_next_page': False,
                 'page': page_number,
-                'total_pages': paginator.num_pages,
+                'total_pages': max_preview_pages,
             })
 
-    except Exception as e:
-        API_Errors.objects.create(
-            task="Fetch my feed no auth",
-            error=str(e)
-        )
-        return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
+        three_weeks_ago = timezone.now() - timedelta(days=21)
 
+        # 1. Fetch all potential sales items
+        sales = list(deals_models.GmailSaleAnalysis.objects.filter(
+            is_sale_mail=True,
+            is_personal_deal=False,
+            deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
+            message__received_date__gte=three_weeks_ago,
+            message__store__isnull=False,
+            is_new_deal_better=True
+        ).select_related('message', 'message__store').order_by('-message__received_date'))
+        
+        # 2. Filter to one unique sale per store per day (retained from original logic)
+        unique_sales = []
+        seen_store_days = set()
+        for sale in sales:
+            if sale.message and sale.message.store:
+                store_id = sale.message.store.id
+                sale_date = sale.message.received_date.date()
+                if (store_id, sale_date) not in seen_store_days:
+                    unique_sales.append(sale)
+                    seen_store_days.add((store_id, sale_date))
+        
+        # 3. Fetch all potential items for injection (new stores)
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        new_stores = list(deals_models.Store.objects.filter(dateIssued__gte=seven_days_ago).order_by('-dateIssued'))
+
+        # 4. Paginate ONLY the main feed content (the unique sales)
+        paginator = Paginator(unique_sales, ITEMS_PER_PAGE)
+        try:
+            page_obj = paginator.page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+            page_number = 1
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
+            page_number = paginator.num_pages if paginator.num_pages > 0 else 1
+
+        # 5. Serialize the items for the current page and the items to be injected
+        # Note: Pass `user=None` as there is no authenticated user.
+        serialized_sales = [serialize_feed_item(item, None) for item in page_obj.object_list]
+        serialized_new_stores = [serialize_feed_item(item, None) for item in new_stores]
+        
+        # For the non-auth feed, we don't have sponsors or highlighted sales.
+        sponsors = []
+        highlighted_sales = []
+
+        # 6. Inject the extra items into the serialized list of sales
+        response_items = inject_extras(
+            serialized_sales, 
+            page_number, 
+            serialized_new_stores, 
+            sponsors, 
+            highlighted_sales
+        )
+
+        return Response({
+            'success': True,
+            'items': response_items,
+            'has_next_page': page_obj.has_next(),
+            'page': page_number,
+            'total_pages': paginator.num_pages,
+        })
+
+    except Exception as e:
+        API_Errors.objects.create(task="Fetch my feed no auth", error=str(e))
+        return Response({'error': 'Er ging iets mis.'}, status=500)
 
 
 @api_view(['POST'])
@@ -537,7 +501,6 @@ def IOS_API_fetch_stores_no_auth(request):
         )
 
         # 2. Annotate the count onto every store in the queryset
-        # We count the distinct dates of the sales messages to ensure "one sale per day" logic.
         queryset = queryset.annotate(
             active_sales_count=Count(
                 TruncDate('gmailmessage__received_date'), filter=active_sales_filter, distinct=True

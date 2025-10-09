@@ -100,7 +100,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class OneTimeLoginToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    token = models.CharField(max_length=200, default=uuid.uuid4, editable=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # We can add an explicit 'used' flag or check expiration
     

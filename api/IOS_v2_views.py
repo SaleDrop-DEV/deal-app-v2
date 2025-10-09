@@ -977,14 +977,20 @@ def generate_auto_login_token(request):
     """
     Generates a short-lived, one-time token for a user to log into the web app.
     """
-    user = request.user
-    # Optional: Delete old tokens for this user to keep the table clean
-    OneTimeLoginToken.objects.filter(user=user).delete()
-    
-    # Create a new token
-    new_token = OneTimeLoginToken.objects.create(user=user)
-    
-    return Response({'token': str(new_token.token)})
-
+    try:
+        user = request.user
+        # Optional: Delete old tokens for this user to keep the table clean
+        OneTimeLoginToken.objects.filter(user=user).delete()
+        
+        # Create a new token
+        new_token = OneTimeLoginToken.objects.create(user=user)
+        
+        return Response({'token': str(new_token.token)})
+    except Exception as e:
+        API_Errors.objects.create(
+            task="Generate auto login token",
+            error=str(e)
+        )
+        return Response({'error': 'Er ging iets mis.'}, status=500)
 
 # END OF FILE #

@@ -138,7 +138,7 @@
         <p class="subtitle">Selecteer je geslacht om je profiel te voltooien.</p>
         
         {# --- FIX 3: Add the action attribute to the form --- #}
-        <form method="post" action="{% url 'complete_profile' %}">
+        <form method="post" action="{% url 'complete_profile' %}{% if request.GET.source %}?source={{ request.GET.source }}{% endif %}">
             {% csrf_token %}
             
             <div class="form-group">

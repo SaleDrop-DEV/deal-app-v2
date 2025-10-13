@@ -161,6 +161,7 @@ def get_sponsors():
         'title': 'Ontvang 10% korting bij Via Appia',
         'grabber': 'Bekijk de nieuwe collectie!',
         'description': 'Ontvang 10% korting op je eerste bestelling bij Via Appia met de code "SALE10".',
+        'link': via_appia.home_url
     }
     return [data]
 

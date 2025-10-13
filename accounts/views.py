@@ -18,6 +18,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.contrib.auth.views import LoginView
 from .forms import CustomAuthenticationForm
+from django.http import HttpResponseRedirect
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -201,7 +202,8 @@ def complete_profile(request):
                 refresh = RefreshToken.for_user(user)
                 access_token = str(refresh.access_token)
                 if user.is_staff:
-                    return redirect(f'saledrop://login?token={access_token}')
+                    
+                    return HttpResponseRedirect(f'saledrop://login?token={access_token}')
                 else:
                     return redirect(f"{reverse('stores')}?succesfuly_activated=1")
             else:
@@ -397,4 +399,3 @@ def auto_login_with_token(request, token):
     except OneTimeLoginToken.DoesNotExist:
         # Handle invalid token
         return render(request, 'account/token_invalid.html')
-

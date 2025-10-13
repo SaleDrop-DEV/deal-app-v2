@@ -114,8 +114,59 @@ highlighted_sales = [
     }
 ]
 
+def get_highlighted_sales(user):
+    """
+    Fetch highlighted sales from the database.
+    For simplicity, we return a static list here.
+    """
+    try:
+        # Use filter to fetch all existing sales with the given IDs in one query.
+        # This is more efficient and avoids errors if an ID doesn't exist.
+        id_s = [2234, 2246] # Example IDs
+        # sales_qs = deals_models.GmailSaleAnalysis.objects.filter(id__in=id_s)
+        # print(f"Fetched {sales_qs.count()} highlighted sales from DB.")
+
+        highlighted_sales = []
+        for id in id_s:
+            message = deals_models.GmailMessage.objects.get(id=id)
+            analysis = message.analysis
+            if message and message.store:
+                data = {
+                    'type': 'highlighted_sale',
+                    'title': analysis.title,
+                    'grabber': analysis.grabber,
+                    'description': analysis.description,
+                    'storeName': analysis.message.store.name,
+                    'mainLink': f"deals/visit/{analysis.id}/{user.id}/" if user else f"deals/visit/{analysis.id}/0/",
+                    'messageId': analysis.message.id,
+                    'analysisId': analysis.id,
+                    'dateReceived': analysis.message.received_date,
+                    'parsedDateReceived': parse_date_received(analysis.message.received_date),
+                }
+                highlighted_sales.append(data)
+            else:
+                print(f"Skipping sale ID {analysis.id} due to missing related objects.")
+        return highlighted_sales
+    except Exception as e:
+        print(e)
+        return []
+
+def get_sponsors():
+    via_appia = deals_models.Store.objects.get(id=44)
+    data = {
+        'id': via_appia.id,
+        'type': 'sponsor',
+        'name': via_appia.name,
+        'image_url': f"https://saledrop.app/{via_appia.image_url}",
+        'title': 'Ontvang 10% korting bij Via Appia',
+        'grabber': 'Bekijk de nieuwe collectie!',
+        'description': 'Ontvang 10% korting op je eerste bestelling bij Via Appia met de code "SALE10".',
+    }
+    return [data]
+
+
 ITEMS_PER_PAGE = 10
-SLEEP_TIME = 0.2
+SLEEP_TIME = 0
 
 
 def parse_date_received(date_received):
@@ -272,7 +323,7 @@ def IOS_API_fetch_my_feed(request):
         serialized_new_stores = [serialize_feed_item(item, user) for item in new_stores]
 
         # Inject extras - passing all potential items to the injection function
-        response = inject_extras(response, page_number, serialized_new_stores, sponsors, highlighted_sales)
+        response = inject_extras(response, page_number, serialized_new_stores, get_sponsors(), get_highlighted_sales(user))
 
         return Response({
             'success': True,
@@ -624,7 +675,7 @@ def IOS_API_fetch_public_sales(request):
         for analysis in page_obj:
             response.append(serialize_feed_item(analysis, user))
 
-        response = inject_extras(response, page_number, serialized_new_stores, sponsors, [])
+        response = inject_extras(response, page_number, serialized_new_stores, get_sponsors(), [])
         return Response({
             'success': True,
             'items': response,

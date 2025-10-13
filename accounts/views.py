@@ -201,14 +201,13 @@ def complete_profile(request):
                 if source == 'app':
                     # Generate a one-time token for the app to log the user in.
                     refresh = RefreshToken.for_user(user)
-                    access_token = str(refresh.access_token)
                     if user.is_staff:
                         API_Errors_Site.objects.create(
                             task = "Admin logged in via app.",
-                            error = f"Admin user {user.email} logged in via app."
+                            error = f"Admin user {user.email} logged in via app. Token: {str(refresh)}"
                         )
                         # return HttpResponseRedirect(f'saledrop://login?token={access_token}')
-                        return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={access_token}")
+                        return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={str(refresh)}")
                     else:
                         return redirect(f"{reverse('stores')}?succesfuly_activated=1")
                 else:
@@ -229,6 +228,21 @@ def complete_profile(request):
         error = "Er is iets misgegaan. Probeer het later opnieuw."
         return render(request, 'account/gender_form.html', {'error': error})
 
+
+from django.http import JsonResponse
+@login_required
+def get_refresh_token(request):
+    """
+    Endpoint to get a new refresh token for the logged-in user.
+    """
+    user = request.user
+    if not user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    refresh = RefreshToken.for_user(user)
+    return JsonResponse({
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    })
 
 
 from deals.models import GmailToken, Click, Store

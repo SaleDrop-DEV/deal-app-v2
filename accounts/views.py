@@ -201,12 +201,7 @@ def complete_profile(request):
                 if source == 'app':
                     # Generate a one-time token for the app to log the user in.
                     refresh = RefreshToken.for_user(user)
-                    if user.is_staff:
-                        API_Errors_Site.objects.create(
-                            task = "Admin logged in via app.",
-                            error = f"Admin user {user.email} logged in via app. Token: {str(refresh)}"
-                        )
-                        # return HttpResponseRedirect(f'saledrop://login?token={access_token}')
+                    if user.email == 'gijsgroenendijk@yahoo.com':
                         return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={str(refresh)}")
                     else:
                         return redirect(f"{reverse('stores')}?succesfuly_activated=1")

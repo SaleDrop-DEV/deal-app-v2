@@ -207,7 +207,8 @@ def complete_profile(request):
                             task = "Admin logged in via app.",
                             error = f"Admin user {user.email} logged in via app."
                         )
-                        return HttpResponseRedirect(f'saledrop://login?token={access_token}')
+                        # return HttpResponseRedirect(f'saledrop://login?token={access_token}')
+                        return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={access_token}")
                     else:
                         return redirect(f"{reverse('stores')}?succesfuly_activated=1")
                 else:

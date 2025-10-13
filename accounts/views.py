@@ -179,42 +179,54 @@ def complete_profile(request):
     """
     Handles both displaying the gender form and processing its submission.
     """
-    user = request.user
-    # --- FIX 2: Handle the POST request from the form submission ---
-    if request.method == 'POST':
-        gender_str = request.POST.get('gender')
-        valid_genders = ['man', 'vrouw', 'anders']
+    try:
+        user = request.user
+        # --- FIX 2: Handle the POST request from the form submission ---
+        if request.method == 'POST':
+            gender_str = request.POST.get('gender')
+            valid_genders = ['man', 'vrouw', 'anders']
 
-        if gender_str in valid_genders:
-            gender_map = {'man': 0, 'vrouw': 1, 'anders': 2}
-            gender_int = gender_map.get(gender_str)
-            
-            # Use get_or_create to safely create the record.
-            extra_info, created = ExtraUserInformation.objects.get_or_create(user=user)
-            
-            # Now, 'extra_info' is the actual object, not a tuple
-            extra_info.gender = gender_int
-            extra_info.save()
-            
-            source = request.GET.get('source')
-            if source == 'app':
-                # Generate a one-time token for the app to log the user in.
-                refresh = RefreshToken.for_user(user)
-                access_token = str(refresh.access_token)
-                if user.is_staff:
-                    
-                    return HttpResponseRedirect(f'saledrop://login?token={access_token}')
+            if gender_str in valid_genders:
+                gender_map = {'man': 0, 'vrouw': 1, 'anders': 2}
+                gender_int = gender_map.get(gender_str)
+                
+                # Use get_or_create to safely create the record.
+                extra_info, created = ExtraUserInformation.objects.get_or_create(user=user)
+                
+                # Now, 'extra_info' is the actual object, not a tuple
+                extra_info.gender = gender_int
+                extra_info.save()
+                
+                source = request.GET.get('source')
+                if source == 'app':
+                    # Generate a one-time token for the app to log the user in.
+                    refresh = RefreshToken.for_user(user)
+                    access_token = str(refresh.access_token)
+                    if user.is_staff:
+                        API_Errors_Site.objects.create(
+                            task = "Admin logged in via app.",
+                            error = f"Admin user {user.email} logged in via app."
+                        )
+                        return HttpResponseRedirect(f'saledrop://login?token={access_token}')
+                    else:
+                        return redirect(f"{reverse('stores')}?succesfuly_activated=1")
                 else:
                     return redirect(f"{reverse('stores')}?succesfuly_activated=1")
             else:
-                return redirect(f"{reverse('stores')}?succesfuly_activated=1")
-        else:
-            # If the submission is invalid, show an error.
-            error = "Selecteer een geldige optie."
-            return render(request, 'account/gender_form.html', {'error': error})
+                # If the submission is invalid, show an error.
+                error = "Selecteer een geldige optie."
+                return render(request, 'account/gender_form.html', {'error': error})
 
-    # This part handles the initial GET request.
-    return render(request, 'account/gender_form.html')
+        # This part handles the initial GET request.
+        return render(request, 'account/gender_form.html')
+    except Exception as e:
+        # Log the error and show a generic error message.
+        API_Errors_Site.objects.create(
+            task = "Completing profile.",
+            error = str(e)
+        )
+        error = "Er is iets misgegaan. Probeer het later opnieuw."
+        return render(request, 'account/gender_form.html', {'error': error})
 
 
 

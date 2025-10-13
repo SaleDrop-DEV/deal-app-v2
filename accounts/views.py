@@ -18,6 +18,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.contrib.auth.views import LoginView
 from .forms import CustomAuthenticationForm
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 
@@ -194,9 +195,17 @@ def complete_profile(request):
             extra_info.gender = gender_int
             extra_info.save()
             
-            # Redirect to the main page after successful submission
-            # return redirect(f"{reverse('stores')}?succesfuly_activated=1&go_to_app=1")
-            return redirect(f"{reverse('stores')}?succesfuly_activated=1&go_to_app=0")
+            source = request.GET.get('source')
+            if source == 'app':
+                # Generate a one-time token for the app to log the user in.
+                refresh = RefreshToken.for_user(user)
+                access_token = str(refresh.access_token)
+                if user.is_staff:
+                    return redirect(f'saledrop://login?token={access_token}')
+                else:
+                    return redirect(f"{reverse('stores')}?succesfuly_activated=1")
+            else:
+                return redirect(f"{reverse('stores')}?succesfuly_activated=1")
         else:
             # If the submission is invalid, show an error.
             error = "Selecteer een geldige optie."

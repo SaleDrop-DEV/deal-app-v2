@@ -163,7 +163,7 @@ def activate(request, uidb64, token):
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         source = request.GET.get('source')
         if source == 'app' or source == 'appV2':
-            return redirect(f"{reverse('complete_profile')}?source=app")
+            return redirect(f"{reverse('complete_profile')}?source={source}")
         else:
             return redirect(f"{reverse('stores')}?succesfuly_activated=1")
     else:

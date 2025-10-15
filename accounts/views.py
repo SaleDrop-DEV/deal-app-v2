@@ -162,7 +162,7 @@ def activate(request, uidb64, token):
         user.save()
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         source = request.GET.get('source')
-        if source == 'app':
+        if source == 'app' or source == 'appV2':
             return redirect(f"{reverse('complete_profile')}?source=app")
         else:
             return redirect(f"{reverse('stores')}?succesfuly_activated=1")
@@ -198,13 +198,10 @@ def complete_profile(request):
                 extra_info.save()
                 
                 source = request.GET.get('source')
-                if source == 'app':
+                if source == 'appV2':
                     # Generate a one-time token for the app to log the user in.
                     refresh = RefreshToken.for_user(user)
-                    if user.email == 'gijsgroenendijk@yahoo.com':
-                        return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={str(refresh)}")
-                    else:
-                        return redirect(f"{reverse('stores')}?succesfuly_activated=1")
+                    return redirect(f"{reverse('stores')}?succesfuly_activated=1&token={str(refresh)}")
                 else:
                     return redirect(f"{reverse('stores')}?succesfuly_activated=1")
             else:

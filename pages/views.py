@@ -364,3 +364,14 @@ def test_notification(request):
     else:
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
+
+
+def apple_app_site_association(request):
+    data = {
+        "webcredentials": {
+            "apps": ["TSUTXHU596.com.SaleDrop.SaleDrop"]
+        }
+    }
+    return JsonResponse(data)
+
+

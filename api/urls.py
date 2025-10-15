@@ -62,5 +62,10 @@ urlpatterns = [
 
     path('v2/create-auto-login-token/', IOS_v2_views.generate_auto_login_token, name='v2_generate_auto_login_token'),
 
+    path('v2/register-new-user/', IOS_v2_views.UserRegistrationView.as_view(), name='v2_register_new_user'),
+    
+
+
+
 
 ]

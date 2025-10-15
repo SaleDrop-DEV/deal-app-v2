@@ -23,7 +23,7 @@ from rest_framework import status
 from time import sleep
 import json
 
-from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer
+from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer, UserRegistrationSerializerV2
 from .models import API_Errors
 from deals import models as deals_models
 from pages import models as pages_models
@@ -168,6 +168,49 @@ def get_sponsors():
 
 ITEMS_PER_PAGE = 10
 SLEEP_TIME = 0
+
+
+
+
+class UserRegistrationView(APIView):
+    """
+    API endpoint for user registration.
+    """
+    permission_classes = []  # No permissions required to register a new user
+    authentication_classes = [] # No authentication required
+
+    def post(self, request, format=None):
+        try:
+            serializer = UserRegistrationSerializerV2(data=request.data)
+            if serializer.is_valid():
+                user = serializer.save()
+                if getattr(serializer, 'verification_email_sent', False):
+                    d1 = "Er is een link verstuurd naar uw e-mailadres om uw account te activeren."
+                    d2 = "Volg de link in die e-mail om je registratie te voltooien."
+                    d3 = "Als je de e-mail niet ziet, controleer dan je spammap."
+                    d4 = "Neem contact met ons op als je de e-mail binnen enkele minuten niet ontvangt."
+                    return Response(
+                        
+                        {"message": f"{d1} {d2}\n{d3} {d4}"},
+                        status=status.HTTP_201_CREATED
+                    )
+                else:
+                    API_Errors.objects.create(
+                        task= "Send email",
+                        error = f"No email sent to {user.email}"
+                    )
+                    return Response(
+                        {"message": "Er is iets misgegaan met het versturen van de verificatie link, neem alstublieft contact op met ons."},
+                        status=status.HTTP_201_CREATED
+                    )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            API_Errors.objects.create(
+                task= "Registration",
+                error = str(e)
+            )
+            return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
+
 
 
 def parse_date_received(date_received):

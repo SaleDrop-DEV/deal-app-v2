@@ -137,3 +137,82 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             self.verification_email_sent = False # Set to False on failure
         return user
 
+
+class UserRegistrationSerializerV2(serializers.ModelSerializer):
+    """
+    Serializer for the user registration endpoint.
+    It handles validation for email and password.
+    """
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+    )
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+    gender = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'password', 'password2', 'gender')
+
+    def validate(self, attrs):
+        """
+        Check that the two password fields match.
+        """
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Wachtwoorden komen niet overeen."})
+        valid_genders = ['man', 'vrouw', 'anders']
+        if attrs['gender'] not in valid_genders:
+            raise serializers.ValidationError({"gender": "Ongeldige waarde voor geslacht."})
+        return attrs
+
+    def create(self, validated_data):
+        """
+        Create and return a new CustomUser instance, given the validated data.
+        Also attempts to send a verification email.
+        """
+        # Remove password2 as it's not a model field
+        
+        gender_map = {
+            'man': 0,
+            'vrouw': 1,
+            'anders': 2
+        }
+        gender_str = validated_data.pop('gender')
+        validated_data.pop('password2')
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            is_active=False
+        )
+        gender_int = gender_map.get(gender_str)
+        ExtraUserInformation.objects.create(user=user, gender=gender_int)
+        
+        mail_subject = 'Activeer je account.'
+
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        # You must include the protocol (http or https)
+        base_activation_url = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+        activation_link = f"{settings.CURRENT_URL}{base_activation_url}?source=appV2"
+
+        message = render_to_string('email/validation_email.html', {
+            'user': user,
+            'uid': uid,
+            'token': token,
+            'activation_link': activation_link,
+        })
+        to_email = validated_data['email']
+
+        try:
+            email = EmailMessage(
+                mail_subject, message, to=[to_email]
+            )
+            email.content_subtype = "html"
+            email.send()
+            self.verification_email_sent = True  # Set to True on success
+        except Exception as e:
+            print(f"Error sending verification email: {e}")
+            self.verification_email_sent = False # Set to False on failure
+        return user
+

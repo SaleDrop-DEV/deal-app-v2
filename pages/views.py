@@ -368,6 +368,16 @@ def test_notification(request):
 
 def apple_app_site_association(request):
     data = {
+        "applinks": {
+            "apps": [],
+            "details": [
+                {
+                    "appID": "TSUTXHU596.com.SaleDrop.SaleDrop",
+                    # Add paths you want your app to handle
+                    "paths": []
+                }
+            ]
+        },
         "webcredentials": {
             "apps": ["TSUTXHU596.com.SaleDrop.SaleDrop"]
         }

@@ -27,18 +27,18 @@ class ExtraUserInformation(models.Model):
     
 
 
-class Device(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='devices'
-    )
-    device_id = models.CharField(max_length=255, unique=True, db_index=True)
-    expo_token = models.CharField(max_length=255, unique=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class Device(models.Model):
+#     user = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         related_name='devices'
+#     )
+#     device_id = models.CharField(max_length=255, unique=True, db_index=True)
+#     expo_token = models.CharField(max_length=255, unique=True, db_index=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.user.username} - {self.device_id}"
+#     def __str__(self):
+#         return f"{self.user.username} - {self.device_id}"
 
 
 

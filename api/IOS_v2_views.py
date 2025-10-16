@@ -1011,7 +1011,7 @@ def IOS_API_fetch_store_data_no_auth(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def save_expo_token_new(request):
+def IOS_API_save_expo_token(request):
     try:
         data = json.loads(request.body)
         expo_token = data.get('expoToken', '').strip()

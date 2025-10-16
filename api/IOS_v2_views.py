@@ -1047,41 +1047,33 @@ def save_expo_token_new(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def IOS_API_delete_expo_token(request):
-    """
-    Unregisters a device by deleting its Expo push token record.
-    Expects {'expo_token': 'ExponentPushToken[...]'} in the request body.
-    """
-    expo_token = request.data.get('expoToken', '').strip()
-
-    if not expo_token:
-        return Response(
-            {'error': 'Expo token is required.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
     try:
-        # Find and delete the device record for the current user matching the token.
-        # .delete() returns the number of objects deleted.
-        deleted_count, _ = accounts_models.Device.objects.filter(
-            user=request.user,
-            expo_token=expo_token
-        ).delete()
+        data = json.loads(request.body)
+        expo_token = data.get('expoToken', '').strip()
+        if not expo_token:
+            return JsonResponse({'error': 'Ongeldig token.'}, status=405)
 
-        if deleted_count == 0:
-            # This is not an error, but good to know. The token might have been already removed.
-            return JsonResponse({'success': True})
+        user = request.user
+        extra_info = user.extrauserinformation
+
+        # Remove the token from the list if it exists
+        if extra_info.expoTokens and expo_token in extra_info.expoTokens:
+            extra_info.expoTokens.remove(expo_token)
+            if extra_info.expoToken == expo_token:
+                extra_info.expoToken = None  # Clear the single token field if it matches
+            extra_info.save()
 
         return JsonResponse({'success': True})
-
     except Exception as e:
-        # Log your error
-        API_Errors.objects.create(task="Unregister Device", error=str(e))
-        return Response(
-            {'error': 'An internal error occurred.'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        API_Errors.objects.create(
+            task="Delete Expo token",
+            error=str(e)
         )
+        return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
 
 
+
+#return JsonResponse({'success': True})
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

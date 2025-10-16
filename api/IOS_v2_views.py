@@ -1068,6 +1068,10 @@ def IOS_API_delete_expo_token(request):
         ).delete()
 
         if deleted_count == 0:
+            API_Errors.objects.create(
+                task="Unregister Device",
+                error="Expo token not found"
+            )
             # This is not an error, but good to know. The token might have been already removed.
             return JsonResponse({'success': True})
 

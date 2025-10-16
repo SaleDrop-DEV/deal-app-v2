@@ -38,7 +38,7 @@ class Device(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.device_id}"
+        return f"{self.user.email} - {self.device_id}"
 
 
 

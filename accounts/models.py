@@ -1,8 +1,9 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.utils import timezone
+
 import uuid
-
-
 
 class ExtraUserInformation(models.Model):
     GENDER_CHOICES = [
@@ -23,13 +24,23 @@ class ExtraUserInformation(models.Model):
             2: 'Anders',
         }
         return f"{self.user.email}: {gender_map.get(self.gender, 'Unknown')}"
+    
 
 
-# In your app's models.py
+class Device(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='devices'
+    )
+    device_id = models.CharField(max_length=255, unique=True, db_index=True)
+    expo_token = models.CharField(max_length=255, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.utils import timezone
+    def __str__(self):
+        return f"{self.user.username} - {self.device_id}"
+
+
 
 class CustomUserManager(BaseUserManager):
     """

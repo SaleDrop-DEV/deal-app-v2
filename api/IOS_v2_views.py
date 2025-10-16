@@ -27,6 +27,7 @@ from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer
 from .models import API_Errors
 from deals import models as deals_models
 from pages import models as pages_models
+from accounts import models as accounts_models
 from accounts.models import OneTimeLoginToken
 
 SLEEP_TIME = 0
@@ -1010,59 +1011,75 @@ def IOS_API_fetch_store_data_no_auth(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def IOS_API_save_expo_token(request):
+def save_expo_token_new(request):
     try:
         data = json.loads(request.body)
         expo_token = data.get('expoToken', '').strip()
-        if not expo_token:
-            return JsonResponse({'error': 'Ongeldig token.'}, status=405)
+        device_id = data.get('deviceId', '').strip()
+
+        if not expo_token or not device_id:
+            return JsonResponse({'error': 'Expo token and device ID are required.'}, status=400)
 
         user = request.user
-        extra_info = user.extrauserinformation
 
-        # Add the new token to the list if it's not already present
-        if extra_info.expoTokens is None:
-            extra_info.expoTokens = []
-        if expo_token not in extra_info.expoTokens:
-            extra_info.expoTokens.append(expo_token)
-            extra_info.save()
+        # 1. If another user has this token, delete their device record
+        accounts_models.Device.objects.filter(expo_token=expo_token).exclude(user=user).delete()
 
-        return JsonResponse({'success': True})
-    except Exception as e:
-        API_Errors.objects.create(
-            task="Save Expo token",
-            error=str(e)
+        # 2. Use update_or_create to handle the deviceId
+        # This finds a device with the given device_id.
+        # - If it exists, it updates the user and expo_token.
+        # - If it doesn't exist, it creates a new record.
+        # This elegantly handles re-assigning a device to a new user.
+        accounts_models.Device.objects.update_or_create(
+            device_id=device_id,
+            defaults={'user': user, 'expo_token': expo_token}
         )
-        return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
+
+        return JsonResponse({'success': True, 'message': 'Device registered successfully.'})
+
+    except Exception as e:
+        # Log your error properly
+        print(f"Error saving expo token: {e}")
+        return JsonResponse({'error': 'An internal error occurred.'}, status=500)
 
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def IOS_API_delete_expo_token(request):
+    """
+    Unregisters a device by deleting its Expo push token record.
+    Expects {'expo_token': 'ExponentPushToken[...]'} in the request body.
+    """
+    expo_token = request.data.get('expoToken', '').strip()
+
+    if not expo_token:
+        return Response(
+            {'error': 'Expo token is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     try:
-        data = json.loads(request.body)
-        expo_token = data.get('expoToken', '').strip()
-        if not expo_token:
-            return JsonResponse({'error': 'Ongeldig token.'}, status=405)
+        # Find and delete the device record for the current user matching the token.
+        # .delete() returns the number of objects deleted.
+        deleted_count, _ = accounts_models.Device.objects.filter(
+            user=request.user,
+            expo_token=expo_token
+        ).delete()
 
-        user = request.user
-        extra_info = user.extrauserinformation
-
-        # Remove the token from the list if it exists
-        if extra_info.expoTokens and expo_token in extra_info.expoTokens:
-            extra_info.expoTokens.remove(expo_token)
-            if extra_info.expoToken == expo_token:
-                extra_info.expoToken = None  # Clear the single token field if it matches
-            extra_info.save()
+        if deleted_count == 0:
+            # This is not an error, but good to know. The token might have been already removed.
+            return JsonResponse({'success': True})
 
         return JsonResponse({'success': True})
+
     except Exception as e:
-        API_Errors.objects.create(
-            task="Delete Expo token",
-            error=str(e)
+        # Log your error
+        API_Errors.objects.create(task="Unregister Device", error=str(e))
+        return Response(
+            {'error': 'An internal error occurred.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        return JsonResponse({'error': 'Er ging iets mis.'}, status=500)
 
 
 @api_view(['POST'])

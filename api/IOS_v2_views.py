@@ -1029,7 +1029,7 @@ def IOS_API_save_expo_token(request):
         accounts_models.Device.objects.filter(expo_token=expo_token).delete()
 
         # 2. Clean up the old expoToken field from ExtraUserInformation if it exists.
-        accounts_models.ExtraUserInformation.objects.filter(expo_token=expo_token).update(expo_token=None)
+        accounts_models.ExtraUserInformation.objects.filter(expoToken=expo_token).update(expoToken=None)
 
         # 3. Use update_or_create, keyed on the unique device_id.
         # - If a device with this ID exists, it will be updated with the new user and token.

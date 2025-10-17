@@ -35,10 +35,11 @@ class Device(models.Model):
     )
     device_id = models.CharField(max_length=255, unique=True, db_index=True)
     expo_token = models.CharField(max_length=255, unique=True, db_index=True)
+    device_model = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.email} - {self.device_id}"
+        return f"{self.user.email} - {self.device_model} - {self.device_id}"
 
 
 

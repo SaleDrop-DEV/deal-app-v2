@@ -1016,6 +1016,8 @@ def IOS_API_save_expo_token(request):
         data = json.loads(request.body)
         expo_token = data.get('expoToken', '').strip()
         device_id = data.get('deviceId', '').strip()
+        device_model = data.get('device_model', '').strip()
+
 
         if not expo_token or not device_id:
             return JsonResponse({'error': 'Expo token and device ID are required.'}, status=400)
@@ -1025,6 +1027,9 @@ def IOS_API_save_expo_token(request):
         # 1. If another user has this token, delete their device record
         accounts_models.Device.objects.filter(expo_token=expo_token).exclude(user=user).delete()
 
+        # 1.2 Rmove Expo token from old save method
+        accounts_models.ExtraUserInformation.objects.filter(expo_token=expo_token).update(expo_token=None)
+
         # 2. Use update_or_create to handle the deviceId
         # This finds a device with the given device_id.
         # - If it exists, it updates the user and expo_token.
@@ -1032,6 +1037,7 @@ def IOS_API_save_expo_token(request):
         # This elegantly handles re-assigning a device to a new user.
         accounts_models.Device.objects.update_or_create(
             device_id=device_id,
+            device_model=device_model,
             defaults={'user': user, 'expo_token': expo_token}
         )
 
@@ -1070,7 +1076,7 @@ def IOS_API_delete_expo_token(request):
         if deleted_count == 0:
             API_Errors.objects.create(
                 task="Unregister Device",
-                error="Expo token not found"
+                error=f"Expo token not found '{expo_token}'"
             )
             # This is not an error, but good to know. The token might have been already removed.
             return JsonResponse({'success': True})

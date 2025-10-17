@@ -1024,28 +1024,27 @@ def IOS_API_save_expo_token(request):
 
         user = request.user
 
-        # 1. If another user has this token, delete their device record
-        accounts_models.Device.objects.filter(expo_token=expo_token).exclude(user=user).delete()
+        # 1. Ensure the expo_token is unique. If any other device (regardless of user)
+        # has this token, it's stale. We can safely remove that device record.
+        accounts_models.Device.objects.filter(expo_token=expo_token).delete()
 
-        # 1.2 Rmove Expo token from old save method
+        # 2. Clean up the old expoToken field from ExtraUserInformation if it exists.
         accounts_models.ExtraUserInformation.objects.filter(expo_token=expo_token).update(expo_token=None)
 
-        # 2. Use update_or_create to handle the deviceId
-        # This finds a device with the given device_id.
-        # - If it exists, it updates the user and expo_token.
-        # - If it doesn't exist, it creates a new record.
-        # This elegantly handles re-assigning a device to a new user.
+        # 3. Use update_or_create, keyed on the unique device_id.
+        # - If a device with this ID exists, it will be updated with the new user and token.
+        # - If not, a new device record will be created.
+        # This correctly handles transferring a device between users.
         accounts_models.Device.objects.update_or_create(
             device_id=device_id,
-            device_model=device_model,
-            defaults={'user': user, 'expo_token': expo_token}
+            defaults={'user': user, 'expo_token': expo_token, 'device_model': device_model}
         )
 
         return JsonResponse({'success': True, 'message': 'Device registered successfully.'})
 
     except Exception as e:
         # Log your error properly
-        print(f"Error saving expo token: {e}")
+        API_Errors.objects.create(task="Register Device", error=str(e))
         return JsonResponse({'error': 'An internal error occurred.'}, status=500)
 
 

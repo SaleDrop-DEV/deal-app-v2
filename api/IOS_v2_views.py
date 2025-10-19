@@ -496,8 +496,11 @@ def IOS_API_fetch_stores(request):
         if preference == 2:  # Gender BOTH => all stores matter
             queryset = deals_models.Store.objects.all()
         else:
-            gender_char = 'M' if preference == 0 else 'F'
-            queryset = deals_models.Store.objects.filter(Q(gender=gender_char) | Q(gender="B"))
+            if search_query == '':
+                gender_char = 'M' if preference == 0 else 'F'
+                queryset = deals_models.Store.objects.filter(Q(gender=gender_char) | Q(gender="B"))
+            else:
+                queryset = deals_models.Store.objects.all()
 
         if search_query:
             queryset = queryset.filter(name__icontains=search_query)

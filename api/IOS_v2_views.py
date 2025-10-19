@@ -492,15 +492,14 @@ def IOS_API_fetch_stores(request):
         if sort not in ['popular', 'new', 'name', 'with_sales']:
             return JsonResponse({'error': "Ongeldige sorteermethode."}, status=400)
 
-        # Base queryset based on user's gender preference for stores
-        if preference == 2:  # Gender BOTH => all stores matter
+        # If there's a search query, we should search across all stores.
+        if search_query:
             queryset = deals_models.Store.objects.all()
-        else:
-            if search_query == '':
-                gender_char = 'M' if preference == 0 else 'F'
-                queryset = deals_models.Store.objects.filter(Q(gender=gender_char) | Q(gender="B"))
-            else:
-                queryset = deals_models.Store.objects.all()
+        elif preference == 2:  # Gender BOTH => all stores matter
+            queryset = deals_models.Store.objects.all()
+        else: # No search, but gender preference exists (Male or Female)
+            gender_char = 'M' if preference == 0 else 'F'
+            queryset = deals_models.Store.objects.filter(Q(gender=gender_char) | Q(gender="B"))
 
         if search_query:
             queryset = queryset.filter(name__icontains=search_query)

@@ -726,6 +726,22 @@ def IOS_API_delete_expo_push_token(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_analysis_detail(request):
+    def parse_date_received(date_received):
+        now = timezone.now()
+        delta = now - date_received
+
+        if delta.total_seconds() < 60:
+            seconds = int(delta.total_seconds())
+            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
+        elif delta.total_seconds() < 3600:
+            minutes = int(delta.total_seconds() / 60)
+            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
+        elif delta.total_seconds() < 86400:
+            hours = int(delta.total_seconds() / 3600)
+            return f"{hours} uur geleden"
+        else:
+            days = int(delta.total_seconds() / 86400)
+            return f"{days} dag{'en' if days > 1 else ''} geleden"
     try:
         analysis_id = json.loads(request.body).get('analysisId')
         analysis = deals_models.GmailSaleAnalysis.objects.get(id=analysis_id)
@@ -746,5 +762,6 @@ def get_analysis_detail(request):
         'storeName': analysis.message.store.name,
         'mainLink': f"deals/visit/{analysis.id}/{request.user.id}/",  # consider if request.user.id is needed here
         'description': analysis.description if analysis.description != "N/A" else d,
+        'parsedDateReceived': parse_date_received(analysis.message.received_date),
         'messageId': analysis.message.id,
     })

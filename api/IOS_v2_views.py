@@ -777,7 +777,7 @@ def IOS_API_fetch_account_details(request):
                 message__received_date__gte=one_month_ago
             ).filter(gender_filters).count()
 
-        paginator = Paginator(subscriptions_qs, ITEMS_PER_PAGE)
+        paginator = Paginator(subscriptions_qs, ITEMS_PER_PAGE * 2)
         try:
             page_obj = paginator.page(page_number)
         except PageNotAnInteger:
@@ -1008,6 +1008,50 @@ def IOS_API_fetch_store_data_no_auth(request):
             error=str(e)
         )
         return Response({'error': 'Er ging iets mis.'}, status=500)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def get_analysis_detail_no_auth(request):
+    def parse_date_received(date_received):
+        now = timezone.now()
+        delta = now - date_received
+
+        if delta.total_seconds() < 60:
+            seconds = int(delta.total_seconds())
+            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
+        elif delta.total_seconds() < 3600:
+            minutes = int(delta.total_seconds() / 60)
+            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
+        elif delta.total_seconds() < 86400:
+            hours = int(delta.total_seconds() / 3600)
+            return f"{hours} uur geleden"
+        else:
+            days = int(delta.total_seconds() / 86400)
+            return f"{days} dag{'en' if days > 1 else ''} geleden"
+    try:
+        analysis_id = json.loads(request.body).get('analysisId')
+        analysis = deals_models.GmailSaleAnalysis.objects.get(id=analysis_id)
+    except deals_models.GmailSaleAnalysis.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+    except Exception as e:
+        API_Errors.objects.create(
+            task= "Get analysis detail",
+            error = str(e)
+        )
+        return JsonResponse({'error': str(e)}, status=500)
+    
+    s = "Er is een nieuwe deal beschikbaar!"
+    d = "Bekijk jouw nieuwe deal door op de knop te klikken."
+    return JsonResponse({
+        'title': analysis.title,
+        'grabber': analysis.grabber if analysis.grabber != "N/A" else s,
+        'storeName': analysis.message.store.name,
+        'mainLink': f"deals/visit/{analysis.id}/0/",  # consider if request.user.id is needed here
+        'description': analysis.description if analysis.description != "N/A" else d,
+        'parsedDateReceived': parse_date_received(analysis.message.received_date),
+        'messageId': analysis.message.id,
+    })
 
 
 @api_view(['POST'])

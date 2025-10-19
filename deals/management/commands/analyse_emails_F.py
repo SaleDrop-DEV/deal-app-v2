@@ -327,7 +327,17 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
                 .values_list('extrauserinformation__expoToken', flat=True)
             )
 
-            if expo_tokens and analysis.is_new_deal_better:
+            # New method using the Device model
+            device_expo_tokens = list(
+                subscribers.prefetch_related('devices')
+                .filter(devices__expo_token__isnull=False)
+                .exclude(devices__expo_token='')
+                .values_list('devices__expo_token', flat=True)
+            )
+
+            all_tokens = list(set(expo_tokens + device_expo_tokens))
+
+            if all_tokens and analysis.is_new_deal_better:
                 title = f"{store.name}: {analysis.title}"
                 grabber = analysis.grabber if analysis.grabber != 'N/A' else "Nieuwe deal beschikbaar!"
                 body = grabber
@@ -335,7 +345,7 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
                     "page": "SaleDetail",
                     "analysisId": analysis.id,
                 }
-                send_batch_notifications(expo_tokens, title, body, data)
+                send_batch_notifications(all_tokens, title, body, data)
 
 def generate_analysis_from_gemini_data(message, data):
 

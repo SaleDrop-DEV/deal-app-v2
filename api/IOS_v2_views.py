@@ -507,9 +507,9 @@ def IOS_API_fetch_stores(request):
         # 1. Define gender filters for sales emails, relative to Store
         gender_of_user = getattr(user.extrauserinformation, 'gender', None)
         gender_sales_filter = Q()
-        if gender_of_user == 0 and search_query != '': # Male
+        if gender_of_user == 0 and search_query == '': # Male
             gender_sales_filter = Q(gmailmessage__email_to="gijsgprojects@gmail.com") | Q(gmailmessage__store__genderPreferenceSet=False)
-        elif gender_of_user == 1 and search_query != '': # Female
+        elif gender_of_user == 1 and search_query == '': # Female
             gender_sales_filter = Q(gmailmessage__email_to="donnapatrona79@gmail.com") | Q(gmailmessage__store__genderPreferenceSet=False)
             
         # 2. Define the main filter for active sales, relative to Store

@@ -947,35 +947,39 @@ from deals.models import Click, ClickNoAuth
 from django.http import Http404
 
 def visit_sale_view(request, gmail_analysis_id, user_id):
+    # 1. Get the analysis object or return 404 if not found.
     gmail_analysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
 
+    # 2. Validate that the analysis has a store and a main link.
     if not (gmail_analysis.message.store and gmail_analysis.main_link):
         return Http404()
 
+    # 3. Determine the final redirect URL.
     redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
+    
+    # 4. Find the corresponding Url object if it exists.
     url_object = Url.objects.filter(general_url=redirect_url_string).first()
-    click_url_to_save = None
-    if url_object:
-        url_object.add_visit(user=user)
-        click_url_to_save = url_object
 
+    # 5. Handle authenticated vs. unauthenticated users.
     if user_id == 0:
+        # Unauthenticated user: Record a ClickNoAuth event.
         ClickNoAuth.objects.create(
             analysis=gmail_analysis,
-            store = gmail_analysis.message.store,
-            url=click_url_to_save
+            store=gmail_analysis.message.store,
+            url=url_object  # Can be None, which is fine.
         )
-        return redirect(redirect_url_string)
+    else:
+        # Authenticated user: Fetch the user object.
+        user = get_object_or_404(User, id=user_id)
+        
+        # If a Url object was found, record the user's visit to it.
+        if url_object:
+            url_object.add_visit(user=user)
+        
+        # Record the click event for the authenticated user.
+        Click.objects.create(user=user, analysis=gmail_analysis, store=gmail_analysis.message.store, url=url_object)
     
-    user = get_object_or_404(User, id=user_id)
-
-    Click.objects.create(
-        user=user,
-        analysis=gmail_analysis,
-        store=gmail_analysis.message.store,
-        url=click_url_to_save
-    )
-
+    # 6. Redirect the user to the sale page.
     return redirect(redirect_url_string)
 
 
@@ -1309,4 +1313,3 @@ def search_store_sales_home_view(request):
     return render(request, 'deals/public_search_home.html', context)
 
  
-

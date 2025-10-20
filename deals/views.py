@@ -1177,6 +1177,15 @@ def store_sales_view(request, store_id, sales_per_page=9):
 
 
 def search_store_sales_view(request, store_id, gender, slug):
+    def parse_date_issued(date_issued):
+        month_map = {
+            1: 'jan', 2: 'feb', 3: 'mrt', 4: 'apr', 5: 'mei', 6: 'jun',
+            7: 'jul', 8: 'aug', 9: 'sep', 10: 'okt', 11: 'nov', 12: 'dec'
+        }
+        # return 14 mei, 2024
+        month_abbr = month_map.get(date_issued.month, '')
+        return f"{date_issued.day} {month_abbr}, {date_issued.year}"
+    
     store = get_object_or_404(Store, id=store_id) 
     if store.slug != slug:
             # Redirect Permanent (301) naar de juiste, canonieke URL.
@@ -1253,7 +1262,7 @@ def search_store_sales_view(request, store_id, gender, slug):
 
     context = {
         'results': results , 
-        'page': 'search_stores_sale',
+        'page': 'public_deals',
         'appStoreImage': appStoreImage,
         'store': store,
         'image_url': store.image_url if store.mayUseContent else get_store_logo(store.name),
@@ -1268,6 +1277,12 @@ def search_store_sales_view(request, store_id, gender, slug):
         store_gender_recommendation = gender
         context['other_gender'] = other_gender
         context['other_gender_link'] = f"/deals/{store_id}/{other_gender}/{slug}/"
+
+    if store.description:
+        context['description'] = store.description
+    else:
+        context['description'] = f"Op SaleDrop sinds {parse_date_issued(store.dateIssued)}."
+
     context['store_gender_recommendation'] = store_gender_recommendation
 
     return render(request, 'deals/public_search.html', context)

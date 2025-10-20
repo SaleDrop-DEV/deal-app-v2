@@ -113,10 +113,10 @@
 {% block index_header %}
 <header id="gradient-card" style="padding-bottom: 1.5rem;" class="animated-header">
     <h1 style="font-weight: 350;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
-    <p style="font-weight: 400;" class="header-subtitle">Ontvang als eerste de beste sales en deals!</p>
+    <p style="font-weight: 400;" class="header-subtitle">Nooit meer te laat bij sales</p>
     <div id="sampleNotifications1" class="notification-container"></div>
     <!-- <button onclick="window.location.href='/accounts/sign-up/'" class="action-btn">Aanmelden</button> -->
-    <a target="_blank" href="https://apps.apple.com/us/app/saledrop/id6751799791"><img src="https://saledrop.app{{ appStoreImage.image_url }}" alt="Link naar appstore" style="width: 200px;" ></a>
+     <a target="_blank" href="https://apps.apple.com/us/app/saledrop/id6751799791"><img src="https://saledrop.app{{ appStoreImage.image_url }}" alt="" style="width: 200px;"></a>
 </header>
 {% endblock%}
 
@@ -128,18 +128,19 @@
 
         <div class="section-container-row">
             <div class="section-container-col">
-                <h3>Zoek je favoriete winkels</h3>
-                <p>Zoek je favoriete winkels in onze zoekfunctie en abonneer je gratis.</p>
+                <h3>Zoek eenvoudig</h3>
+                <p>Vind jouw favoriete kledingmerken en winkels in onze zoekfunctie.</p>
             </div>
             <div class="section-container-col fade-in-up">
-                <img src="https://saledrop.app{{ search_stores_image.image_url }}" alt="Zoekfunctie in de app">
+                <!-- <img src="https://saledrop.app{{ search_stores_image.image_url }}" alt="Zoekfunctie in de app"> -->
+                 <img src="{% static 'images/screenShotSearch.png' %}" alt="Zoekfunctie in de app">
             </div>
         </div>
 
         <div class="section-container-row">
             <div class="section-container-col">
-                <h3>Ontvang meldingen</h3>
-                <p>Ontvang push notificaties zodra er een nieuwe sale of deal beschikbaar is.</p>
+                <h3>Volg wat je wil</h3>
+                <p>Klik op het belletje en wij houden jouw merken continu in de gaten.</p>
             </div>
             <div class="section-container-col fade-in-up">
                 <div id="sampleNotifications2" class="notification-container"></div>
@@ -148,11 +149,12 @@
 
         <div class="section-container-row">
             <div class="section-container-col">
-                <h3>Bekijk de deals</h3>
-                <p>Bekijk de deal en klik meteen door zodat je favoriete kleding niet uitverkocht raakt.</p>
+                <h3>Ontvang meldingen</h3>
+                <p>Wij sturen je een melding van nieuwe deals zodat jij als eerste je favoriete items kan shoppen tegen de beste prijzen.</p>
             </div>
             <div class="section-container-col fade-in-up">
-                <img src="https://saledrop.app{{ example_sale_image.image_url }}" alt="Deal detail pagina">
+                <!-- <img src="https://saledrop.app{{ example_sale_image.image_url }}" alt="Deal detail pagina"> -->
+                 <img src="{% static 'images/screenShotSaleDetail.png' %}" alt="Deal detail pagina">
             </div>
         </div>
     </div>

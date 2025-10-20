@@ -237,7 +237,7 @@ def get_refresh_token(request):
     })
 
 
-from deals.models import GmailToken, Click, Store
+from deals.models import GmailToken, Click, Store, ClickNoAuth
 from pages.models import recommendation, BusinessRequest
 from api.models import API_Errors_Site
 from google.oauth2 import service_account
@@ -340,7 +340,8 @@ def admin_dashboard(request):
         return bing_data
 
     def get_total_clicks():
-        return Click.objects.count()
+
+        return Click.objects.count() + ClickNoAuth.objects.count()
 
     def get_n_most_subscribed_stores(n=5):
         results = Store.objects.all().annotate(

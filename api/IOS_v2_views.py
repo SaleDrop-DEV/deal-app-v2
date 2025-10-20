@@ -152,7 +152,8 @@ def get_highlighted_sales(user):
         print(e)
         return []
 
-def get_sponsors():
+def get_sponsors(active=False):
+    if not active: return []
     via_appia = deals_models.Store.objects.get(id=44)
     data = {
         'id': via_appia.id,

@@ -1,13 +1,15 @@
 from django.contrib import admin
 from django.db.models import Q
 
-from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken, User, Click
+from .models import GmailMessage, GmailSaleAnalysis, Store, ScrapeData, SubscriptionData, Url, GmailToken, User, Click, ClickNoAuth
 
 # Register other models without custom admin
 admin.site.register(GmailSaleAnalysis)
 admin.site.register(SubscriptionData)
 admin.site.register(GmailToken)
 admin.site.register(Click)
+admin.site.register(ClickNoAuth)
+
 
 # --- Store Admin Configuration ---
 class HasNoDescriptionFilter(admin.SimpleListFilter):

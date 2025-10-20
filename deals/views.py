@@ -943,7 +943,7 @@ def toggle_subscription(request):
 
 
 
-from deals.models import Click
+from deals.models import Click, ClickNoAuth
 from django.http import Http404
 
 def visit_sale_view(request, gmail_analysis_id, user_id):
@@ -954,17 +954,20 @@ def visit_sale_view(request, gmail_analysis_id, user_id):
 
     redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
     url_object = Url.objects.filter(general_url=redirect_url_string).first()
-
-    if user_id == 0:
-        # maybe create new click model for unauths
-        return redirect(redirect_url_string)
-    
-    user = get_object_or_404(User, id=user_id)
-
     click_url_to_save = None
     if url_object:
         url_object.add_visit(user=user)
         click_url_to_save = url_object
+
+    if user_id == 0:
+        ClickNoAuth.objects.create(
+            analysis=gmail_analysis,
+            store = gmail_analysis.message.store,
+            url=click_url_to_save
+        )
+        return redirect(redirect_url_string)
+    
+    user = get_object_or_404(User, id=user_id)
 
     Click.objects.create(
         user=user,

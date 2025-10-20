@@ -458,3 +458,12 @@ class Click(models.Model):
     def __str__(self):
         return f"{self.store} visited at {self.timestamp}"
 
+
+class ClickNoAuth(models.Model):
+    analysis = models.ForeignKey(GmailSaleAnalysis, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    url = models.ForeignKey(Url, on_delete=models.CASCADE, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Visited sale from {self.store.name} - {self.timestamp}"

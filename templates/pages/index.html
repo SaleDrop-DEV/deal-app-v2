@@ -96,7 +96,7 @@
             );
         background-size: 400% 400%;
         animation: animate-gradient-position 10s ease infinite alternate;
-        padding-bottom: 2.5rem !important;
+        /* padding-bottom: 2.5rem !important; */
     }
 
     @keyframes animate-gradient-position {
@@ -107,16 +107,25 @@
             background-position: 100% 50%;
         }
     }
+
+    .header-smoother{
+        /* background should vertical fade from top opacity 0 to 1 */
+        margin-top: 2.5rem;
+        height: 4rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    }
 </style>
 {% endblock %}
 
 {% block index_header %}
-<header id="gradient-card" style="padding-bottom: 1.5rem;" class="animated-header">
+<header id="gradient-card" style="padding: 1rem 0 0 0; " class="animated-header">
     <h1 style="font-weight: 350;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
     <p style="font-weight: 400;" class="header-subtitle">Nooit meer te laat bij sales</p>
     <div id="sampleNotifications1" class="notification-container"></div>
     <!-- <button onclick="window.location.href='/accounts/sign-up/'" class="action-btn">Aanmelden</button> -->
      <a target="_blank" href="https://apps.apple.com/us/app/saledrop/id6751799791"><img src="https://saledrop.app{{ appStoreImage.image_url }}" alt="" style="width: 200px;"></a>
+     <div class="header-smoother"></div>
 </header>
 {% endblock%}
 

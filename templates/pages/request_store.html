@@ -107,11 +107,19 @@
             );
         background-size: 400% 400%;
         animation: animate-gradient-position 10s ease infinite alternate;
-        padding: 2.5rem 1.5rem !important;
+        padding: 2.5rem 0 0 0 !important;
     }
     header p{
         color: var(--secondary-text-color);
         font-weight: bold;
+    }
+
+    .header-smoother{
+        /* background should vertical fade from top opacity 0 to 1 */
+        margin-top: 2.5rem;
+        height: 4rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
     }
 
     main{
@@ -293,9 +301,10 @@
 {% endblock %}
 
 {% block index_header %}
-<header style="padding-bottom: 1.5rem;" class="animated-header">
+<header class="animated-header">
     <h1 style="font-weight: 350;">Contact voor bedrijven</h1>
     <p style="font-weight: 400;">Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met u op.</p>
+    <div class="header-smoother"></div>
 </header>
 {% endblock%}
 {% block content %}

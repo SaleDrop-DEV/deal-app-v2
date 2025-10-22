@@ -43,6 +43,14 @@ GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemin
 EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 
 
+deal_types = {
+    0: {'emoji': "💸", 'description': "Korting en besparen"},
+    1: {'emoji': "🔥", 'description': "Hot deal"},
+    2: {'emoji': "💥", 'description': "Mega deal"},
+    3: {'emoji': "🎁", 'description': "Acties, verrassingen of gratis items"},
+    4: {'emoji': "🛍️", 'description': "Overig"},
+}
+
 
 def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
     """
@@ -63,6 +71,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"
+        f"- deal_type: 0 als de deal korting en besparen is, 1 als de deal hot deal is, 2 als de deal mega deal is, 3 als de deal een actie, cadeau of verrassing is, 4 als de deal niet te categoriseren is."
         f"- is_new_deal_better: boolean \n{prompt_addition}\n\n"
         f"Als een variabele er niet is, gebruik dan 'N/A'.\n"
         f"Geef de output als een JSON object dat het gevraagde schema volgt.\n"
@@ -79,6 +88,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
             "description": {"type": "STRING"},
             "main_link": {"type": "STRING"},
             "deal_probability": {"type": "NUMBER"},
+            "deal_type": {"type": "NUMBER"},
             "is_new_deal_better": {"type": "BOOLEAN"},
             
             "highlighted_products": {
@@ -161,16 +171,34 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
 
     json_text = parts[0].get('text', '{}')
     parsed = json.loads(json_text)
+
+    # Safely get and validate deal_type from the parsed JSON
+    deal_type = parsed.get('deal_type', 4)
+    try:
+        deal_type = int(deal_type)
+        # Use .values to get a list like [0, 1, 2, 3, 4]
+        if deal_type not in GmailSaleAnalysis.DealType.values: 
+            deal_type = GmailSaleAnalysis.DealType.OTHER.value # Assign the integer value
+    except (ValueError, TypeError):
+        ScrapeData.objects.create(
+            task="Invalid deal_type in Gemini response",
+            succes=False,
+            major_error=False,
+            error=f"Invalid deal_type: {deal_type}",
+            execution_date=timezone.now()
+        )
+        deal_type = GmailSaleAnalysis.DealType.OTHER.value
+
     data = {
         "is_sale_mail": parsed.get("is_sale_mail", False),
         "is_personal_deal": parsed.get("is_personal_deal", False),
         "title": parsed.get("title"),
         "grabber": parsed.get("grabber"),
-        "description": decode_unicode_escapes(parsed.get("description")), # Apply decoding here
+        "description": decode_unicode_escapes(parsed.get("description")),
         "main_link": parsed.get("main_link"),
         "highlighted_products": parsed.get("highlighted_products", []),
         "deal_probability": float(parsed.get("deal_probability", 0.0)),
-
+        "deal_type": deal_type,
         "is_new_deal_better": parsed.get("is_new_deal_better", True)
     }
     return {'success': True, 'data': data}
@@ -260,7 +288,7 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
         for i in range(0, len(token_list), chunk_size):
             yield token_list[i:i + chunk_size]
 
-    def send_batch_notifications(tokens, title, body, data):
+    def send_batch_notifications(tokens, title, subtitle, body, data):
         """
         Sends notifications in batches to the Expo Push API.
         """
@@ -274,6 +302,7 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
             messages = [{
                 'to': token,
                 'title': title,
+                'subtitle': subtitle,
                 'body': body,
                 'data': data
             } for token in token_chunk]
@@ -339,14 +368,16 @@ def sendPushNotifications(analysis: GmailSaleAnalysis, probability_threshold=set
             all_tokens = list(set(expo_tokens + device_expo_tokens))
 
             if all_tokens and analysis.is_new_deal_better:
-                title = f"{store.name}: {analysis.title}"
+                title = store.name
+                emoji = deal_types[analysis.deal_type]['emoji']
+                subtitle = f"{emoji} {analysis.title}"
                 grabber = analysis.grabber if analysis.grabber != 'N/A' else "Nieuwe deal beschikbaar!"
                 body = grabber
                 data = {
                     "page": "SaleDetail",
                     "analysisId": analysis.id,
                 }
-                send_batch_notifications(all_tokens, title, body, data)
+                send_batch_notifications(all_tokens, title, subtitle, body, data)
 
 def generate_analysis_from_gemini_data(message, data):
 
@@ -385,6 +416,7 @@ def generate_analysis_from_gemini_data(message, data):
         main_link=data["main_link"],
         highlighted_products=data["highlighted_products"],
         deal_probability=data["deal_probability"],
+        deal_type=data["deal_type"],
         is_new_deal_better=data["is_new_deal_better"]
     )
 

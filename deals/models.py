@@ -102,6 +102,13 @@ class GmailMessage(models.Model):
         }
     
 class GmailSaleAnalysis(models.Model):
+    class DealType(models.IntegerChoices):
+        DISCOUNT = 0, "Korting en besparen"
+        HOT_DEAL = 1, "Hot deal"
+        MEGA_DEAL = 2, "Mega deal"
+        GIFTS = 3, "Acties, verrassingen of gratis items"
+        OTHER = 4, "Overig"
+
     message = models.OneToOneField(GmailMessage, on_delete=models.CASCADE, related_name="analysis")
     is_sale_mail = models.BooleanField(null=False, blank=False)
     is_personal_deal = models.BooleanField(null=False, blank=False)
@@ -112,6 +119,11 @@ class GmailSaleAnalysis(models.Model):
     highlighted_products = models.JSONField(null=True, blank=True)
     deal_probability = models.FloatField()
     is_new_deal_better = models.BooleanField(default=True, null=False, blank=False)
+
+    deal_type = models.IntegerField(
+        choices=DealType.choices,
+        default=DealType.OTHER
+    )
 
 
     def __str__(self):

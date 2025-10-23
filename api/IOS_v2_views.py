@@ -152,6 +152,79 @@ def get_highlighted_sales(user):
         print(e)
         return []
 
+def get_highlighted_sales_v2(user):
+    """
+    This function returns a list of sales from the past 5 days from stores to which the user has not subscribed.
+    The top 20% of sales with the most clicks will be returned. The sales are filtered on gender preference.
+    """
+    try:
+        # 1. Get user's gender preference and subscribed stores
+        gender_of_user = getattr(user.extrauserinformation, 'gender', None)
+        subscribed_store_ids = list(user.subscribed_stores.values_list('id', flat=True))
+
+        # 2. Define gender filters for sales
+        if gender_of_user == 0:
+            gender_filters = Q(message__email_to="gijsgprojects@gmail.com") | Q(message__store__genderPreferenceSet=False)
+        elif gender_of_user == 1:
+            gender_filters = Q(message__email_to="donnapatrona79@gmail.com") | Q(message__store__genderPreferenceSet=False)
+        else:
+            gender_filters = Q()
+
+        # 3. Define date range and base filters
+        five_days_ago = timezone.now() - timedelta(days=5)
+        sales_qs = deals_models.GmailSaleAnalysis.objects.filter(
+            is_sale_mail=True,
+            is_personal_deal=False,
+            deal_probability__gt=settings.THRESHOLD_DEAL_PROBABILITY,
+            message__received_date__gte=five_days_ago,
+            message__store__isnull=False,
+            is_new_deal_better=True
+        ).filter(
+            gender_filters
+        ).exclude(
+            message__store__id__in=subscribed_store_ids
+        ).annotate(
+            click_count=Count('click', distinct=True) + Count('clicknoauth', distinct=True)
+        ).order_by('-click_count')
+
+        # 4. Filter to get one sale per store and calculate the limit (top 20%)
+        unique_sales_by_store = []
+        seen_store_ids = set()
+        for sale in sales_qs:
+            if sale.message.store.id not in seen_store_ids:
+                unique_sales_by_store.append(sale)
+                seen_store_ids.add(sale.message.store.id)
+
+        if not unique_sales_by_store:
+            return []
+        
+        print(len(unique_sales_by_store))
+        
+        limit = max(1, int(len(unique_sales_by_store) * 0.75))
+        top_sales = unique_sales_by_store[:limit]
+
+        # 5. Serialize the results
+        highlighted_sales = []
+        for analysis in top_sales:
+            data = {
+                'type': 'highlighted_sale',
+                'title': analysis.title,
+                'grabber': analysis.grabber,
+                'storeName': analysis.message.store.name,
+                'mainLink': f"deals/visit/{analysis.id}/{user.id}/" if user else f"deals/visit/{analysis.id}/0/",
+                'messageId': analysis.message.id,
+                'analysisId': analysis.id,
+                'dateReceived': analysis.message.received_date,
+                'parsedDateReceived': parse_date_received(analysis.message.received_date),
+            }
+            highlighted_sales.append(data)
+        return highlighted_sales
+
+    except Exception as e:
+        print(e)
+        return []
+
+
 def get_sponsors(active=False):
     if not active: return []
     via_appia = deals_models.Store.objects.get(id=44)
@@ -369,7 +442,7 @@ def IOS_API_fetch_my_feed(request):
         serialized_new_stores = [serialize_feed_item(item, user) for item in new_stores]
 
         # Inject extras - passing all potential items to the injection function
-        response = inject_extras(response, page_number, serialized_new_stores, get_sponsors(), get_highlighted_sales(user))
+        response = inject_extras(response, page_number, serialized_new_stores, get_sponsors(), get_highlighted_sales_v2(user))
 
         return Response({
             'success': True,

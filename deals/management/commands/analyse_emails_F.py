@@ -71,7 +71,7 @@ def analyze_email_with_gemini(email_html, prompt_addition) -> dict:
         f"- main_link: string (URL naar de sale)\n"
         f"- highlighted_products: array van objecten met {{title, new_price, old_price, product_image_url, link}}\n"
         f"- deal_probability: float (tussen 0 en 1, met hoe zeker je bent dat dit een echte sale is)\n\n"
-        f"- deal_type: 0 als de deal korting en besparen is, 1 als de deal hot deal is, 2 als de deal mega deal is, 3 als de deal een actie, cadeau of verrassing is, 4 als de deal niet te categoriseren is."
+        f"- deal_type: 0 als de deal korting en besparen is, 1 als de deal een korting een percentage van 50% of hoger is, 2 als de deal een korting een percentage van 70% of hoger is, 3 als de deal een actie, cadeau of verrassing is, 4 als de deal niet te categoriseren is."
         f"- is_new_deal_better: boolean \n{prompt_addition}\n\n"
         f"Als een variabele er niet is, gebruik dan 'N/A'.\n"
         f"Geef de output als een JSON object dat het gevraagde schema volgt.\n"

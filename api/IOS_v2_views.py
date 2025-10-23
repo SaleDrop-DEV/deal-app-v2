@@ -210,6 +210,7 @@ def get_highlighted_sales_v2(user):
                 'type': 'highlighted_sale',
                 'title': analysis.title,
                 'grabber': analysis.grabber,
+                'description': analysis.description,
                 'storeName': analysis.message.store.name,
                 'mainLink': f"deals/visit/{analysis.id}/{user.id}/" if user else f"deals/visit/{analysis.id}/0/",
                 'messageId': analysis.message.id,

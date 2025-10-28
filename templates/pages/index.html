@@ -13,7 +13,7 @@
 
 <meta property="og:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
 <meta property="og:description" content="Abonneer je gratis en ontvang direct meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
-<meta property="og:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+<meta property="og:image" content="https://saledrop.app{{  sharingPhoto.image_url }}">
 <meta property="og:url" content="https://www.saledrop.app/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
 <meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
-<meta name="twitter:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+<meta name="twitter:image" content="https://saledrop.app{{  sharingPhoto.image_url }}">
 
 <script type="application/ld+json">
 {
@@ -754,45 +754,35 @@ document.addEventListener("DOMContentLoaded", function() {
             let currentIndex = 0;
             const intervalTime = 5000;
     
-            function createNotificationElement(notification) {
-                const bubble = document.createElement('div');
-                bubble.className = 'notification-bubble';
-                bubble.innerHTML = `
-                    <strong>${notification.title}</strong>
-                    <small>${notification.description}</small>
-                    <span>${notification.time}</span>
+            function handleUpdate(container, newData, isInitial = false) {
+                // 1. Always clear the container first to prevent multiple bubbles.
+                container.innerHTML = '';
+
+                // 2. Create the new notification element.
+                const newBubble = document.createElement('div');
+                newBubble.className = 'notification-bubble';
+                newBubble.innerHTML = `
+                    <strong>${newData.title}</strong>
+                    <small>${newData.description}</small>
+                    <span>${newData.time}</span>
                 `;
-                return bubble;
-            }
-    
-            function handleUpdate(container, newData) {
-                const oldNotification = container.querySelector('.notification-bubble');
-    
-                if (oldNotification) {
-                    oldNotification.classList.remove('show');
-                    oldNotification.classList.add('hide');
-    
-                    oldNotification.addEventListener('transitionend', () => {
-                        oldNotification.remove();
-    
-                        const newNotification = createNotificationElement(newData);
-                        container.appendChild(newNotification);
-    
-                        // Force a reflow before showing
-                        void newNotification.offsetWidth;
-                        newNotification.classList.add('show');
-    
-                    }, { once: true });
-    
-                } else {
-                    const newNotification = createNotificationElement(newData);
-                    container.innerHTML = ''
-                    container.appendChild(newNotification);
-    
-                    // Force a reflow before showing
-                    void newNotification.offsetWidth;
-                    newNotification.classList.add('show');
+
+                // 3. If it's not the very first notification, add the 'hide' class
+                //    to allow it to fade in smoothly.
+                if (!isInitial) {
+                    newBubble.classList.add('hide');
                 }
+
+                // 4. Add the new bubble to the DOM.
+                container.appendChild(newBubble);
+
+                // 5. Use a tiny timeout to ensure the browser has registered the element
+                //    with the 'hide' class before we trigger the transition to 'show'.
+                //    This is more reliable than `void newBubble.offsetWidth`.
+                setTimeout(() => {
+                    newBubble.classList.remove('hide');
+                    newBubble.classList.add('show');
+                }, 10); // A small delay is sufficient.
             }
     
             function updateNotifications() {
@@ -804,7 +794,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
     
             // Initial call
-            updateNotifications();
+            handleUpdate(containers[0], notificationData[0], true); // Initial, immediate show
             setInterval(updateNotifications, intervalTime);
         }
     }

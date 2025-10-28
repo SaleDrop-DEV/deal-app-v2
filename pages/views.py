@@ -27,6 +27,8 @@ def index(request):
     example_sale_image = StaticContent.objects.get(content_name="Home: Voorbeeld sale")
     logo_name_image = StaticContent.objects.get(content_name="Logo + SaleDrop")
     appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+
+    sharingPhoto = StaticContent.objects.get(content_name="sharingPhoto")
     
     all_stores = list(Store.objects.all().values_list('name', flat=True).order_by('name'))
     premium_stores_count = len(all_stores)
@@ -51,7 +53,8 @@ def index(request):
         'appStoreImage': appStoreImage.to_dict(),
         'logo_name_image': logo_name_image.to_dict(),
         'premium_stores_count': premium_stores_count,
-        'statCard': statCard
+        'statCard': statCard,
+        'sharingPhoto': sharingPhoto.to_dict()
     })
 
 def privacy_policy(request):

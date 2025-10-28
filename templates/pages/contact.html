@@ -30,7 +30,8 @@
         --color-4: #fff9de;
     }
 
-    header {
+    .page-header {
+        position: relative;
         background: linear-gradient(
             var(--gradient-angle),
             var(--color-1), var(--color-2), var(--color-3), var(--color-4)
@@ -40,24 +41,20 @@
         padding-bottom: 2.5rem !important;
         text-align: center;
     }
+
+    .header-smoother{
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2.5rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    }
+
     @keyframes animate-gradient-position {
         0% { background-position: 0% 50%; }
         100% { background-position: 100% 50%; }
     }
-
-    /* Animaties voor de titel letters */
-    .header-title span {
-        display: inline-block;
-        opacity: 0;
-        transform: scale(0.5);
-        animation: none;
-    }
-    @keyframes letterPopIn {
-        0% { opacity: 0; transform: scale(0.5); }
-        50% { opacity: 0.8; transform: scale(1.1); }
-        100% { opacity: 1; transform: scale(1); }
-    }
-
     /* Animaties voor scrollen */
     .reveal-on-scroll {
         opacity: 0;
@@ -74,7 +71,7 @@
         font-size: 2rem;
         font-weight: 600;
         margin-top: 3rem;
-        margin-bottom: 1rem;
+        margin-bottom: 2.5rem;
     }
     
     .intro-text {
@@ -177,23 +174,12 @@
     main{
       min-height: calc(100vh - var(--navbar-height) - 186px - 64px) !important;
     }
+    .page-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--primary-text-color);
+    }
 
-    header{
-        background: linear-gradient(
-                var(--gradient-angle),
-                var(--color-1),
-                var(--color-2),
-                var(--color-3),
-                var(--color-4)
-            );
-        background-size: 400% 400%;
-        animation: animate-gradient-position 10s ease infinite alternate;
-        padding: 2.5rem 1.5rem !important;
-    }
-    header p{
-        color: var(--secondary-text-color);
-        font-weight: bold;
-    }
 
     @keyframes animate-gradient-position {
         0% {
@@ -203,15 +189,25 @@
             background-position: 100% 50%;
         }
     }
+
+    .header-smoother{
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2.5rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    }
 </style>
 {% endblock %}
 
 {% block index_header %}
-<header>
-    <h1 style="font-weight: 350;">
-        Contact
-    </h1>
-    <p style="font-weight: 400;">We horen graag van je!</p>
+<header class="page-header">
+    <h1>Contact</h1>
+    <p class="intro-p" style="max-width: 600px; margin: 1rem auto 2.5rem auto; font-size: 1.1rem; color: var(--secondary-text-color); background-color: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 1.5rem 2rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        Of je nu een vraag hebt, een suggestie wilt doen of geïnteresseerd bent in een samenwerking, hier vind je de juiste manieren om ons te bereiken.
+    </p>
+    <div class="header-smoother"></div>
 </header>
 {% endblock %}
 
@@ -219,9 +215,6 @@
 <div class="container">
     <div class="reveal-on-scroll">
         <h2 class="section-title">Neem contact op</h2>
-        <p class="intro-text">
-            Of je nu een vraag hebt, een suggestie wilt doen of geïnteresseerd bent in een samenwerking, hier vind je de juiste manieren om ons te bereiken.
-        </p>
     </div>
 
     <div class="contact-options-grid">
@@ -250,6 +243,26 @@
                 <a href="mailto:business@saledrop.app">business@saledrop.app</a>
             </div>
         </div>
+
+        <div class="contact-card-3d reveal-on-scroll">
+            <div class="card-content">
+                <div class="card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke-width="1.5" 
+                        stroke="currentColor" 
+                        class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" 
+                            d="M3 9.75V21h18V9.75M3 9.75l2.25-6h13.5L21 9.75M3 9.75h18m-9 0V21" />
+                    </svg>
+                </div>
+                <h3>Winkel Aanmelden</h3>
+                <p>Heeft u een winkel en wilt u uw sales delen? Meld u hier aan.</p>
+                <a href="{% url 'for_business' %}">Naar winkelpagina</a>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -264,17 +277,7 @@
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // --- 1. Letter pop-in animatie voor de header titel ---
-    const letters = document.querySelectorAll(".header-title span");
-    setTimeout(() => {
-        letters.forEach((letter, index) => {
-            setTimeout(() => {
-                letter.style.animation = "letterPopIn 0.6s ease-out forwards";
-            }, index * 80);
-        });
-    }, 300);
-
-    // --- 2. Reveal-on-scroll animatie ---
+    // --- Reveal-on-scroll animatie ---
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -296,6 +299,9 @@ document.addEventListener("DOMContentLoaded", function () {
         card.addEventListener('mousemove', (e) => {
             // Check if the user prefers reduced motion
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            // Check if the primary input mechanism supports hovering (likely desktop)
+            if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+            
             
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;

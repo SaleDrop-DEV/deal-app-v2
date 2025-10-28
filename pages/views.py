@@ -25,16 +25,34 @@ def index(request):
     notifications = [n.to_dict() for n in notifications]
     search_stores_image = StaticContent.objects.get(content_name="Home: Zoek je favoriete winkels")
     example_sale_image = StaticContent.objects.get(content_name="Home: Voorbeeld sale")
+    logo_name_image = StaticContent.objects.get(content_name="Logo + SaleDrop")
     appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+    
+    all_stores = list(Store.objects.all().values_list('name', flat=True).order_by('name'))
+    premium_stores_count = len(all_stores)
+    statCard = StaticContent.objects.get(content_name="statistiekKaart")
+
+    # Distribute store names for the three marquees
+    total_stores_for_marquee = len(all_stores)
+    third = total_stores_for_marquee // 3
+    other_stores_marquee = all_stores[:third]
+    females_stores_marquee = all_stores[third:2*third]
+    males_stores_marquee = all_stores[2*third:]
 
     return render(request, 'pages/index.html', {
         'page': 'index',
         'notifications': json.dumps(notifications),
         'search_stores_image': search_stores_image.to_dict(),
+        'featured_stores': Store.objects.filter(isVerified=True).order_by('?')[:12], # Keep some featured stores for the old section if it's still used elsewhere or for fallback
+        'other_stores_marquee': other_stores_marquee,
+        'females_stores_marquee': females_stores_marquee,
+        'males_stores_marquee': males_stores_marquee,
         'example_sale_image': example_sale_image.to_dict(),
         'appStoreImage': appStoreImage.to_dict(),
+        'logo_name_image': logo_name_image.to_dict(),
+        'premium_stores_count': premium_stores_count,
+        'statCard': statCard
     })
-
 
 def privacy_policy(request):
     return render(request, 'pages/privacy_policy.html', {

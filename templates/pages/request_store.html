@@ -4,6 +4,8 @@
 {% block title %}Voor Bedrijven{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 <meta name="description" content="Werk samen met SaleDrop en bereik duizenden koopjesjagers. Meld uw winkel aan en deel uw beste sales en aanbiedingen via onze app.">
 <meta name="keywords" content="SaleDrop, samenwerking, voor bedrijven, winkel promoten, sales delen, aanbiedingen plaatsen, retail marketing, winkel deals">
 <meta name="robots" content="index, follow">
@@ -23,70 +25,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="SaleDrop">
 
-
-<style>
-    /* Aangepaste styling om te matchen met de aanmeldpagina */
-    .for-business-card {
-        background-color: var(--color-white);
-        padding: 2rem;
-        border-radius: var(--border-radius-round);
-        box-shadow: 0 4px 12px rgba(5, 32, 74, 0.05);
-        max-width: 500px; /* Gebruikt dezelfde max-breedte als de aanmeldkaart */
-        margin: 2rem auto;
-    }
-
-    .for-business-card h3 {
-        text-align: center;
-        margin-bottom: 2rem;
-        font-weight: 550;
-        color: var(--primary-text-color);
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: var(--primary-text-color);
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--color-gray-medium);
-        border-radius: var(--border-radius-round);
-        font-size: 1rem;
-        font-family: 'Inter', sans-serif;
-        background-color: var(--color-white); /* Standaard witte achtergrond */
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--color-accent);
-        box-shadow: 0 0 0 2px var(--color-accent-light);
-    }
-
-    .form-group textarea {
-        resize: vertical;
-    }
-
-    /* Nieuwe stijlen voor de berichtcontainer */
-    #form-message-container {
-        margin-top: 1rem;
-        padding: 0.75rem 1rem;
-        border-radius: var(--border-radius-round);
-        text-align: center;
-        font-weight: 500;
-        display: none; /* Standaard verborgen */
-    }
-</style>
-
 <style>
     :root {
         --gradient-angle: 135deg;
@@ -97,27 +35,32 @@
         --color-4: #fff9de; /* Light Cream */
     }
 
-    header{
+    .page-header {
+        position: relative;
         background: linear-gradient(
                 var(--gradient-angle),
                 var(--color-1),
                 var(--color-2),
                 var(--color-3),
                 var(--color-4)
-            );
+        );
         background-size: 400% 400%;
         animation: animate-gradient-position 10s ease infinite alternate;
-        padding: 2.5rem 0 0 0 !important;
+        padding: calc(var(--navbar-height) + 2rem) 1.5rem 4rem 1.5rem;
+        text-align: center;
     }
-    header p{
-        color: var(--secondary-text-color);
-        font-weight: bold;
+
+    .page-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--primary-text-color);
     }
 
     .header-smoother{
-        /* background should vertical fade from top opacity 0 to 1 */
-        margin-top: 2.5rem;
-        height: 4rem;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2.5rem;
         width: 100%;
         background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
     }
@@ -137,20 +80,99 @@
 </style>
 
 <style>
-.for-business-card {
-    background-color: var(--color-white);
-    padding: 2.5rem;
-    border-radius: var(--border-radius-round);
-    box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
+/* Layout styles from access.html */
+.page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    width: 100%;
+    max-width: 1100px;
+    align-items: center;
+    margin: 4rem auto;
+    padding: 0 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .page-wrapper {
+        grid-template-columns: 0.8fr 1fr; /* Left column (benefits) smaller */
+    }
+}
+
+/* Benefits section styles (inspired by how-it-works) */
+.benefits-container {
+    color: var(--primary-text-color);
+}
+
+.benefits-container h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.benefits-container .intro-p {
+    font-size: 1.1rem;
+    color: var(--secondary-text-color);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
     max-width: 500px;
-    margin: 2rem auto;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.benefit-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.benefit-card__icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-accent-lighter);
+    color: var(--color-accent);
+    font-size: 1.5rem;
+}
+
+.benefit-card__text h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.benefit-card__text p {
+    margin: 0;
+    color: var(--secondary-text-color);
+    line-height: 1.6;
+}
+
+/* Form Card styles from access.html */
+.for-business-card {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--color-border, #E0E0E0);
+    border-radius: var(--border-radius-round, 8px);
+    padding: 2.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     overflow: hidden; /* Prevents box-shadow from being cut off by animations */
 }
 
 .for-business-card h3 {
     text-align: center;
     margin-bottom: 2rem;
-    font-weight: 600; /* Slightly bolder */
+    font-size: 1.75rem;
+    font-weight: 700;
     color: var(--primary-text-color);
 }
 
@@ -163,7 +185,7 @@
 .floating-label input,
 .floating-label textarea {
     width: 100%;
-    padding: 1rem;
+    padding: 0.85rem 1rem;
     border: 1px solid var(--color-gray-medium);
     border-radius: var(--border-radius-default);
     font-size: 1rem;
@@ -183,7 +205,7 @@
 
 .floating-label label {
     position: absolute;
-    top: 1rem;
+    top: 0.85rem;
     left: 1rem;
     color: var(--secondary-text-color);
     pointer-events: none;
@@ -206,6 +228,7 @@
 .floating-label input:focus,
 .floating-label textarea:focus {
     outline: none;
+    box-shadow: 0 0 0 3px var(--color-accent-lighter);
     border-color: var(--color-accent);
 }
 
@@ -229,24 +252,24 @@
 }
 
 
-.action-btn-special {
-        display: block;
-        background-color: var(--color-accent);
-        color: var(--color-white);
-        border: none;
-        border-radius: 50px;
-        padding: 10px 20px;
-        font-size: 16px;
-        transition: 0.3s ease;
-        margin: 0 auto;
-    }
-    .action-btn-special:hover:not(:disabled) {
-        transform: scale(1.05);
-        cursor: pointer;
-    }
-    .action-btn-special:disabled { background-color: var(--color-accent-light); cursor: not-allowed; }
+/* Consistent Button Style */
+.action-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-white);
+    background-color: var(--color-accent);
+    border: none;
+    border-radius: var(--border-radius-round, 6px);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    position: relative; /* For spinner */
+}
 
-.action-btn-special .spinner {
+.action-btn .spinner {
     display: none;
     position: absolute;
     top: 50%;
@@ -260,11 +283,11 @@
     transform: translate(-50%, -50%);
 }
 
-.action-btn-special.loading .spinner {
+.action-btn.loading .spinner {
     display: block;
 }
 
-.action-btn-special.loading .btn-text {
+.action-btn.loading .btn-text {
     visibility: hidden;
 }
 
@@ -272,69 +295,284 @@
     to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* --- Message Container Styling --- */
-#form-message-container {
-    margin-top: 1.5rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius-default);
-    text-align: center;
-    font-weight: 500;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    visibility: hidden;
+.action-btn:hover:not(:disabled) {
+    background-color: var(--color-accent-hover) !important;
+    color: white !important;
+    transform: translateY(-2px);
 }
-#form-message-container.visible {
-    opacity: 1;
-    transform: translateY(0);
-    visibility: visible;
+
+.action-btn:disabled {
+    background-color: var(--color-accent-light) !important;
+    color: white !important;
+    cursor: not-allowed;
+    transform: none;
 }
-.success-message {
-    background-color: var(--color-succes-background);
-    color: var(--color-succes);
-}
-.error-message {
-    background-color: var(--color-error-background);
-    color: var(--color-error);
-}
+</style>
+
+<!-- Styles from access.html for trusted-by-section -->
+<style>
+    h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: normal;
+        font-size: 2.5rem;
+        font-weight: 600;
+    }
+
+    .splitter{
+        width: 50px;
+        height: 2px;
+        background-color: black;
+        display: block;
+        margin: 2rem auto;
+    }
+
+    .link {
+        color: var(--color-accent);
+        cursor: pointer;
+    }
+
+    .link:hover {
+        color: var(--color-accent);
+        text-decoration: underline;
+    }
+
+    /* --- Trusted By Section --- */
+    .trusted-by-section {
+        width: 100%;
+        max-width: 900px; /* A bit wider to accommodate text */
+        margin: 4rem auto 0 auto;
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
+
+    .trusted-by-section .section-subtitle {
+        font-size: 1.1rem;
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .trusted-stores-grid {
+        display: grid;
+        /* Updated grid for better spacing */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .trusted-store-card {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease;
+    }
+
+    .trusted-by-section h2 {
+        margin-bottom: 2rem;
+        text-transform: none; /* Changed from uppercase for a softer look */
+    }
+
+    .trusted-store-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Center content vertically */
+        background-color: var(--color-white, #fff);
+        border: 1px solid var(--color-border, #E0E0E0);
+        border-radius: 12px; /* Softer radius */
+        padding: 1.5rem 1rem;
+        height: 160px; /* Give cards a uniform height */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04); /* Softer shadow */
+        transition: 
+            transform 0.3s ease, 
+            box-shadow 0.3s ease, 
+            border-color 0.3s ease,
+            opacity 0.6s ease-out, 
+            transform 0.6s ease-out;
+    }
+
+    .trusted-store-card:hover {
+        transform: translateY(-6px); /* A more noticeable "lift" */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border-color: var(--color-accent-light, #FFD1BD); /* Accent border on hover */
+    }
+
+    .trusted-store-card img {
+        width: 70px; /* Fixed width for perfect circle */
+        height: 70px;         /* Fixed height for perfect circle */
+        object-fit: contain;  /* Keeps aspect ratio */
+        margin-bottom: 1rem;
+        border-radius: 50%;     /* Makes the image circular! */
+        background-color: var(--color-white); /* Subtle white background for logos */
+        border: 1px solid var(--color-border-light, #f0f0f0); /* Light border */
+        padding: 0.5rem; /* Add some padding inside the circle */
+        filter: grayscale(100%);
+        opacity: 0.8;
+        transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease; /* Added transform for a subtle hover effect */
+    }
+
+    .trusted-store-card:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+        transform: scale(1.05); /* Slightly enlarge on hover */
+    }
+
+    .trusted-store-card h3 {
+        font-size: 0.9rem; /* Slightly smaller text */
+        font-weight: 500;  /* Lighter weight by default */
+        color: var(--secondary-text-color, #555);
+        margin: 0;
+        text-align: center;
+        transition: color 0.3s ease, font-weight 0.3s ease;
+    }
+
+    .trusted-store-card:hover h3 {
+        color: var(--primary-text-color, #000);
+        font-weight: 600;
+    }
+
+    /* --- Premium Store Count Card --- */
+    .premium-store-count-card {
+        background: url('https://saledrop.app{{ statCard.image_url }}');
+        background-size: cover;          /* Fills the container, may crop */
+        background-position: center;   /* Centers the image */
+        background-repeat: no-repeat;  /* Prevents tiling */
+        color: var(--color-white);
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 400px;
+        margin: 0 auto 2rem auto;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+
+    .premium-store-count-card.visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .premium-store-count-card #storeCount {
+        font-size: 4rem;
+        font-weight: 700;
+        display: block;
+    }
 </style>
 {% endblock %}
 
 {% block index_header %}
-<header class="animated-header">
-    <h1 style="font-weight: 350;">Contact voor bedrijven</h1>
-    <p style="font-weight: 400;">Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met u op.</p>
+<header class="page-header">
+    <h1>Werk met ons samen</h1>
+    <p class="intro-p" style="max-width: 600px; margin: 1rem auto 0 auto; font-size: 1.1rem; color: var(--secondary-text-color); background-color: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 1.5rem 2rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het formulier in en we nemen zo snel mogelijk contact met u op.
+    </p>
     <div class="header-smoother"></div>
 </header>
 {% endblock%}
 {% block content %}
     <main>
-        <section class="for-business-card">
-            <h3>Contactverzoek voor bedrijven</h3>
-            <form id="business-request-form" method="POST" novalidate>
-                {% csrf_token %}
-                <div class="form-group floating-label">
-                    <input type="text" id="store_name" name="store_name" required placeholder=" ">
-                    <label for="store_name">Winkelnaam</label>
+        <div class="page-wrapper">
+            <div class="benefits-container">
+                <h2>De voordelen voor jouw winkel</h2>
+                <p class="intro-p">Bereik honderden koopjesjagers die actief op zoek zijn naar de beste deals van winkels zoals die van jou.</p>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-card__icon"><i style="color: var(--color-accent)" class="fas fa-bullseye"></i></div>
+                        <div class="benefit-card__text">
+                            <h3>Gericht Bereik</h3>
+                            <p>Jouw sales worden getoond aan gebruikers die geïnteresseerd zijn in jouw merk en producten.</p>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-card__icon"><i style="color: var(--color-accent)"  class="fas fa-tachometer-alt"></i></div>
+                        <div class="benefit-card__text">
+                            <h3>Eenvoudig Dashboard</h3>
+                            <p>Beheer je winkelprofiel, kondig sales aan en bekijk statistieken via ons intuïtieve portaal.</p>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-card__icon"><i style="color: var(--color-accent)"  class="fas fa-chart-line"></i></div>
+                        <div class="benefit-card__text">
+                            <h3>Verhoog je Zichtbaarheid</h3>
+                            <p>Word uitgelicht in onze app en trek nieuwe klanten aan die op zoek zijn naar de beste aanbiedingen van premium merken.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group floating-label">
-                    <input type="email" id="store_email" name="store_email" required placeholder=" ">
-                    <label for="store_email">E-mailadres van de winkel</label>
+            </div>
+
+            <section class="for-business-card">
+                <h3>Contactverzoek</h3>
+                <p class="form-intro" style="text-align: center; margin-bottom: 2rem; line-height: 1.6;">
+                    Heeft u een winkel en wilt u uw beste sales en deals met onze gebruikers delen? Vul het formulier in en we nemen zo snel mogelijk contact met u op.
+                </p>
+                <form id="business-request-form" method="POST" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group floating-label">
+                        <input type="text" id="store_name" name="store_name" required placeholder=" ">
+                        <label for="store_name">Winkelnaam</label>
+                    </div>
+                    <div class="form-group floating-label">
+                        <input type="email" id="store_email" name="store_email" required placeholder=" ">
+                        <label for="store_email">Zakelijk e-mailadres</label>
+                    </div>
+                    <div class="form-group floating-label">
+                        <input type="tel" id="store_phone_number" name="store_phone_number" required placeholder=" ">
+                        <label for="store_phone_number">Telefoonnummer</label>
+                    </div>
+                    <div class="form-group floating-label">
+                        <textarea id="message" name="message" rows="4" placeholder=" "></textarea>
+                        <label for="message">Bericht (optioneel)</label>
+                    </div>
+                    <button type="submit" class="action-btn" disabled>
+                        <span class="btn-text" style="color: white;">Verzoek versturen</span>
+                        <span class="spinner"></span>
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <section class="trusted-by-section">
+            <h2>Sluit je bij ons aan</h2>
+            <p class="section-subtitle">
+                Sluit je merk aan op SaleDrop om met meer dan honderd premium merken te concurreren. Neem contact met ons op als je jouw merk wil aansluiten op SaleDrop.
+            </p>
+        
+            <div class="premium-store-count-card">
+                <p style="font-weight: bold; color: var(--color-accent) !important;">Premium merken op SaleDrop</p>
+                <div>
+                    <span id="storeCount" style="color: var(--color-accent);">{{ premium_stores_count }}</span>
                 </div>
-                <div class="form-group floating-label">
-                    <input type="tel" id="store_phone_number" name="store_phone_number" required placeholder=" ">
-                    <label for="store_phone_number">Telefoonnummer</label>
-                </div>
-                <div class="form-group floating-label">
-                    <textarea id="message" name="message" rows="5" placeholder=" "></textarea>
-                    <label for="message">Bericht (optioneel)</label>
-                </div>
-                <button type="submit" class="action-btn-special" disabled>
-                    <span class="btn-text" style="color: white;">Verzoek versturen</span>
-                    <span class="spinner"></span>
-                </button>
-                <div id="form-message-container"></div>
-            </form>
+            </div>
+        
+            <h3 style="margin-top: 4rem;">Vertrouwd door</h3>
+        
+            <div class="splitter"></div>
+        
+            <div class="trusted-stores-grid">
+        
+                {% if trusted_stores|length == 1 %}
+                    <div class="trusted-store-card" style="opacity: 0;">
+                    </div>
+                    {% for store in trusted_stores %}
+                        <div class="trusted-store-card">
+                            <img src="https://saledrop.app{{ store.image_url }}" alt="{{ store.name }} Logo">
+                            <h3>{{ store.name }}</h3>
+                        </div>
+                    {% endfor %}
+                    <div class="trusted-store-card" style="opacity: 0;">
+                    </div>
+                {% else %}
+                    {% for store in trusted_stores %}
+                        <div class="trusted-store-card">
+                            <img src="https://saledrop.app{{ store.image_url }}" alt="{{ store.name }} Logo">
+                            <h3>{{ store.name }}</h3>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+        
+            </div>
         </section>
     </main>
 {% endblock %}
@@ -343,9 +581,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('business-request-form');
-    const submitButton = form.querySelector('button[type="submit"]');
+    const submitButton = form.querySelector('.action-btn');
     const btnText = submitButton.querySelector('.btn-text');
-    const formMessageContainer = document.getElementById('form-message-container');
     const requiredInputs = form.querySelectorAll('[required]');
 
     // --- Real-time Validation ---
@@ -396,8 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Activate loading state
         submitButton.classList.add('loading');
         btnText.textContent = 'Bezig met versturen...';
-        submitButton.disabled = true;
-        formMessageContainer.classList.remove('visible'); // Hide previous messages
 
         const formData = new FormData(form);
         const requestData = Object.fromEntries(formData.entries());
@@ -414,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                window.displayMessage('success', "Bedankt! Uw verzoek is ontvangen en wordt zo snel mogelijk behandeld.");
+                window.displayMessage('success', "Bedankt! Uw verzoek is ontvangen, wij nemen z.s.m. contact met u op.");
                 form.reset();
                 requiredInputs.forEach(input => input.classList.remove('valid', 'invalid'));
             } else {
@@ -433,6 +668,67 @@ document.addEventListener('DOMContentLoaded', function() {
             checkFormValidity(); // Re-check validity to set button state correctly
         }
     });
+});
+</script>
+
+<!-- Script from access.html for animations -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Animated Number Counter ---
+    const storeCountCard = document.querySelector('.premium-store-count-card');
+    const storeCountElement = document.getElementById('storeCount');
+
+    const animateCount = (element, start, end, duration) => {
+        let startTime = null;
+
+        const step = (currentTime) => {
+            if (!startTime) startTime = currentTime;
+            const progress = Math.min((currentTime - startTime) / duration, 1);
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            element.textContent = Math.floor(easedProgress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                element.textContent = end;
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    const countObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const targetElement = entry.target;
+                const countElement = targetElement.querySelector('#storeCount');
+                const endValue = parseInt(countElement.textContent, 10);
+
+                targetElement.classList.add('visible');
+                animateCount(countElement, 0, endValue, 2000);
+
+                observer.unobserve(targetElement);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    if (storeCountCard) {
+        countObserver.observe(storeCountCard);
+    }
+
+    // --- Animate "Trusted by" cards on scroll ---
+    const trustedCards = document.querySelectorAll('.trusted-store-card');
+    if (trustedCards.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    const index = Array.from(card.parentNode.children).indexOf(card);
+                    setTimeout(() => card.classList.add('visible'), 150 * index);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+        trustedCards.forEach(card => observer.observe(card));
+    }
 });
 </script>
 {% endblock %}

@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Home{% endblock %}
+{% block title %}SaleDrop - Mis nooit meer een sale{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <meta name="description" content="SaleDrop: Ontvang direct meldingen van de beste sales en deals bij je favoriete winkels. Mis nooit meer korting op kleding, schoenen en accessoires.">
 <meta name="keywords" content="sales, deals, korting, aanbiedingen, kleding, schoenen, accessoires, SaleDrop, push notificaties">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.saledrop.app/">
 
-<!-- Open Graph -->
 <meta property="og:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
 <meta property="og:description" content="Abonneer je gratis en ontvang direct meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
 <meta property="og:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
@@ -19,13 +18,11 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SaleDrop - Ontvang als eerste de beste sales en deals">
 <meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
 <meta name="twitter:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
 
-<!-- Structured Data (JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -39,41 +36,317 @@
 <script type="application/json" id="notification-data">
     {{ notifications|safe }}
 </script>
-<style>
-    /* Voeg deze code toe aan je index.css bestand */
-.header-title span {
-    display: inline-block; /* Belangrijk voor transformaties */
-    opacity: 0;
-    transform: scale(0.5); /* Begin de letters klein */
-    animation: none; /* Zorgt ervoor dat de animatie niet direct start */
-}
 
-@keyframes letterPopIn {
-    0% {
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 2.5rem;
+        text-align: center;
+    }
+
+    .splitter{
+        width: 50px;
+        height: 2px;
+        background-color: black;
+        display: block;
+        margin: 2rem auto;
+    }
+
+    /* --- Generic Animation Class --- */
+    .animate-on-scroll {
         opacity: 0;
-        transform: scale(0.5);
+        transform: translateY(30px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
-    50% {
-        opacity: 0.8;
-        transform: scale(1.1); /* Een lichte 'overshoot' voor een springend effect */
-    }
-    100% {
+
+    .animate-on-scroll.visible {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0);
     }
-}
-@media (max-width: 768px) {
-    header h1{
-        font-size: 4rem !important;
-    
+
+
+    /* --- Hero Section --- */
+    .page-header {
+        position: relative;
+        padding-top: var(--navbar-height);
+        padding-bottom: 4rem;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
     }
-}
-@media (min-width: 769px) {
-    header h1{
-        font-size: 5.5rem !important;
-    
+
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        width: 100%;
+        max-width: 1100px;
+        align-items: center;
     }
-}
+
+    @media (min-width: 992px) {
+        .page-wrapper {
+            grid-template-columns: 1fr 0.8fr;
+        }
+    }
+
+    .hero-content h1 {
+        font-family: 'Poppins', sans-serif;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-content .header-subtitle {
+        font-size: 1.2rem;
+        color: var(--secondary-text-color);
+        max-width: 500px;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* --- Hero Slider Styles --- */
+    .hero-image-container .custom-slider {
+        max-width: 100%;
+        width: 450px; /* You can adjust this */
+        max-height: 80vh;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        overflow: hidden; /* Important for border-radius */
+        position: relative;
+        aspect-ratio: 9 / 16; /* Set a consistent aspect ratio */
+    }
+
+    @media (max-width: 991px) {
+        .hero-content { text-align: center; }
+        .hero-content .header-subtitle { margin-left: auto; margin-right: auto; }
+        .hero-image-container { margin-top: 2rem; }
+        .hero-image-container .custom-slider {
+            width: 100%; /* Scales down nicely on mobile */
+            max-width: 350px;
+        }
+    }
+
+    .custom-slider .slider-wrapper .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
+    }
+
+    .custom-slider .slider-wrapper .slide.active {
+        opacity: 1;
+        position: relative; /* Keep the active slide in the document flow */
+    }
+
+    .custom-slider .slide img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        padding: 1rem; /* Apply padding directly to the image */
+    }
+
+    .custom-slider .slider-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        position: relative; /* Places dots below the image */
+        bottom: auto;
+        padding-top: 10px;
+    }
+
+    .hero-slider .swiper-pagination-bullet {
+        background-color: #fff;
+        opacity: 0.7;
+    }
+
+    .hero-slider .swiper-pagination-bullet-active {
+        background-color: #fff;
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    /* --- End Slider Styles --- */
+
+
+    /* --- How It Works Section --- */
+    .how-it-works-section {
+        padding: 5rem 1.5rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .how-it-works-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .how-it-works-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+        /* Animation properties are now in .animate-on-scroll */
+    }
+
+    .how-it-works-card__icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-accent-lighter);
+        font-size: 1.5rem;
+    }
+
+    .how-it-works-card__icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        fill: var(--color-accent);
+    }
+
+    /* .how-it-works-card__icon i { color: var(--color-accent); } */
+
+    .how-it-works-card__text h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .how-it-works-card__text p {
+        color: var(--secondary-text-color);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* --- Featured Stores Section --- */
+    .featured-stores-section {
+        padding: 5rem 1.5rem;
+        text-align: center;
+        background-color: #f9fafb;
+    }
+
+    .featured-stores-section .section-subtitle {
+        max-width: 675px;
+        margin: 1rem auto 1rem auto;
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+    }
+
+    .stores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1.5rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .store-logo-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.5rem 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+        border: 1px solid #e5e7eb;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        /* Animation properties are now in .animate-on-scroll */
+    }
+
+    .store-logo-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .store-logo-card img {
+        max-width: 80%;
+        max-height: 50px;
+        object-fit: contain;
+        filter: grayscale(100%);
+        opacity: 0.7;
+        transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .store-logo-card:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+
+
+
+        /* --- Premium Store Count Card --- */
+    .premium-store-count-card {
+        background: url('https://saledrop.app{{ statCard.image_url }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: var(--color-white);
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 400px;
+        margin: 0 auto 4rem auto; /* Added margin for spacing */
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+
+    @media (max-width: 450px) {
+        .premium-store-count-card {
+            width: 90%;
+            margin: 0 auto;
+
+        }
+    }
+
+    .premium-store-count-card.visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .premium-store-count-card #storeCount {
+        font-size: 4rem;
+        font-weight: 700;
+        display: block;
+        color: var(--color-accent); /* Ensure number is visible */
+    }
+
+
+    /* --- For Business Section --- */
+    .for-business-section {
+        padding: 5rem 1.5rem;
+    }
+
 </style>
 
 <style>
@@ -86,7 +359,7 @@
         --color-4: #fff9de; /* Light Cream */
     }
 
-    header{
+    .page-header {
         background: linear-gradient(
                 var(--gradient-angle),
                 var(--color-1),
@@ -109,219 +382,563 @@
     }
 
     .header-smoother{
-        /* background should vertical fade from top opacity 0 to 1 */
-        margin-top: 2.5rem;
-        height: 4rem;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2.5rem;
         width: 100%;
         background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
     }
+
+    /* --- Notification Bubble Styles --- */
+    .notification-container {
+        position: relative;
+        min-height: 70px; /* Reserve space to prevent layout shift */
+        width: 100%;
+        max-width: 320px; /* Typical width for a notification */
+    }
+
+    @media (max-width: 991px) {
+        .notification-container {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    .notification-bubble {
+        position: absolute;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 12px 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .notification-bubble.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .notification-bubble.hide {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+
+    /* ---- Marquee / Scrolling Brands ---- */
+    .marquee-section {
+        padding: 2rem 0;
+    }
+
+    /* FADE OVERLAY EFFECT */
+    .marquee::before,
+    .marquee::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 100px; /* Breedte van de fade */
+        z-index: 10;
+        pointer-events: none; /* Zorgt dat clicks door de overlay gaan */
+    }
+
+    /* Linker fade */
+    .marquee::before {
+        left: 0;
+        background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
+    }
+
+    /* Rechter fade */
+    .marquee::after {
+        right: 0;
+        background: linear-gradient(to left, white, rgba(255, 255, 255, 0));
+    }
+
+    .marquee {
+        width: 100%;
+        margin: 0.5rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .marquee-content {
+        display: inline-block;
+        padding-right: 100%;
+        /* Animation duration will be set by JavaScript */
+    }
+
+    .marquee-content span {
+        display: inline-block;
+        padding: 0 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--secondary-text-color);
+    }
+
+    /* Keyframes blijven hetzelfde, maar de duur wordt dynamisch door JS */
+    .left-to-right {
+        animation-name: scroll-left;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes scroll-left {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+
+    .right-to-left {
+        animation-name: scroll-right;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes scroll-right {
+        from { transform: translateX(-50%); }
+        to { transform: translateX(0); }
+    }
+
+    .marquee:hover .marquee-content {
+        animation-play-state: paused;
+    }
+
+    .notification-bubble strong { font-weight: 600; font-size: 0.9rem; }
+    .notification-bubble small { color: #555; font-size: 0.85rem; }
+    .notification-bubble span { font-size: 0.75rem; color: #888; align-self: flex-end; }
+
+    /* --- Support Card Styles (from dashboard.html) --- */
+    .support-card {
+        max-width: 800px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, var(--color-white) 0%, #fdfdff 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+        border: 1px solid #f0f0f0;
+    }
+
+    .support-card .support-icon {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+        margin-bottom: 1rem;
+    }
+
+    .support-card h3 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+    }
+
+    .support-card p {
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+
+    .support-card .action-btn {
+        width: fit-content;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .for-business-section {
+        padding: 5rem 1.5rem;
+    }
 </style>
+
 {% endblock %}
 
-{% block index_header %}
-<header id="gradient-card" style="padding: 1rem 0 0 0; " class="animated-header">
-    <h1 style="font-weight: 350;" class="header-title"><span>S</span><span>a</span><span>l</span><span>e</span><span>D</span><span>r</span><span>o</span><span>p</span></h1>
-    <p style="font-weight: 400;" class="header-subtitle">Nooit meer te laat bij sales</p>
-    <div id="sampleNotifications1" class="notification-container"></div>
-    <!-- <button onclick="window.location.href='/accounts/sign-up/'" class="action-btn">Aanmelden</button> -->
-     <a target="_blank" href="https://apps.apple.com/us/app/saledrop/id6751799791"><img src="https://saledrop.app{{ appStoreImage.image_url }}" alt="" style="width: 200px;"></a>
-     <div class="header-smoother"></div>
-</header>
-{% endblock%}
-
 {% block content %}
-
-<div class="container">
-    <div id="HowItWorks" class="section">
-        <h1>Hoe werkt het?</h1>
-
-        <div class="section-container-row">
-            <div class="section-container-col">
-                <h3>Zoek eenvoudig</h3>
-                <p>Vind jouw favoriete kledingmerken en winkels in onze zoekfunctie.</p>
-            </div>
-            <div class="section-container-col fade-in-up">
-                <!-- <img src="https://saledrop.app{{ search_stores_image.image_url }}" alt="Zoekfunctie in de app"> -->
-                 <img src="{% static 'images/screenShotSearch.png' %}" alt="Zoekfunctie in de app">
-            </div>
+<div class="page-header">
+    <div class="page-wrapper">
+        <div class="hero-content">
+            <h1>Mis nooit meer een sale.</h1>
+            <p class="header-subtitle">Ontvang direct een melding wanneer jouw favoriete merken in de uitverkoop gaan. Volg je winkels, wij doen de rest.</p>
+            <div id="sampleNotifications1" class="notification-container" style="margin-top: 2.5rem;"></div>
         </div>
-
-        <div class="section-container-row">
-            <div class="section-container-col">
-                <h3>Volg wat je wil</h3>
-                <p>Klik op het belletje en wij houden jouw merken continu in de gaten.</p>
-            </div>
-            <div class="section-container-col fade-in-up">
-                <div id="sampleNotifications2" class="notification-container"></div>
-            </div>
-        </div>
-
-        <div class="section-container-row">
-            <div class="section-container-col">
-                <h3>Ontvang meldingen</h3>
-                <p>Wij sturen je een melding van nieuwe deals zodat jij als eerste je favoriete items kan shoppen tegen de beste prijzen.</p>
-            </div>
-            <div class="section-container-col fade-in-up">
-                <!-- <img src="https://saledrop.app{{ example_sale_image.image_url }}" alt="Deal detail pagina"> -->
-                 <img src="{% static 'images/screenShotSaleDetail.png' %}" alt="Deal detail pagina">
+        <div class="hero-image-container">
+            <div class="custom-slider">
+                <div class="slider-wrapper">
+                    <div class="slide active"><img src="{% static 'images/slidePhotos/1.png' %}" alt="De toekomst van besparen begint hier"></div>
+                    <div class="slide"><img src="{% static 'images/slidePhotos/2.png' %}" alt="Ontdek sales van meer dan 130 premium merken"></div>
+                    <div class="slide"><img src="{% static 'images/slidePhotos/3.png' %}" alt="Abonner je gratis op meer dan 130 premium merken"></div>
+                    <div class="slide"><img src="{% static 'images/slidePhotos/4.png' %}" alt="Bekijk sales van jouw favoriete merken"></div>
+                    <div class="slide"><img src="{% static 'images/slidePhotos/5.png' %}" alt="Als eerste bij de beste deals"></div>
+                </div>
+                <div class="slider-pagination"></div>
             </div>
         </div>
     </div>
-    <div id="forBusinesses" class="section">
-        <div class="for-business-card">
-            <h3>Voor bedrijven</h3>
-            <p>Neem contact met ons op als je wil dat jouw merk in onze app komt.</p>
-            <button onclick="window.location.href='/for-business/'" class="action-btn">Contact</button>
-        </div>
-    </div>
+    <div class="header-smoother"></div>
 </div>
+
+<section class="how-it-works-section animate-on-scroll">
+    <h2>Hoe het werkt</h2>
+    <div class="splitter"></div>
+    <div class="how-it-works-grid">
+        <div class="how-it-works-card animate-on-scroll">
+            <div class="how-it-works-card__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+            </div>
+            <div class="how-it-works-card__text">
+                <h3>1. Zoek je Winkel</h3>
+                <p>Vind je favoriete merken in de zoekfunctie. Staat die er niet tussen? Dan kun je hem aanvragen en voegen we hem toe.</p>
+            </div>
+        </div>
+        <div class="how-it-works-card animate-on-scroll">
+            <div class="how-it-works-card__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 125.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-74.8-55-134-128-148.8V32c0-17.7-14.3-32-32-32zm0 96c61.9 0 112 50.1 112 112v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 336 112 289.3 112 241.4V208c0-61.9 50.1-112 112-112zm64 352H160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"/></svg>
+            </div>
+            <div class="how-it-works-card__text">
+                <h3>2. Volg & Abonneer</h3>
+                <p>Abonneer je met één klik om meldingen te ontvangen zodra er een nieuwe sale start.</p>
+            </div>
+        </div>
+        <div class="how-it-works-card animate-on-scroll">
+            <div class="how-it-works-card__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M160 112c0-35.3 28.7-64 64-64s64 28.7 64 64v48H160V112zm-48 48H48c-26.5 0-48 21.5-48 48V416c0 53 43 96 96 96H352c53 0 96-43 96-96V208c0-26.5-21.5-48-48-48H336V112C336 50.1 285.9 0 224 0S112 50.1 112 112v48zm24 48a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm152 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/></svg>
+            </div>
+            <div class="how-it-works-card__text">
+                <h3>3. Ontvang Meldingen</h3>
+                <p>Krijg direct melding als een nieuwe sale start, zodat jij als eerste de leukste items kunt shoppen.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="animate-on-scroll">
+    <div class="premium-store-count-card">
+        <p style="font-weight: bold; color: var(--color-accent) !important;">Premium merken op SaleDrop</p>
+        <div>
+            <span id="storeCount" style="color: var(--color-accent);">{{ premium_stores_count }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="featured-stores-section marquee-section animate-on-scroll">
+    <h2 style="padding: 5px 0;">Populaire merken</h2>
+    <p class="section-subtitle" style="padding: 5px 0;">Sluit je aan bij honderden gebruikers die sales volgen van de mooiste premium merken in Nederland. Zorg dat je nooit meer te laat, en als eerste bij de leukste items bent.</p>
+    <a target="_blank" href="https://apps.apple.com/nl/app/saledrop/id6479835973">
+                <img src="https://saledrop.app{{ appStoreImage.image_url }}" alt="Download in de App Store" style="width: 200px; height: auto; margin-bottom: 1rem">
+            </a>
+    <div class="splitter" style="margin-bottom: 3rem;"></div>
+    <div class="marquee">
+        <div class="marquee-content left-to-right">
+            {% for store in other_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+            {# Duplicate for seamless loop #}
+            {% for store in other_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+        </div>
+    </div>
+    <div class="marquee">
+        <div class="marquee-content right-to-left">
+            {% for store in females_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+            {# Duplicate for seamless loop #}
+            {% for store in females_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+        </div>
+    </div>
+    <div class="marquee">
+        <div class="marquee-content left-to-right">
+            {% for store in males_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+            {# Duplicate for seamless loop #}
+            {% for store in males_stores_marquee %}<span>{{ store }}</span>{% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="for-business-section animate-on-scroll">
+    <div class="support-card">
+        <i class="fa-solid fa-briefcase support-icon"></i>
+        <h3>Voor Bedrijven</h3>
+        <p>
+            Wil je jouw merk op SaleDrop? Bereik een gericht publiek dat klaar is om te kopen. Neem contact op om de mogelijkheden te bespreken.
+        </p>
+        <a href="{% url 'for_business' %}" class="action-btn">Meer informatie</a>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block scripts %}
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Fade-in scroll effect
-    const fadeElems = document.querySelectorAll('.fade-in-up');
+
+    // --- Animated Number Counter ---
+    const storeCountCard = document.querySelector('.premium-store-count-card');
+    if (storeCountCard) {
+        const storeCountElement = document.getElementById('storeCount');
+
+        const animateCount = (element, start, end, duration) => {
+            let startTime = null;
+
+            const step = (currentTime) => {
+                if (!startTime) startTime = currentTime;
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const easedProgress = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                element.textContent = Math.floor(easedProgress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    element.textContent = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
+
+        const countObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const targetElement = entry.target;
+                    const countElement = targetElement.querySelector('#storeCount');
+                    const endValue = parseInt(countElement.textContent, 10);
+
+                    targetElement.classList.add('visible');
+                    animateCount(countElement, 0, endValue, 2000);
+
+                    observer.unobserve(targetElement);
+                }
+            });
+        }, { threshold: 0.2, rootMargin: "0px 0px -50px 0px"});
+        countObserver.observe(storeCountCard);
+    }
+
+    // --- Animate elements into view on scroll ---
+    const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+                const element = entry.target;
+                
+                // Check if the element is a card *within* a grid for staggering
+                if (element.classList.contains('how-it-works-card') || element.classList.contains('store-logo-card')) {
+                    const index = Array.from(element.parentNode.children).indexOf(element);
+                    setTimeout(() => {
+                        element.classList.add('visible');
+                    }, 100 * (index % 10)); // Staggered delay (modulo 10 to keep it fast)
+                } else {
+                    // For sections, just show them (slight delay for effect)
+                    setTimeout(() => {
+                        element.classList.add('visible');
+                    }, 150); 
+                }
+                observer.unobserve(element);
             }
         });
-    }, { threshold: 0.2 });
-    fadeElems.forEach(el => observer.observe(el));
+    }, { threshold: 0.2, rootMargin: "0px 0px -50px 0px" });
 
-    // Notification rotator
-    const notificationData = JSON.parse(document.getElementById('notification-data').textContent);
-    const containers = [
-        document.getElementById('sampleNotifications1'),
-        document.getElementById('sampleNotifications2')
-    ];
+    elementsToAnimate.forEach(el => observer.observe(el));
 
-    let currentIndex = 0;
-    const intervalTime = 5000;
+    // --- Notification rotator ---
+    const notificationDataEl = document.getElementById('notification-data');
+    if (notificationDataEl) { // Check if data exists
+        const notificationData = JSON.parse(notificationDataEl.textContent);
+        const containers = [
+            document.getElementById('sampleNotifications1')
+        ].filter(Boolean); // Filter out null containers
 
-    function createNotificationElement(notification) {
-        const bubble = document.createElement('div');
-        bubble.className = 'notification-bubble';
-        bubble.innerHTML = `
-            <strong>${notification.title}</strong>
-            <small>${notification.description}</small>
-            <span>${notification.time}</span>
-        `;
-        return bubble;
-    }
-
-    function handleUpdate(container, newData) {
-        const oldNotification = container.querySelector('.notification-bubble');
-
-        if (oldNotification) {
-            oldNotification.classList.remove('show');
-            oldNotification.classList.add('hide');
-
-            oldNotification.addEventListener('transitionend', () => {
-                oldNotification.remove();
-
-                const newNotification = createNotificationElement(newData);
-                container.innerHTML = ''
-                container.appendChild(newNotification);
-
-                // Force a reflow before showing
-                void newNotification.offsetWidth;
-                newNotification.classList.add('show');
-
-            }, { once: true });
-
-        } else {
-            const newNotification = createNotificationElement(newData);
-            container.innerHTML = ''
-            container.appendChild(newNotification);
-
-            // Force a reflow before showing
-            void newNotification.offsetWidth;
-            newNotification.classList.add('show');
+        if (containers.length > 0 && notificationData.length > 0) {
+            let currentIndex = 0;
+            const intervalTime = 5000;
+    
+            function createNotificationElement(notification) {
+                const bubble = document.createElement('div');
+                bubble.className = 'notification-bubble';
+                bubble.innerHTML = `
+                    <strong>${notification.title}</strong>
+                    <small>${notification.description}</small>
+                    <span>${notification.time}</span>
+                `;
+                return bubble;
+            }
+    
+            function handleUpdate(container, newData) {
+                const oldNotification = container.querySelector('.notification-bubble');
+    
+                if (oldNotification) {
+                    oldNotification.classList.remove('show');
+                    oldNotification.classList.add('hide');
+    
+                    oldNotification.addEventListener('transitionend', () => {
+                        oldNotification.remove();
+    
+                        const newNotification = createNotificationElement(newData);
+                        container.appendChild(newNotification);
+    
+                        // Force a reflow before showing
+                        void newNotification.offsetWidth;
+                        newNotification.classList.add('show');
+    
+                    }, { once: true });
+    
+                } else {
+                    const newNotification = createNotificationElement(newData);
+                    container.innerHTML = ''
+                    container.appendChild(newNotification);
+    
+                    // Force a reflow before showing
+                    void newNotification.offsetWidth;
+                    newNotification.classList.add('show');
+                }
+            }
+    
+            function updateNotifications() {
+                containers.forEach((container, idx) => {
+                    const dataIndex = (currentIndex + idx) % notificationData.length;
+                    handleUpdate(container, notificationData[dataIndex]);
+                });
+                currentIndex = (currentIndex + 1) % notificationData.length;
+            }
+    
+            // Initial call
+            updateNotifications();
+            setInterval(updateNotifications, intervalTime);
         }
     }
 
-    function updateNotifications() {
-        containers.forEach((container, idx) => {
-            const dataIndex = (currentIndex + idx) % notificationData.length;
-            handleUpdate(container, notificationData[dataIndex]);
+    // --- Custom Slider Logic ---
+    const slider = document.querySelector('.custom-slider');
+    if (slider) {
+        const slides = slider.querySelectorAll('.slide');
+        const paginationContainer = slider.querySelector('.slider-pagination');
+        let currentSlide = 0;
+        let slideInterval;
+
+        // Create pagination dots
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('pagination-dot');
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                goToSlide(index);
+                resetInterval();
+            });
+            paginationContainer.appendChild(dot);
         });
-        currentIndex = (currentIndex + 1) % notificationData.length;
-    }
 
-    updateNotifications();
-    setInterval(updateNotifications, intervalTime);
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const letters = document.querySelectorAll(".header-title span");
+        const dots = paginationContainer.querySelectorAll('.pagination-dot');
 
-    setTimeout(() => {
-        letters.forEach((letter, index) => {
-            setTimeout(() => {
-                letter.style.animation = "letterPopIn 0.6s ease-out forwards";
-            }, index * 80); // delay per letter, matching RN delay
-        });
-    }, 300);
-    // Fade-in scroll effect
-
-});
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const card = document.getElementById('gradient-card');
-        const root = document.documentElement;
-
-        // We will use HSL and an oscillating value to create a smooth,
-        // controlled color shift within a specific range.
-        let time = 0;
-        // Initialize the angle based on the CSS variable
-        let angle = 135;
-
-        // This function will be called on every animation frame.
-        function updateGradientColors() {
-            // Increment a time variable to drive the color animation
-            time += 0.01;
-
-            // --- Animate the gradient angle ---
-            // Slowly increment the angle, wrapping around at 360 degrees
-            angle = (angle + 0.15) % 360;
-
-            // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
-            const sinValue = Math.sin(time);
-
-            // Map the sine value to a warm, yellowish hue range.
-            // We'll oscillate between a peachy-orange (30) and a golden-yellow (60).
-            const baseHue = 45; // Midpoint (Golden Yellow)
-            const hueRange = 15;  // Oscillation range (45 +/- 15)
-            const dynamicHue = baseHue + sinValue * hueRange;
-
-            // Create a palette based on the oscillating hue and your theme colors
-            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
-            const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
-            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
-            const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
-
-            // Update the CSS variables on the root element
-            root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
-            root.style.setProperty('--color-1', color1);
-            root.style.setProperty('--color-2', color2);
-            root.style.setProperty('--color-3', color3);
-            root.style.setProperty('--color-4', color4);
-
-
-            // Request the next animation frame to create a smooth loop
-            requestAnimationFrame(updateGradientColors);
+        function goToSlide(slideIndex) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            currentSlide = slideIndex;
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
         }
 
-        // Start the color animation loop
+        function nextSlide() {
+            let nextIndex = (currentSlide + 1) % slides.length;
+            goToSlide(nextIndex);
+        }
+
+        function startInterval() {
+            slideInterval = setInterval(nextSlide, 4000); // 4-second delay
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            startInterval();
+        }
+
+        // Initial setup
+        if (slides.length > 1) {
+            startInterval();
+        }
+    }
+
+
+
+
+
+    // --- Animated Gradient Logic ---
+    let time = 0;
+    let angle = 135; // Initial angle from CSS
+    const root = document.documentElement;
+
+    function updateGradientColors() {
+        // Increment a time variable to drive the color animation
+        time += 0.01;
+
+        // --- Animate the gradient angle ---
+        angle = (angle + 0.15) % 360;
+
+        // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
+        const sinValue = Math.sin(time);
+
+        // Map the sine value to a warm, yellowish hue range.
+        const baseHue = 45; // Midpoint (Golden Yellow)
+        const hueRange = 15;  // Oscillation range (45 +/- 15)
+        const dynamicHue = baseHue + sinValue * hueRange;
+
+        // Create a palette based on the oscillating hue and your theme colors
+        const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+        const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
+        const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+        const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
+
+        // Update the CSS variables on the root element
+        root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
+        root.style.setProperty('--color-1', color1);
+        root.style.setProperty('--color-2', color2);
+        root.style.setProperty('--color-3', color3);
+        root.style.setProperty('--color-4', color4);
+
+        // Request the next animation frame to create a smooth loop
         requestAnimationFrame(updateGradientColors);
-    });
+    }
+
+    // Start the color animation loop
+    requestAnimationFrame(updateGradientColors);
+
+    // --- Marquee Speed Adjustment ---
+    function adjustMarqueeSpeed() {
+        const marquees = document.querySelectorAll('.marquee-content');
+        
+        // Speed factors: [slow, medium, fast]
+        // Smaller factor = shorter duration = faster scroll
+        const speedFactors = [35, 50, 70]; 
+
+        marquees.forEach((marquee, index) => {
+            const speedFactor = speedFactors[index] || speedFactors[0];
+            
+            // Do not remove this check, it prevents resource-heavy recalculations on every resize.
+            if (marquee.dataset.speedAdjusted) return;
+
+            // Determine the total width of the content (including the duplicate)
+            const contentWidth = marquee.scrollWidth / 2;
+
+            // Determine the speed: (larger width / lower factor) = faster animation
+            let duration = contentWidth / speedFactor;
+
+            // Ensure speed remains within reasonable limits
+            const minDuration = 15;
+            if (duration < minDuration) {
+                duration = minDuration;
+            }
+
+            // Apply the CSS style
+            marquee.style.animationDuration = `${duration}s`;
+            marquee.dataset.speedAdjusted = 'true';
+        });
+    }
+
+    // Initialize marquee speed on load and on resize
+    adjustMarqueeSpeed();
+    window.addEventListener('resize', adjustMarqueeSpeed);
+});
 </script>
 
 {% endblock %}

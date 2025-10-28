@@ -104,10 +104,29 @@ def for_business(request):
             # If the form is not valid, return the form errors
             return JsonResponse({'message': form.errors}, status=400)
     else:
+        # For GET requests, fetch the data needed for the 'trusted-by' section
+        trusted_stores = Store.objects.filter(mayUseContent=True)
+        stores_data = []
+        for store in trusted_stores:
+            data = {
+                'id': store.id,
+                'name': store.name,
+                'image_url': store.image_url,
+            }
+            if store.name != "SaleDrop":
+                stores_data.append(data)
+
+        premium_stores_count = Store.objects.all().count()
+        statCard = StaticContent.objects.get(content_name="statistiekKaart")
+
         # For GET requests, render the page with the context
         return render(request, 'pages/request_store.html', {
-            'page': 'request_store'
+            'page': 'request_store',
+            'trusted_stores': stores_data,
+            'premium_stores_count': premium_stores_count,
+            'statCard': statCard
         })
+
 
 def custom_404_view(request, exception):
     return render(request, 'pages/404.html', {}, status=404)

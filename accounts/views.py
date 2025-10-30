@@ -249,6 +249,7 @@ import json
 
 
 
+from business.models import SaleMessage
 @login_required
 def admin_dashboard(request):
     def get_google_search_console_data(token_name="googleSearchConsole"):
@@ -340,8 +341,7 @@ def admin_dashboard(request):
         return bing_data
 
     def get_total_clicks():
-
-        return Click.objects.count() + ClickNoAuth.objects.count()
+        return Click.objects.count()
 
     def get_n_most_subscribed_stores(n=5):
         results = Store.objects.all().annotate(
@@ -364,6 +364,9 @@ def admin_dashboard(request):
         recent_requests = BusinessRequest.objects.filter(date_sent__gte=seven_days_ago).order_by('-date_sent').all()[:6]
         return [data.to_dict() for data in recent_requests]
 
+    def get_manualCheckSaleMessages():
+        return SaleMessage.objects.filter(needsManualReview=True, isManualReviewed=False).order_by('created_at').all()
+
     if request.user.is_staff:
         gsc_data = get_google_search_console_data()
         bing_data = get_bing_webmaster_data()
@@ -380,6 +383,7 @@ def admin_dashboard(request):
             'most_subscribed_stores': get_n_most_subscribed_stores(),
             'unhandled_recommendations': get_unhandled_recommendations(),
             'latest_business_requests': get_six_latest_business_requests(),
+            'manualCheckSaleMessages': get_manualCheckSaleMessages(),
         }
         return render(request, 'admin_templates/dashboard.html', context)
     else:

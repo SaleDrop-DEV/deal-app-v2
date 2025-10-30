@@ -298,6 +298,101 @@
         background: linear-gradient(135deg, var(--color-white), var(--color-accent-light));
     }
 
+    /* --- Manual Check Sales Card Styles --- */
+    .manual-check-sales-card {
+        /* Inherits basic card styling from .dashboard-card */
+        grid-column: 1 / -1; /* Span full width on mobile/tablet */
+    }
+
+    @media (min-width: 1200px) {
+        .manual-check-sales-card {
+            grid-column: span 2; /* Span 2 columns on desktop */
+        }
+    }
+
+    .manual-check-sales-card .dashboard-card-header {
+        margin-bottom: 1rem;
+    }
+
+    .manual-check-sale-item {
+        background-color: var(--color-gray-lighter);
+        border: 1px solid var(--color-gray-light);
+        border-radius: var(--border-radius-round);
+        padding: 1rem;
+        margin-bottom: 1rem; /* Space between items */
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .manual-check-sale-item:last-child {
+        margin-bottom: 0; /* No margin after the last item */
+    }
+
+    .manual-check-sale-item:hover {
+        box-shadow: 0 2px 8px rgba(5, 32, 74, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .manual-check-sale-item h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin: 0;
+    }
+
+    .manual-check-sale-item p {
+        font-size: 0.9rem;
+        color: var(--secondary-text-color);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .manual-check-sale-item .item-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .manual-check-sale-item .item-actions button {
+        flex: 1; /* Make buttons take equal width */
+        padding: 0.6rem 1rem;
+        border-radius: var(--border-radius-round);
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .manual-check-sale-item .item-actions .check-button {
+        background-color: var(--color-succes);
+        color: var(--color-white);
+        border: none;
+        /* border: 1px solid var(--color-accent); */
+    }
+
+    .manual-check-sale-item .item-actions .check-button:hover {
+        background-color: var(--color-succes-background);
+        color: var(--color-succes);
+    }
+
+    .manual-check-sale-item .item-actions .delete-button {
+        background-color: var(--color-error);
+        color: white;
+        border: none;
+    }
+
+    .manual-check-sale-item .item-actions .delete-button:hover {
+        background-color: var(--color-error-background);
+        color: var(--color-error);
+    }
+
+    .manual-check-sales-card > p { /* Style for the "empty" message */
+        color: var(--secondary-text-color);
+        padding: 1rem;
+        text-align: center;
+    }
+
 </style>
 
 
@@ -416,6 +511,23 @@
                 <p id="no-recommendations-message">Geen nieuwe aanbevelingen. ✨</p>
                 {% endfor %}
             </div>
+        </div>
+
+        <div class="dashboard-card manual-check-sales-card">
+            <h3 class="dashboard-card-header">Sale-berichten voor Handmatige Controle</h3>
+            {% for sale in manualCheckSaleMessages %}
+            <div class="manual-check-sale-item" data-id = "{{ sale.id }}">
+                <h3>{{ sale.title }}</h3>
+                <p><strong>{{ sale.grabber }}</strong></p>
+                <p>{{ sale.description }}</p>
+                <div class="item-actions">
+                    <button class="check-button">Check</button>
+                    <button class="delete-button">Verwijder</button>
+                </div>
+            </div>
+            {% empty %}
+            <p>Geen sale-berichten die handmatige controle vereisen.</p>
+            {% endfor %}
         </div>
 
         <div class="dashboard-card business-requests-card">
@@ -660,6 +772,72 @@ document.addEventListener("DOMContentLoaded", function () {
             checkButton.disabled = false;
         });
     });
+
+    // --- Manual Sale Message Check Logic ---
+    const manualCheckSalesCard = document.querySelector('.manual-check-sales-card');
+    if (manualCheckSalesCard) {
+        manualCheckSalesCard.addEventListener('click', function(event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const saleItem = button.closest('.manual-check-sale-item');
+            if (!saleItem) return;
+
+            const saleId = saleItem.dataset.id;
+            let action = '';
+
+            if (button.classList.contains('check-button')) {
+                action = 'check';
+            } else if (button.classList.contains('delete-button')) {
+                action = 'delete';
+            } else {
+                return; // Not one of our action buttons
+            }
+
+            // Prevent multiple clicks
+            if (saleItem.classList.contains('processing')) return;
+            saleItem.classList.add('processing');
+            saleItem.style.opacity = '0.5';
+
+            fetch('/api/check-salemessage/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    sale_message_id: saleId,
+                    action: action
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Server error'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const message = action === 'check' ? 'Bericht goedgekeurd.' : 'Bericht verwijderd.';
+                    window.displayMessage('success', message);
+                    
+                    // Animate and remove the item
+                    saleItem.style.transition = 'all 0.4s ease';
+                    saleItem.style.transform = 'scale(0.95)';
+                    saleItem.style.opacity = '0';
+                    setTimeout(() => saleItem.remove(), 400);
+
+                } else {
+                    throw new Error(data.error || 'An unknown error occurred.');
+                }
+            })
+            .catch(error => {
+                window.displayMessage('error', error.message);
+                saleItem.classList.remove('processing');
+                saleItem.style.opacity = '1';
+            });
+        });
+    }
 });
 </script>
 

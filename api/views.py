@@ -549,3 +549,54 @@ def check_recommendation(request):
         )
         return JsonResponse({'error': "Er ging iets mis op de server."}, status=500)
 
+
+
+
+from business.models import SaleMessage
+@login_required
+@require_POST
+def checkSaleMessage(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        sale_message_id = data.get('sale_message_id')
+        action = data.get('action')  # Default action is 'check'
+
+        if sale_message_id is None or action is None:
+            return JsonResponse({'error': 'sale_message_id not provided in request body'}, status=400)
+
+        try:
+            sale_message = SaleMessage.objects.get(id=int(sale_message_id))
+        except SaleMessage.DoesNotExist:
+            return HttpResponseNotFound(JsonResponse({'error': 'SaleMessage not found.'}))
+        except ValueError:
+            return JsonResponse({'error': 'Invalid sale_message_id format.'}, status=400)
+
+        # Update the SaleMessage object
+        if action == 'check':
+            sale_message.needsManualReview = False
+            sale_message.publicReady = True
+            sale_message.isReviewed = True
+            # sale_message.sent_at = timezone.now()
+        elif action == 'delete':
+            sale_message.needsManualReview = False
+            sale_message.isManualReviewed = True
+            sale_message.publicReady = False
+            sale_message.isReviewed = True
+
+        sale_message.save()
+
+        return JsonResponse({'success': True, 'message': 'SaleMessage marked as checked.'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON format in request body.'}, status=400)
+    except Exception as e:
+        print(e)
+        API_Errors_Site.objects.create(
+            task="Check SaleMessage",
+            error=str(e)
+        )
+        return JsonResponse({'error': "Er ging iets mis op de server."}, status=500)
+

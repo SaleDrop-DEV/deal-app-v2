@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'pages',
     'deals',
     'api',
+    'business',
 
     'accounts',
     'django.contrib.sites',

@@ -17,6 +17,7 @@ urlpatterns = [
     path('get-stores-admin/', views.fetch_stores_for_admin, name='get_all_stores'),
     path('check-recommendation/', views.check_recommendation, name='check_recommendation'),
     path('check-salemessage/', views.checkSaleMessage, name='check_salemessage'),
+    path('check-edit-profile-request/', views.check_edit_profile_request, name='check_edit_profile_request'),
 
 
     # API Authentication URLs (for JWT)

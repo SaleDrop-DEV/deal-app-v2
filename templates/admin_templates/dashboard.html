@@ -387,10 +387,86 @@
         color: var(--color-error);
     }
 
+    /* --- Profile Edit Requests Card Styles --- */
+    .profile-edit-requests-card {
+        grid-column: 1 / -1; /* Span full width on mobile/tablet */
+    }
+
+    @media (min-width: 1200px) {
+        .profile-edit-requests-card {
+            grid-column: span 2; /* Span 2 columns on desktop */
+        }
+    }
+
+    .profile-edit-request-item {
+        background-color: var(--color-gray-lighter);
+        border: 1px solid var(--color-gray-light);
+        border-radius: var(--border-radius-round);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .profile-edit-request-item:hover {
+        box-shadow: 0 2px 8px rgba(5, 32, 74, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .profile-edit-request-item .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .profile-edit-request-item .store-data {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .profile-edit-request-item .store-data img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: contain;
+        border: 1px solid var(--color-gray-light);
+    }
+
+    .profile-edit-request-item .store-name {
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin: 0;
+    }
+
+    .profile-edit-request-item .request-description {
+        font-style: italic;
+        color: var(--secondary-text-color);
+        margin: 0;
+        padding-left: 1rem;
+        border-left: 3px solid var(--color-accent);
+        background-color: var(--color-white);
+        padding: 0.75rem;
+    }
+
     .manual-check-sales-card > p { /* Style for the "empty" message */
         color: var(--secondary-text-color);
         padding: 1rem;
         text-align: center;
+    }
+
+    .profile-edit-request-item .item-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .profile-edit-request-item .item-actions button {
+        flex: 1;
+        padding: 0.6rem 1rem;
+        border-radius: var(--border-radius-round);
     }
 
 </style>
@@ -529,6 +605,32 @@
             <p>Geen sale-berichten die handmatige controle vereisen.</p>
             {% endfor %}
         </div>
+
+        <div class="dashboard-card profile-edit-requests-card">
+            <h3 class="dashboard-card-header">Wachtende Profiel Wijzigingsverzoeken</h3>
+            <div class="request-list">
+                {% for request in business_profile_edit_requests %}
+                <div class="profile-edit-request-item" data-id="{{ request.id }}">
+                    <div class="request-header">
+                        <div class="store-data">
+                            <img src="https://saledrop.app{{ request.image_url }}" alt="{{ request.business_profile.store.name }} logo">
+                            <h4 class="store-name">{{ request.business_profile.store.name }}</h4>
+                        </div>
+                        <span class="date">{{ request.requested_at|timesince }} geleden</span>
+                    </div>
+                    {% if request.description %}
+                        <p class="request-description">"{{ request.description }}"</p>
+                    {% endif %}
+                    <div class="item-actions">
+                        <button class="check-button" data-action="approve">Goedkeuren</button>
+                        <button class="delete-button" data-action="reject">Afwijzen</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="text-align: center;">Geen profiel wijzigingsverzoeken.</p>
+                {% endfor %}
+            </div>
+        </div>  
 
         <div class="dashboard-card business-requests-card">
             <h3 class="dashboard-card-header">6 Nieuwste Bedrijfsaanvragen</h3>
@@ -835,6 +937,110 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.displayMessage('error', error.message);
                 saleItem.classList.remove('processing');
                 saleItem.style.opacity = '1';
+            });
+        });
+    }
+
+    // --- Profile Edit Request Logic ---
+    // const profileEditRequestsCard = document.querySelector('.profile-edit-requests-card');
+    // if (profileEditRequestsCard) {
+    //     profileEditRequestsCard.addEventListener('click', function(event) {
+    //         const button = event.target.closest('button');
+    //         if (!button) return;
+
+    //         const requestItem = button.closest('.profile-edit-request-item');
+    //         if (!requestItem) return;
+
+    //         const requestId = requestItem.dataset.id;
+    //         const action = button.dataset.action;
+
+    //         if (!requestId || !action) return;
+
+    //         if (requestItem.classList.contains('processing')) return;
+    //         requestItem.classList.add('processing');
+    //         requestItem.style.opacity = '0.5';
+
+    //         fetch('/api/check-edit-profile-request/', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'X-CSRFToken': csrftoken
+    //             },
+    //             body: JSON.stringify({
+    //                 edit_profile_request_id: requestId,
+    //                 action: action
+    //             })
+    //         })
+    //         .then(response => response.ok ? response.json() : response.json().then(err => { throw new Error(err.error || 'Server error'); }))
+    //         .then(data => {
+    //             if (data.success) {
+    //                 const message = action === 'approve' ? 'Wijziging goedgekeurd.' : 'Wijziging afgewezen.';
+    //                 window.displayMessage('success', message);
+
+    //                 requestItem.style.transition = 'all 0.4s ease';
+    //                 requestItem.style.transform = 'scale(0.95)';
+    //                 requestItem.style.opacity = '0';
+    //                 setTimeout(() => requestItem.remove(), 400);
+    //             } else {
+    //                 throw new Error(data.error || 'An unknown error occurred.');
+    //             }
+    //         })
+    //         .catch(error => {
+    //             window.displayMessage('error', error.message);
+    //             requestItem.classList.remove('processing');
+    //             requestItem.style.opacity = '1';
+    //         });
+    //     });
+    // }
+
+    // --- Profile Edit Request Logic ---
+    const profileEditRequestsCard = document.querySelector('.profile-edit-requests-card');
+    if (profileEditRequestsCard) {
+        profileEditRequestsCard.addEventListener('click', function(event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const requestItem = button.closest('.profile-edit-request-item');
+            if (!requestItem) return;
+
+            const requestId = requestItem.dataset.id;
+            const action = button.dataset.action;
+
+            if (!requestId || !action) return;
+
+            if (requestItem.classList.contains('processing')) return;
+            requestItem.classList.add('processing');
+            requestItem.style.opacity = '0.5';
+
+            fetch('/api/check-edit-profile-request/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    edit_profile_request_id: requestId,
+                    action: action
+                })
+            })
+            .then(response => response.ok ? response.json() : response.json().then(err => { throw new Error(err.error || 'Server error'); }))
+            .then(data => {
+                if (data.success) {
+                    const message = action === 'approve' ? 'Wijziging goedgekeurd.' : 'Wijziging afgewezen.';
+                    window.displayMessage('success', message);
+
+                    requestItem.style.transition = 'all 0.4s ease';
+                    requestItem.style.transform = 'scale(0.95)';
+                    requestItem.style.opacity = '0';
+                    setTimeout(() => requestItem.remove(), 400);
+                } else {
+                    throw new Error(data.error || 'An unknown error occurred.');
+                }
+            })
+            .catch(error => {
+                window.displayMessage('error', error.message);
+                requestItem.classList.remove('processing');
+                requestItem.style.opacity = '1';
             });
         });
     }

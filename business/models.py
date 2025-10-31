@@ -17,6 +17,18 @@ class BusinessProfile(models.Model):
     def __str__(self):
         return f"{self.user.email} @ {self.store.name}"
     
+class EditProfileRequest(models.Model):
+    business_profile = models.ForeignKey(BusinessProfile,
+                                         on_delete=models.CASCADE,
+                                         related_name='edit_requests')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    is_processed = models.BooleanField(default=False)
+
+    # fields to be edited in the store profile
+    description = models.TextField(max_length=175, null=True, blank=True)
+    image_url = models.CharField(max_length=255, blank=True, null=False)
+
 class SaleMessage(models.Model):
     store = models.ForeignKey(Store, 
                               on_delete=models.CASCADE, 

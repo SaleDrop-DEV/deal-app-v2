@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.utils import timezone
 
-from .models import BusinessProfile, BusinessLoginCode, SaleMessage, GroqAPIData
+from .models import BusinessProfile, BusinessLoginCode, SaleMessage, GroqAPIData, EditProfileRequest
 
 admin.site.register(BusinessProfile)
 admin.site.register(BusinessLoginCode)
 admin.site.register(GroqAPIData)
+admin.site.register(EditProfileRequest)
 
 # Register your models here.
 

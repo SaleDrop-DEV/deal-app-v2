@@ -600,3 +600,64 @@ def checkSaleMessage(request):
         )
         return JsonResponse({'error': "Er ging iets mis op de server."}, status=500)
 
+
+from business.models import EditProfileRequest
+import os
+@login_required
+@require_POST
+def check_edit_profile_request(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+    try:
+        data = json.loads(request.body)
+        edit_profile_request_id = data.get('edit_profile_request_id')
+        action = data.get('action')  # Default action is 'check'
+        if edit_profile_request_id is None or action is None:
+            return JsonResponse({'error': 'edit_profile_request_id not provided in request body'}, status=400)
+        
+        if action not in ['approve', 'reject']:
+            return JsonResponse({'error': 'Invalid action provided.'}, status=400)
+        
+        if action == 'approve':
+            edit_request = EditProfileRequest.objects.get(id=int(edit_profile_request_id))
+            store = edit_request.business_profile.store
+            # Apply changes to the store
+            if edit_request.description:
+                store.description = edit_request.description
+
+            if edit_request.image_url != store.image_url:
+                #remove the old
+                relative_path = store.image_url.lstrip('/').replace('media/', '', 1)
+                old_image_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+                store.image_url = edit_request.image_url
+            store.save()
+            # Mark the request as processed
+            edit_request.is_processed = True
+            edit_request.processed_at = timezone.now()
+            edit_request.save()
+        elif action == 'reject':
+            edit_request = EditProfileRequest.objects.get(id=int(edit_profile_request_id))
+            # Just mark as processed without applying changes
+            edit_request.is_processed = True
+            edit_request.processed_at = timezone.now()
+            edit_request.save()
+
+        return JsonResponse({'success': True, 'message': 'EditProfileRequest marked as checked.'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON format in request body.'}, status=400)
+    except EditProfileRequest.DoesNotExist:
+        return HttpResponseNotFound(JsonResponse({'error': 'EditProfileRequest not found.'}))
+    except ValueError:
+        return JsonResponse({'error': 'Invalid edit_profile_request_id format.'}, status=400)
+    except Exception as e:
+        print(e)
+        API_Errors_Site.objects.create(
+            task="Check EditProfileRequest",
+            error=str(e)
+        )
+        return JsonResponse({'error': "Er ging iets mis op de server."}, status=500)
+
+

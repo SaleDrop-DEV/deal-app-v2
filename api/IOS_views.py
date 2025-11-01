@@ -722,46 +722,49 @@ def IOS_API_delete_expo_push_token(request):
         return JsonResponse({'error': 'Er ging iets mis bij het verwijderen van het token.'}, status=500)
 
 
+from business.models import SaleMessage
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_analysis_detail(request):
-    def parse_date_received(date_received):
-        now = timezone.now()
-        delta = now - date_received
-
-        if delta.total_seconds() < 60:
-            seconds = int(delta.total_seconds())
-            return f"{seconds} seconde{'n' if seconds > 1 else ''} geleden"
-        elif delta.total_seconds() < 3600:
-            minutes = int(delta.total_seconds() / 60)
-            return f"{minutes} minuut{'en' if minutes > 1 else ''} geleden"
-        elif delta.total_seconds() < 86400:
-            hours = int(delta.total_seconds() / 3600)
-            return f"{hours} uur geleden"
-        else:
-            days = int(delta.total_seconds() / 86400)
-            return f"{days} dag{'en' if days > 1 else ''} geleden"
     try:
         analysis_id = json.loads(request.body).get('analysisId')
-        analysis = deals_models.GmailSaleAnalysis.objects.get(id=analysis_id)
+        try:
+            analysis_id = int(analysis_id)
+            if analysis_id < 0:
+                # it is an human created sale message
+                analysis_id = -analysis_id
+                saleMessage = SaleMessage.objects.get(id=analysis_id)
+                return JsonResponse({
+                    'title': saleMessage.title,
+                    'grabber': saleMessage.grabber,
+                    'storeName': saleMessage.store.name,
+                    'mainLink': f"deals/visit/{-saleMessage.id}/{request.user.id}/",  # consider if request.user.id is needed here
+                    'description': saleMessage.description,
+                })
+            else:
+                analysis = deals_models.GmailSaleAnalysis.objects.get(id=analysis_id)
+                s = "Er is een nieuwe deal beschikbaar!"
+                d = "Bekijk jouw nieuwe deal door op de knop te klikken."
+                return JsonResponse({
+                    'title': analysis.title,
+                    'grabber': analysis.grabber if analysis.grabber != "N/A" else s,
+                    'storeName': analysis.message.store.name,
+                    'mainLink': f"deals/visit/{analysis.id}/{request.user.id}/",  # consider if request.user.id is needed here
+                    'description': analysis.description if analysis.description != "N/A" else d,
+                    'messageId': analysis.message.id,
+                })
+        except ValueError:
+            return JsonResponse({'error': 'Invalid analysis ID'}, status=400)
+        except SaleMessage.DoesNotExist:
+            return JsonResponse({'error': 'Not found'}, status=404)
+
     except deals_models.GmailSaleAnalysis.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
+
     except Exception as e:
         API_Errors.objects.create(
             task= "Get analysis detail",
             error = str(e)
         )
         return JsonResponse({'error': str(e)}, status=500)
-    
-    s = "Er is een nieuwe deal beschikbaar!"
-    d = "Bekijk jouw nieuwe deal door op de knop te klikken."
-    return JsonResponse({
-        'title': analysis.title,
-        'grabber': analysis.grabber if analysis.grabber != "N/A" else s,
-        'storeName': analysis.message.store.name,
-        'mainLink': f"deals/visit/{analysis.id}/{request.user.id}/",  # consider if request.user.id is needed here
-        'description': analysis.description if analysis.description != "N/A" else d,
-        'parsedDateReceived': parse_date_received(analysis.message.received_date),
-        'messageId': analysis.message.id,
-    })

@@ -11,10 +11,11 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import Coalesce
-from django.utils import timezone # Import timezone
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 from deals.models import Store, Click, ClickNoAuth, GmailSaleAnalysis # Keep GmailSaleAnalysis for best_sales
-from .models import BusinessProfile, BusinessLoginCode, SaleMessage # Import SaleMessage
+from .models import BusinessProfile, BusinessLoginCode, SaleMessage, EditProfileRequest, SaleMessageClick
 from .forms import StoreProfileEditForm, SaleMessageForm # Import SaleMessageForm
 from api.models import API_Errors_Site
 from pages.models import StaticContent
@@ -22,8 +23,12 @@ from pages.models import StaticContent
 import random
 from datetime import timedelta
 import json
+import os
+import uuid
 
 User = get_user_model()
+
+# Utility Functions #
 
 def get_planned_date_str(sale_message: SaleMessage) -> str:
     """
@@ -55,7 +60,10 @@ def get_planned_date_str(sale_message: SaleMessage) -> str:
         if msg.sent_at:
             planned_date_str = f"{msg.sent_at.strftime('%d-%m-%Y %H:%M')}"
         else:
-            planned_date_str = "Wacht op beoordeling voor verzending."
+            if msg.publicReady:
+                planned_date_str = "Klaar om te verzenden"
+            else:
+                planned_date_str = "Wacht op beoordeling voor verzending."
     
     return planned_date_str
 
@@ -73,7 +81,7 @@ def check_sale_limit_warning(store: Store) -> bool:
     # We use Coalesce to prioritize scheduled_at if it exists,
     # otherwise we fall back to created_at for immediate sends.
     effective_dates = list(
-        SaleMessage.objects.filter(store=store)
+        SaleMessage.objects.filter(store=store).exclude(isReviewed=True, isManualReviewed=True, publicReady=False)
         .annotate(effective_date=Coalesce('scheduled_at', 'created_at'))
         .values_list('effective_date', flat=True)
         .order_by('effective_date') # Sorting is crucial
@@ -104,9 +112,80 @@ def check_sale_limit_warning(store: Store) -> bool:
     # 7. If we finish the loop, no "full" window was found.
     return False
 
+def check_sale_limit_violation(store: Store, new_date) -> bool:
+    """
+    This function checks if the user can add a new sale at 'new_date' without violating the limit.
+    """
+    # get range of dates to check
+    start_range = new_date - timedelta(days=29) # 30-day window includes the new date
+    end_range = new_date + timedelta(days=29)
+    # get all sales in that range
+    sales_in_range = SaleMessage.objects.filter(store=store, created_at__range=(start_range, end_range))
+    return len(sales_in_range) >= 3
+
+def get_un_able_dates_for_store(store: Store) -> list[str]:
+    """
+    This function returns a list of date strings (YYYY-MM-DD) for which the store cannot schedule new sales,
+    based on the 3-sales-per-30-days rule.
+    
+    A date is "unable" if adding a sale on that date would result in 4+ sales
+    within any 30-day window.
+    """
+    # 1. Get all effective sale dates.
+    effective_dates = list(
+        SaleMessage.objects.filter(store=store).exclude(isReviewed=True, isManualReviewed=True, publicReady=False)
+        .annotate(effective_date=Coalesce('scheduled_at', 'created_at'))
+        .values_list('effective_date', flat=True)
+        .order_by('effective_date')
+    )
+    
+    if not effective_dates:
+        return []
+    
+    # Convert to date objects for easier comparison
+    sale_dates = sorted([dt.date() for dt in effective_dates])
+    
+    blocked_dates = set()
+    MAX_SALES_PER_30_DAYS = 3
+    WINDOW_DURATION = timedelta(days=30)
+    
+    # Check a reasonable range
+    check_start = sale_dates[0] - WINDOW_DURATION
+    check_end = sale_dates[-1] + WINDOW_DURATION
+    
+    current_date = check_start
+    while current_date <= check_end:
+        # Check if adding a sale on current_date would violate the rule
+        # We need to check ALL possible 30-day windows that include current_date
+        is_blocked = False
+        
+        # Check windows where current_date could be anywhere within the window
+        for window_start_offset in range(30):
+            window_start = current_date - timedelta(days=window_start_offset)
+            window_end = window_start + WINDOW_DURATION - timedelta(days=1)
+            
+            # Count existing sales in this window
+            sales_in_window = sum(
+                1 for sale_date in sale_dates 
+                if window_start <= sale_date <= window_end
+            )
+            
+            # If adding current_date would exceed limit, block it
+            if sales_in_window >= MAX_SALES_PER_30_DAYS:
+                is_blocked = True
+                break
+        
+        if is_blocked:
+            blocked_dates.add(current_date.strftime("%Y-%m-%d"))
+        
+        current_date += timedelta(days=1)
+    
+    return sorted(list(blocked_dates))
 
 
-# @csrf_exempt
+
+# ------ Views ------- #
+# Login #
 def get_access_to_business_profile_page_view(request):
     """
     This view will handle the authenticate methods to login.
@@ -183,7 +262,6 @@ def get_access_to_business_profile_page_view(request):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
 def handle_code_login(request, data):
     """Handles the multi-step code-based login flow."""
     def is_email_from_verified_domain(email: str, verified_domains: list[str]) -> tuple:
@@ -246,11 +324,12 @@ def handle_code_login(request, data):
         BusinessLoginCode.objects.create(email=email, code=code)
 
         # Render the HTML email template
-        html_content = render_to_string('email/business_login_code.html', {'code': code})
+        image_url = f"https://saledrop.app{StaticContent.objects.get(content_name='Logo + SaleDrop').image_url}"
+        html_content = render_to_string('email/business_login_code.html', {'code': code, 'image_url': image_url})
 
         # Create and send the email
         email_message = EmailMessage(
-            subject='Jouw SaleDrop Login Code',
+            subject='SaleDrop Business | login code',
             body=html_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[email],
@@ -299,7 +378,6 @@ def handle_code_login(request, data):
 
     return JsonResponse({'error': 'Invalid step for code login.'}, status=400)
 
-
 def handle_account_login(request, data):
     """Handles standard email/password login for business users."""
     email = data.get('email', '').strip().lower()
@@ -324,6 +402,8 @@ def handle_account_login(request, data):
         return JsonResponse({'error': 'Ongeldige e-mail of wachtwoord.'}, status=401)
 
 
+
+# Dashboard #
 def business_dashboard_view(request):
     """
     Displays the dashboard for a logged-in business user.
@@ -339,7 +419,13 @@ def business_dashboard_view(request):
     
     def get_planned_sales(store):
         now = timezone.now()
-        sales_messages = SaleMessage.objects.filter(store=store).order_by('scheduled_at')
+        thirty_days_ago = now - timedelta(days=30)
+
+        # Exclude sales that were effectively sent more than 30 days ago.
+        # This considers both scheduled sales and immediately sent sales (using created_at as a fallback).
+        sales_messages = SaleMessage.objects.filter(store=store).annotate(
+            effective_date=Coalesce('scheduled_at', 'created_at')
+        ).filter(effective_date__gte=thirty_days_ago).order_by('scheduled_at')
 
         response = [
         ]
@@ -354,6 +440,7 @@ def business_dashboard_view(request):
                     reason = sale_message.groq_data.reason if hasattr(sale_message, 'groq_data') else "Geen reden opgegeven."
             else:
                 review_status = "approved"
+
             response.append({
                 'id': sale_message.id,
                 'title': sale_message.title,
@@ -363,6 +450,7 @@ def business_dashboard_view(request):
                 'isSent': True if sale_message.sent_at else False,
                 'review_status': review_status,
                 'reason': reason,
+                
             })
 
         return response
@@ -371,6 +459,7 @@ def business_dashboard_view(request):
         return redirect('business_access')
     user = request.user
     store = None
+
     try:
         # Ensure the user has a business profile and get the associated store
         if user.is_superuser:
@@ -464,7 +553,7 @@ def business_dashboard_view(request):
     best_sales_data_json = json.dumps(best_sales_data, cls=DjangoJSONEncoder)
     
 
-    parse_date_issued(store.dateIssued)
+    dates = get_un_able_dates_for_store(store)
 
     context = {
         'general_store_data': general_store_data,
@@ -477,6 +566,7 @@ def business_dashboard_view(request):
         'edit_form': edit_form, # For editing store profile
         'pending_actions_count': pending_actions_count,
         'sale_message_form': sale_message_form, # For creating new sale messages
+        'unable_create_dates_json': json.dumps(dates),
 
         'planned_sales': get_planned_sales(store=store),
         'plannedSalesCountWarningStyle': 'visible' if check_sale_limit_warning(store) else 'hidden'
@@ -485,8 +575,29 @@ def business_dashboard_view(request):
     return render(request, 'business/dashboard.html', context)
 
 
-# POST endpoints for dashboard #
+# Visit Sale #
+def visit_sale_view(request, sale_id, user_id):
+    """
+    Redirects to the sale's main link and logs the click.
+    """
+    try:
+        sale_message = get_object_or_404(SaleMessage, id=sale_id)
 
+        # Log the click
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            SaleMessageClick.objects.create(salemessage=sale_message, user=None)
+        else:
+            SaleMessageClick.objects.create(salemessage=sale_message, user=None)
+
+        redirect(sale_message.link)
+    except Exception as e:
+        print(e)
+        return redirect('/')
+
+
+
+# POST endpoints for dashboard #
 @login_required
 def edit_store_profile_view(request, store_id):
     """Handles the submission of the store profile edit form via AJAX."""
@@ -494,33 +605,75 @@ def edit_store_profile_view(request, store_id):
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
     try:
+        business_profile = None
         # Ensure the user has permission to edit this store
         if request.user.is_superuser:
-            store = Store.objects.get(id=store_id)
+            # Superuser might not have a profile, but needs one to link the request.
+            # We can find one or handle this case as needed. For now, let's assume
+            # a superuser might be acting on behalf of a store's profile.
+            # A simple approach is to get the first profile associated with the store.
+            business_profile = BusinessProfile.objects.filter(store_id=store_id).first()
+            if not business_profile:
+                return JsonResponse({'error': 'No business profile found for this store to attach the request to.'}, status=404)
         else:
-            profile = BusinessProfile.objects.get(user=request.user, store_id=store_id)
-            store = profile.store
+            business_profile = BusinessProfile.objects.get(user=request.user, store_id=store_id)
 
-        form = StoreProfileEditForm(request.POST, request.FILES, instance=store)
+        # We are creating a new EditProfileRequest, so we don't pass an instance.
+        form = StoreProfileEditForm(request.POST, request.FILES)
         if form.is_valid():
-            updated_store = form.save()
+            # delete any existing pending requests for this store
+            EditProfileRequest.objects.filter(business_profile=business_profile).delete()
+
+            # Create an EditProfileRequest instance but don't save to DB yet.
+            edit_request = form.save(commit=False)
+            edit_request.business_profile = business_profile
+
+            if 'image_url' in request.FILES:
+                image = request.FILES['image_url']
+                ext = image.name.split('.')[-1].lower()
+                allowed_extensions = ['jpg', 'jpeg', 'png']
+
+                if ext not in allowed_extensions or not image.content_type.startswith('image'):
+                    return JsonResponse({'error': 'Ongeldig afbeeldingsbestand. Alleen JPG, JPEG, en PNG zijn toegestaan.'}, status=400)
+                
+                # Define the directory where images will be saved
+                upload_dir = os.path.join(settings.MEDIA_ROOT, 'store_logos')
+                os.makedirs(upload_dir, exist_ok=True)
+
+                filename = f"{uuid.uuid4()}.{ext}"
+                full_path = os.path.join(upload_dir, filename)
+
+                try:
+                    with open(full_path, 'wb+') as destination:
+                        for chunk in image.chunks():
+                            destination.write(chunk)
+                    # The form field is 'image_url', but the model field is also 'image_url'.
+                    # We need to save the path to the model field.
+                    edit_request.image_url = f"/media/store_logos/{filename}"
+                except IOError as e:
+                    return JsonResponse({'error': f'Foutmelding bij opslaan van afbeelding: {e}'}, status=500)
+            else:
+                edit_request.image_url = business_profile.store.image_url
+            edit_request.save()
+
             return JsonResponse({
                 'success': True,
-                'message': 'Profiel is bijgewerkt.',
-                'new_description': updated_store.description,
-                'new_image_url': updated_store.image_url.url if updated_store.image_url else ''
+                'new_description': edit_request.description,
+                'new_image_url': edit_request.image_url,
+                'message': 'Je wijzigingsverzoek is ingediend. Het kan tot 48 uur duren voordat de wijzigingen zichtbaar zijn.',
             })
         else:
             errors = {field: error[0] for field, error in form.errors.items()}
             return JsonResponse({'error': 'Validatiefout.', 'errors': errors}, status=400)
 
-    except (Store.DoesNotExist, BusinessProfile.DoesNotExist):
+    except BusinessProfile.DoesNotExist:
         return JsonResponse({'error': 'Winkel niet gevonden of geen permissie.'}, status=404)
     except Exception as e:
-        API_Errors_Site.objects.create(task="edit_store_profile_view", error=str(e))
+        # API_Errors_Site.objects.create(task="edit_store_profile_view", error=str(e))
+        print(e)
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
-
+@login_required
 def allow_logo_use_view(request, id):
     if request.method == 'POST':
         store_id = id
@@ -538,7 +691,6 @@ def allow_logo_use_view(request, id):
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'error': True})
-
 
 @login_required
 def create_sale_message_view(request):
@@ -585,7 +737,7 @@ def create_sale_message_view(request):
 
         # 3. Get all *existing* effective sale dates (using Coalesce, just like the warning function)
         effective_dates = list(
-            SaleMessage.objects.filter(store=store)
+            SaleMessage.objects.filter(store=store).exclude(isReviewed=True, isManualReviewed=True, publicReady=False)
             .annotate(effective_date=Coalesce('scheduled_at', 'created_at'))
             .values_list('effective_date', flat=True)
         )
@@ -660,7 +812,6 @@ def create_sale_message_view(request):
         print(e)
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
-
 @login_required
 def edit_sale_message_view(request, sale_id):
     """
@@ -695,6 +846,13 @@ def edit_sale_message_view(request, sale_id):
         return JsonResponse({'success': True, 'data': data})
 
     elif request.method == 'POST':
+        was_reviewed = sale_message.isReviewed
+        was_manual_reviewed = sale_message.isManualReviewed
+        was_ready = sale_message.publicReady
+        oldTitle = sale_message.title
+        oldGrabber = sale_message.grabber
+        oldDescription = sale_message.description
+        oldScheduledAt = sale_message.scheduled_at
         form = SaleMessageForm(request.POST, instance=sale_message)
         if form.is_valid():
             # --- START: Rate Limiting Logic for Edit ---
@@ -703,7 +861,7 @@ def edit_sale_message_view(request, sale_id):
             # 1. Determine the "effective date" of the edited sale
             new_scheduled_at_date = form.cleaned_data.get('scheduled_at')
             if new_scheduled_at_date is None:
-                new_effective_date = sale_message.created_at # Fallback to creation if schedule is cleared
+                new_effective_date = sale_message.created_at
             else:
                 new_effective_date = new_scheduled_at_date
 
@@ -714,7 +872,7 @@ def edit_sale_message_view(request, sale_id):
 
             # 3. Get all effective dates for the store, EXCLUDING the one being edited
             effective_dates = list(
-                SaleMessage.objects.filter(store=store).exclude(id=sale_id)
+                SaleMessage.objects.filter(store=store).exclude(id=sale_id).exclude(isReviewed=True, isManualReviewed=True, publicReady=False)
                 .annotate(effective_date=Coalesce('scheduled_at', 'created_at'))
                 .values_list('effective_date', flat=True)
             )
@@ -735,42 +893,31 @@ def edit_sale_message_view(request, sale_id):
                         }, status=400)
             # --- END: Rate Limiting Logic for Edit ---
 
-            was_reviewed = sale_message.isReviewed
-            oldTitle = sale_message.title
-            oldGrabber = sale_message.grabber
-            oldDescription = sale_message.description
-            oldLink = sale_message.link
-            oldScheduledAt = sale_message.scheduled_at
             updated_message = form.save(commit=False)
-
-            if not oldTitle == updated_message.title and not request.user.is_superuser:
-                updated_message.isReviewed = False
-            if not oldGrabber == updated_message.grabber and not request.user.is_superuser:
-                updated_message.isReviewed = False
-            if not oldDescription == updated_message.description and not request.user.is_superuser:
-                updated_message.isReviewed = False
-            if not oldLink == updated_message.link and not request.user.is_superuser:
-                updated_message.isReviewed = False
             
-            # Logic for re-review
-            # Superusers can edit without triggering re-review
-            if was_reviewed and not request.user.is_superuser:
-                changed_fields = form.changed_data
-                print(changed_fields)
-                # If only the schedule changed, keep it reviewed.
-                if changed_fields == ['scheduled_at']:
-                    updated_message.isReviewed = True
-                    message = 'Verzenddatum is bijgewerkt.'
-                # If content changed, it needs re-review.
-                else:
-                    updated_message.isReviewed = False
-                    message = 'Sale bericht is bijgewerkt en wordt opnieuw beoordeeld.'
-            else:
-                # For new messages or superuser edits, use standard flow
-                message = 'Sale bericht is bijgewerkt.'
-                if not updated_message.isReviewed:
-                    message = 'Sale bericht is bijgewerkt en wordt beoordeeld.'
+            # --- Corrected Re-review Logic ---
+            content_fields = {'title', 'grabber', 'description'}
+            changed_fields = set(form.changed_data)
+            
+            # Check if any of the content fields have been changed
+            content_has_changed = any(field in changed_fields for field in content_fields)
 
+            message = 'Sale bericht is bijgewerkt.' # Default message
+
+            # If content changed AND the user is not a superuser, it needs re-review.
+            if content_has_changed and not request.user.is_superuser:
+                updated_message.isReviewed = False
+                updated_message.isManualReviewed = False
+                updated_message.publicReady = False
+                message = 'Sale bericht is bijgewerkt en wordt opnieuw beoordeeld.'
+            elif 'scheduled_at' in changed_fields and not content_has_changed:
+                # If only the date changed, the message is just updated.
+                message = 'Verzenddatum is bijgewerkt.'
+                updated_message.isReviewed = was_reviewed
+                updated_message.isManualReviewed = was_manual_reviewed
+                updated_message.publicReady = was_ready
+            # In all other cases (e.g., superuser edit), the review status is preserved
+            # from the instance, and the default message is used.
 
             updated_message.save()
 
@@ -793,7 +940,6 @@ def edit_sale_message_view(request, sale_id):
             return JsonResponse({'error': 'Validatiefout.', 'errors': errors}, status=400)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
 
 @login_required
 def delete_sale_message_view(request, sale_id):

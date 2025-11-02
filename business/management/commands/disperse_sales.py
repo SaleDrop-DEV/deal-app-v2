@@ -62,14 +62,14 @@ def sendPushNotifications(message: SaleMessage):
         store = message.store
         subscribers = store.subscriptions.filter(email = "support@saledrop.app")
 
-        expo_tokens = list(
-            subscribers.select_related('extrauserinformation')
-            .filter(extrauserinformation__expoToken__isnull=False)
-            .exclude(extrauserinformation__expoToken='')
-            .values_list('extrauserinformation__expoToken', flat=True)
+        device_expo_tokens = list(
+            subscribers.prefetch_related('devices')
+            .filter(devices__expo_token__isnull=False)
+            .exclude(devices__expo_token='')
+            .values_list('devices__expo_token', flat=True)
         )
         emoji = "🔥"  # Fire emoji for sales
-        if expo_tokens:
+        if device_expo_tokens:
             title = store.name
             subtitle = f"{emoji} {message.title}"
             grabber = message.grabber if message.grabber != 'N/A' else "Nieuwe deal beschikbaar!"
@@ -78,13 +78,14 @@ def sendPushNotifications(message: SaleMessage):
                 "page": "SaleDetail",
                 "analysisId": -message.id,
             }
-            send_batch_notifications(expo_tokens, title, subtitle, body, data)
+            send_batch_notifications(device_expo_tokens, title, subtitle, body, data)
 
 
 class Command(BaseCommand):
     help = 'Disperse SaleMessages that are marked as publicReady and not yet sent.'
 
     def handle(self, *args, **options):
+        self.stdout.write("Starting to disperse ready SaleMessages...")
         for salemessage in SaleMessage.objects.filter(publicReady=True, sent_at__isnull=True).order_by('scheduled_at', 'created_at'):
             #check if we need to send
             if timezone.now() >= (salemessage.scheduled_at or timezone.now()):

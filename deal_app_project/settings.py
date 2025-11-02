@@ -253,6 +253,17 @@ CELERY_TASK_TIME_LIMIT = 300 # 5 minutes (adjust if fetching many emails)
 CELERY_WORKER_CONCURRENCY = 15 # Adjust based on your server resources
 
 
+# Celery Beat Schedule
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'disperse-sales-every-minute': {
+        'task': 'business.tasks.disperse_ready_sale_messages',
+        'schedule': crontab(minute='*'),  # Runs every minute
+        'args': (),
+    },
+}
+
 
 
 LOGGING = {

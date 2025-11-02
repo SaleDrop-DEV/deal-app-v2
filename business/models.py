@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 from deals.models import Store
@@ -37,9 +39,9 @@ class SaleMessage(models.Model):
                                    on_delete=models.CASCADE,
                                    related_name='salemessages')
     link = models.URLField(blank=False, null=False)
-    title = models.CharField(max_length=255)
-    grabber = models.CharField(max_length=255)
-    description = models.TextField(max_length= 2500)
+    title = models.CharField(max_length=50)
+    grabber = models.CharField(max_length=50)
+    description = models.TextField(max_length= 300)
     created_at = models.DateTimeField(auto_now_add=True)
     isReviewed = models.BooleanField(default=False) # done by AI
     needsManualReview = models.BooleanField(default=False)
@@ -53,6 +55,27 @@ class SaleMessage(models.Model):
     
     def __str__(self):
         return f"{self.store.name} - {self.title}"
+
+@receiver(pre_delete, sender=SaleMessage)
+def delete_related_groq_data(sender, instance, **kwargs):
+    """
+    Ensures that the related GroqAPIData object is deleted before
+    the SaleMessage is deleted to prevent IntegrityError on OneToOneField.
+    """
+    if hasattr(instance, 'groq_data'):
+        instance.groq_data.delete()
+
+    
+class SaleMessageClick(models.Model):
+    salemessage = models.ForeignKey(SaleMessage, 
+                                    on_delete=models.CASCADE, 
+                                    related_name='clicks')
+    clicked_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True,
+                             related_name='brand_made_salemessage_clicks')
     
 class GroqAPIData(models.Model):
     salemessage = models.OneToOneField(SaleMessage, 

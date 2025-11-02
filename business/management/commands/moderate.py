@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 import os
 from groq import Groq, RateLimitError, APIConnectionError, AuthenticationError, GroqError
+from deals.models import ScrapeData
 import json
 import time
 
@@ -152,49 +153,63 @@ class Command(BaseCommand):
     help = 'Moderate unreviewed sale messages using AI and flag for manual review if needed.'
 
     def handle(self, *args, **options):
-        unreviewed_messages = SaleMessage.objects.filter(isReviewed=False)
-        self.stdout.write(f"Found {unreviewed_messages.count()} unreviewed messages to moderate.")
+        try:
+            unreviewed_messages = SaleMessage.objects.filter(isReviewed=False)
+            self.stdout.write(f"Found {unreviewed_messages.count()} unreviewed messages to moderate.")
 
-        for message in unreviewed_messages:
-            msg_to_moderate = f"Title: {message.title}\nGrabebr: {message.grabber}\nDescription: {message.description}"
-            result = moderate_message(msg_to_moderate, groq_api_key=API_KEY)
+            for message in unreviewed_messages:
+                msg_to_moderate = f"Title: {message.title}\nGrabebr: {message.grabber}\nDescription: {message.description}"
+                result = moderate_message(msg_to_moderate, groq_api_key=API_KEY)
 
-            # Case 1: Moderation was successful and the content is safe.
-            if result.get("is_safe") is True:
-                message.isReviewed = True
-                message.publicReady = True
-                message.needsManualReview = False
-                GroqAPIData.objects.create(
-                    salemessage=message,
-                    is_safe=result.get("is_safe"),
-                    reason=result.get("reason"),
-                    category=result.get("category")
-                )
-                self.stdout.write(self.style.SUCCESS(f"Message ID {message.id} approved automatically."))
-            
-            # Case 2: Moderation was successful and the content is NOT safe.
-            elif result.get("is_safe") is False and "error" not in result.get("category", ""):
-                message.isReviewed = True
-                message.publicReady = False
-                message.needsManualReview = True # Flag for a human to check.
-                GroqAPIData.objects.create(
-                    salemessage=message,
-                    is_safe=result.get("is_safe"),
-                    reason=result.get("reason"),
-                    category=result.get("category")
-                )
-                self.stdout.write(self.style.WARNING(f"Message ID {message.id} flagged for manual review. Reason: {result.get('reason')}"))
-            
-            # Case 3: Moderation service failed (API error, timeout, etc.).
-            else:
-                ScrapeData.objects.create(
-                    task="moderation_error",
-                    succes = False,
-                    major_error = False,
-                    error = f"Moderation failed for Message ID {message.id}. Reason: {result.get('reason')}.",
-                )
-                message.isReviewed = False # Keep it as unreviewed to be picked up next time.
-                message.needsManualReview = True # Flag for a human to check in case the service is down for a while.
-                self.stderr.write(self.style.ERROR(f"Moderation failed for Message ID {message.id}. Reason: {result.get('reason')}. It will be retried later."))
+                # Case 1: Moderation was successful and the content is safe.
+                if result.get("is_safe") is True:
+                    message.isReviewed = True
+                    message.publicReady = True
+                    message.needsManualReview = False
+                    GroqAPIData.objects.get_or_create(
+                        salemessage=message,
+                        defaults={
+                            "is_safe": result.get("is_safe"),
+                            "reason": result.get("reason"),
+                            "category": result.get("category")
+                        }
+                    )
+                    self.stdout.write(self.style.SUCCESS(f"Message ID {message.id} approved automatically."))
+                
+                # Case 2: Moderation was successful and the content is NOT safe.
+                elif result.get("is_safe") is False and "error" not in result.get("category", ""):
+                    message.isReviewed = True
+                    message.publicReady = False
+                    message.needsManualReview = True # Flag for a human to check.
+                    GroqAPIData.objects.get_or_create(
+                        salemessage=message,
+                        defaults={
+                            "is_safe": result.get("is_safe"),
+                            "reason": result.get("reason"),
+                            "category": result.get("category")
+                        }
+                    )
+                    self.stdout.write(self.style.WARNING(f"Message ID {message.id} flagged for manual review. Reason: {result.get('reason')}"))
+                
+                # Case 3: Moderation service failed (API error, timeout, etc.).
+                else:
+                    ScrapeData.objects.create(
+                        task="moderation_error",
+                        succes = False,
+                        major_error = False,
+                        error = f"Moderation failed for Message ID {message.id}. Reason: {result.get('reason')}.",
+                    )
+                    message.isReviewed = False # Keep it as unreviewed to be picked up next time.
+                    message.needsManualReview = True # Flag for a human to check in case the service is down for a while.
+                    self.stderr.write(self.style.ERROR(f"Moderation failed for Message ID {message.id}. Reason: {result.get('reason')}. It will be retried later."))
 
-            message.save()
+                message.save()
+
+        except Exception as e:
+            self.stderr.write(self.style.ERROR(f"An unexpected error occurred: {e}"))
+            ScrapeData.objects.create(
+                task="moderation_error",
+                succes = False,
+                major_error = True,
+                error = f"An unexpected error occurred: {e}",
+            )

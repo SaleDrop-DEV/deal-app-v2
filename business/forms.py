@@ -1,6 +1,5 @@
 from django import forms
-from deals.models import Store
-from .models import SaleMessage
+from .models import SaleMessage, EditProfileRequest
 
 class StoreProfileEditForm(forms.ModelForm):
     """
@@ -12,13 +11,13 @@ class StoreProfileEditForm(forms.ModelForm):
         required=False
     )
     class Meta:
-        model = Store
+        model = EditProfileRequest
         fields = ['description', 'image_url']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Vertel iets over je winkel...'}),
         }
         labels = {
-            'description': 'Winkelomschrijving',
+            'description': 'Merk omschrijving',
             'image_url': 'Nieuw logo uploaden',
         }
     

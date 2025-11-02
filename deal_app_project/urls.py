@@ -20,6 +20,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),  # Allauth routes
     path('deals/', include('deals.urls')),
+    path('business/', include('business.urls')),
     path('api/', include('api.urls')),
     path("robots.txt", TemplateView.as_view(
         template_name="robots.txt",

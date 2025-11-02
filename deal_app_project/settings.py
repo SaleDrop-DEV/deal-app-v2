@@ -262,6 +262,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*'),  # Runs every minute
         'args': (),
     },
+    'moderate-sale-messages-very-hour': {
+        'task': 'business.tasks.moderate_sale_messages',
+        'schedule': crontab(minute=0, hour='*'),  # Runs every hour
+        'args': (),
+    },
 }
 
 

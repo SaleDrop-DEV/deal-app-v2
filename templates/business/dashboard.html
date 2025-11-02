@@ -733,7 +733,7 @@
         position: relative;
         transform-style: preserve-3d;
         transition: transform 0.6s;
-        min-height: 100px;
+        min-height: 150px;
     }
     .planned-sale-item.is-rejected.is-flipped {
         transform: rotateY(180deg);
@@ -1074,8 +1074,40 @@
     .action-btn.loading .btn-text {
         visibility: hidden;
     }
+
+    /* --- Action Card Collapse Animation --- */
+    @keyframes collapse-action-card {
+        from {
+            opacity: 1;
+            /* transform: scaleY(1); */
+            /* padding-top: 1rem; */
+            /* padding-bottom: 1rem; */
+        }
+        to {
+            opacity: 0;
+            /* transform: scaleY(0); */
+            /* max-height: 0; */
+            /* padding-top: 0; */
+            /* padding-bottom: 0; */
+            border: none;
+            box-shadow: none;
+        }
+    }
+
     @keyframes spin {
         to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes fadecollapseOut {
+        from { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+        to { 
+            opacity: 0; 
+            max-height: 0;
+            transform: translateY(20px);
+        }
     }
 
 
@@ -1390,12 +1422,12 @@
         <div class="store-action-container">
             {% if not store_actions_container.may_use_content or not user_data.passWordSet %}
                 <div class="actions-header" id="actions-header-toggle">
-                    <div class="actions-header__title-group">
+                    <div id="actionsManagerHeader" class="actions-header__title-group">
                         
-                        <div class="actions-title-with-badge">
+                        <div id="actionsManager" class="actions-title-with-badge">
                             <h3>Acties</h3>
                             {% if pending_actions_count > 0 %}
-                                <span class="actions-badge">{{ pending_actions_count }}</span>
+                                <span id="actionCount" class="actions-badge">{{ pending_actions_count }}</span>
                             {% endif %}
                         </div>
                         
@@ -1417,7 +1449,7 @@
                                             Ik geef toestemming
                                         </label>
                                     </div>
-                                    <button type="submit" class="action-btn">
+                                    <button type="submit" class="action-btn" disabled>
                                         <span class="btn-text" style="color: white;">Opslaan</span>
                                         <span class="spinner"></span>
                                     </button>
@@ -1430,7 +1462,7 @@
                                 <p class="store-action-card__text" style="margin-bottom: 0;">
                                     <strong>Stel een wachtwoord in voor makkelijker inloggen in de toekomst.</strong>
                                 </p>
-                                <form method="POST" action="" class="store-action-card__form">
+                                <form id="set-password-form" method="POST" action="{% url 'set_business_account_password' %}" class="store-action-card__form">
                                     {% csrf_token %}
                                     <div class="form-group floating-label">
                                         <input type="password" name="new_password1" id="new_password1" placeholder=" " required>
@@ -1442,7 +1474,7 @@
                                         <label for="new_password2">Bevestig wachtwoord</label>
                                         <span class="password-toggle-icon"></span>
                                     </div>
-                                    <button type="submit" class="action-btn">
+                                    <button type="submit" class="action-btn" disabled>
                                         <span class="btn-text" style="color: white;">Wachtwoord Instellen</span>
                                         <span class="spinner"></span>
                                     </button>
@@ -2044,19 +2076,70 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const allowContentForm = document.getElementById('allow-content-form');
-    const saveBtn = allowContentForm.querySelector('button[type="submit"]');
-    // Add loading state on submit
-    allowContentForm.addEventListener('submit', function(event) {
-        saveBtn.classList.add('loading');
-        saveBtn.disabled = true;
-    });
+    if (allowContentForm) {
+        const saveBtn = allowContentForm.querySelector('button[type="submit"]');
+        const allowLogoCheckbox = document.getElementById('allow-logo-checkbox');
 
-    // disable when radio is not checked
-    const allowLogoCheckbox = document.getElementById('allow-logo-checkbox');
-    if (allowLogoCheckbox) {
-        saveBtn.disabled = !allowLogoCheckbox.checked;
-        allowLogoCheckbox.addEventListener('change', function() {
-            saveBtn.disabled = !this.checked;
+        // Disable the save button initially if the checkbox isn't checked
+        if (allowLogoCheckbox) {
+            saveBtn.disabled = !allowLogoCheckbox.checked;
+            allowLogoCheckbox.addEventListener('change', function() {
+                saveBtn.disabled = !this.checked;
+            });
+        }
+
+        // Add loading state on submit
+        allowContentForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            saveBtn.classList.add('loading');
+            saveBtn.disabled = true;
+
+            const formData = new FormData(allowContentForm);
+            const url = allowContentForm.action;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+                });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    window.displayMessage('success', result.message);
+                    const actionCountEl = document.getElementById('actionCount');
+                    const actionCount = actionCountEl ? parseInt(actionCountEl.textContent) : 0;
+
+                    if (actionCount === 1) {
+                        const parent = allowContentForm.closest('.store-action-card');
+                        parent.style.animation = 'collapse-action-card 0.5s ease-out forwards';
+                        parent.addEventListener('animationend', () => {
+                            // parent.remove();
+                            parent.innerHTML = '';
+                            document.querySelector('.store-action-container').classList.remove('actions-visible');
+                            const actionManager = document.getElementById('actionsManagerHeader')
+                            actionManager.style.animation = 'fadecollapseOut 0.5s ease-out forwards';
+                            actionManager.addEventListener('animationend', () => {
+                                actionManager.remove();
+                            }, { once: true });
+                        }, { once: true });
+                    } else if (actionCount > 1) {
+                        if(actionCountEl) actionCountEl.textContent = actionCount - 1;
+                        const parent = allowContentForm.closest('.store-action-card');
+                        parent.style.animation = 'collapse-action-card 0.5s ease-out forwards';
+                        parent.addEventListener('animationend', () => {
+                            // parent.remove();
+                            parent.innerHTML = '';
+                        }, { once: true });
+                    }
+                } else {
+                    window.displayMessage('error', result.error || 'Er is een fout opgetreden.');
+                    saveBtn.classList.remove('loading');
+                    saveBtn.disabled = false;
+                }
+            } catch (error) {
+                window.displayMessage('error', 'Er is een netwerkfout opgetreden.');
+            }
         });
     }
 
@@ -2665,6 +2748,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 </script>
 
+<!-- Set Password Form AJAX handler -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const setPasswordForm = document.getElementById('set-password-form');
+    if (setPasswordForm) {
+        const submitBtnPassword = setPasswordForm.querySelector('button[type="submit"]');
+        const passwordInput = document.getElementById('new_password1');
+        const password2Input = document.getElementById('new_password2');
+
+        const checkPasswords = () => {
+            const pass1 = passwordInput.value;
+            const pass2 = password2Input.value;
+            submitBtnPassword.disabled = !(pass1 && pass2 && pass1 === pass2);
+        };
+
+        // Initially disable the button and set up listeners
+        checkPasswords();
+        passwordInput.addEventListener('input', checkPasswords);
+        password2Input.addEventListener('input', checkPasswords);
+
+        setPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtnPassword.classList.add('loading');
+            submitBtnPassword.disabled = true;
+
+            const formData = new FormData(setPasswordForm);
+            const url = setPasswordForm.action;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    },
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    window.displayMessage('success', result.message);
+                    // Optionally, hide the form or reload the page
+                    // get action count
+                    const actionCount = parseInt(document.getElementById('actionCount').textContent);
+                    if (actionCount == 1){
+                        const parent = setPasswordForm.closest('.store-action-card');
+                        parent.style.animation = 'collapse-action-card 0.5s ease-out forwards';
+                        parent.addEventListener('animationend', () => {
+                            // parent.remove();
+                            parent.innerHTML = '';
+                            document.querySelector('.store-action-container').classList.remove('actions-visible');
+                            const actionManager = document.getElementById('actionsManagerHeader')
+                            actionManager.style.animation = 'fadecollapseOut 0.5s ease-out forwards';
+                            actionManager.addEventListener('animationend', () => {
+                                actionManager.remove();
+                            }, { once: true });
+                        }, { once: true });
+                    } else if (actionCount == 2){
+                        // decrease the action count by 1
+                        document.getElementById('actionCount').innerHTML = '1';
+                        // get parent of the form
+                        const parent = setPasswordForm.closest('.store-action-card');
+                        parent.style.animation = 'collapse-action-card 0.5s ease-out forwards';
+                        parent.addEventListener('animationend', () => {
+                            // parent.remove();
+                            parent.innerHTML = '';
+                        }, { once: true });
+                    }
+                } else {
+                    window.displayMessage('error', result.error || 'Er is een fout opgetreden.');
+                }
+            } catch (error) {
+                window.displayMessage('error', 'Er is een netwerkfout opgetreden.');
+            } finally {
+                submitBtnPassword.classList.remove('loading');
+                submitBtnPassword.disabled = false;
+            }
+        });
+    } else{
+        console.log("Set password form not found.");
+    }
+});
+</script>
 
 
 

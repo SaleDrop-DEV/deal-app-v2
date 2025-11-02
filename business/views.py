@@ -966,4 +966,23 @@ def delete_sale_message_view(request, sale_id):
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
 
-# Change store email (easily)
+
+@login_required
+def set_user_passsword(request):
+    from django.contrib.auth import update_session_auth_hash
+    if request.method == 'POST':
+        # The form uses 'new_password1' and 'new_password2'
+        password_1 = request.POST.get('new_password1')
+        password_2 = request.POST.get('new_password2')
+
+        if not password_1 or password_1 != password_2:
+            return JsonResponse({'error': 'Wachtwoorden komen niet overeen.'}, status=400)
+
+        user = request.user
+        user.set_password(password_1)
+        user.save()
+        # Update the session hash to keep the user logged in
+        update_session_auth_hash(request, user)
+
+        return JsonResponse({'success': True, 'message': 'Wachtwoord succesvol ingesteld.'})
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)

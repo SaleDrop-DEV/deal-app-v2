@@ -10,6 +10,6 @@ urlpatterns = [
     path('create-sale-message/', views.create_sale_message_view, name='create_sale_message'), # New URL
     path('edit-sale-message/<int:sale_id>/', views.edit_sale_message_view, name='edit_sale_message'),
     path('delete-sale-message/<int:sale_id>/', views.delete_sale_message_view, name='delete_sale_message'),
-
+    path('set-password/', views.set_user_passsword, name='set_business_account_password'),
     path('sale-click/<int:sale_id>/<int:user_id>/', views.visit_sale_view, name='sale_message_click'), # New URL
 ]

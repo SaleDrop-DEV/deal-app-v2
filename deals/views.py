@@ -955,6 +955,7 @@ def visit_sale_view(request, gmail_analysis_id, user_id):
     if gmail_analysis_id > 0:
         if user_id == 0:
             # Anonymous user
+            gmail_analysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
             redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
             url_object = Url.objects.filter(general_url=redirect_url_string).first()
             return redirect(redirect_url_string)
@@ -1211,7 +1212,7 @@ def search_store_sales_view(request, store_id, gender, slug):
         if gender == 'beide':
             return HttpResponseNotFound("404 - Pagina niet gevonden.")
     
-    last_30_days = timezone.now() - timedelta(days=7)
+    last_30_days = timezone.now() - timedelta(days=30)
 
 
     base_filters = Q(

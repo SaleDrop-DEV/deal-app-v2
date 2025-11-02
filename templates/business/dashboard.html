@@ -1,0 +1,2775 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bedrijfsdashboard - {{ store.name }}{% endblock %}
+
+{% block head %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/nl.js"></script> -->
+
+<!-- Dashboard styles -->
+<style>
+    /* Custom Flatpickr styles to match your theme */
+    .flatpickr-day.disabled, .flatpickr-day.disabled:hover {
+        background: #f1f1f1 !important;
+        color: #b9b9b9 !important;
+    }
+    main {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #dashboard{
+        padding-top: calc(var(--navbar-height) + 2rem);
+        padding-bottom: 0;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .dashboard-smoother{
+        /* background should vertical fade from top opacity 0 to 1 */
+        margin-top: 2.5rem;
+        height: 2.5rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    }
+
+    .dashboard-container, .actions-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+   /* ============  NEW HEADER STYLES  ============ */
+    .store-hero {
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    }
+
+    .store-hero__inner {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    }
+
+    .store-hero__fig {
+    flex-shrink: 0;
+    width: 125;
+    height: 125;
+    margin: 0;
+    }
+
+    .store-hero__fig img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 1px solid #f2f2f2;
+    background: #fafafa;
+    }
+
+    .store-hero__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    }
+
+    .store-hero__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    }
+
+    .store-hero__title-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .store-hero__name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+    }
+
+
+    .store-hero__desc {
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0;
+    }
+
+    .store-hero__since {
+    font-size: .8125rem;
+    color: #9ca3af;
+    margin: 0;
+    }
+
+    /* --- mobile tweak --- */
+    @media (max-width: 640px) {
+    .store-hero__inner {
+        flex-direction: column;
+        text-align: center;
+    }
+    .store-hero__top {
+        flex-direction: column;
+        align-items: center;
+    }
+    .store-action-container h3 { /* Center align h3 on mobile */
+        text-align: center;
+    }
+    .store-action-container .radio-group { /* Center align radio on mobile */
+        justify-content: center;
+    }
+    }
+    /* ============  /NEW HEADER STYLES  ============ */
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card, .sales-card {
+        background-color: var(--color-white);
+        border-radius: var(--border-radius-large, 12px);
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card h2 {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--secondary-text-color);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .stat-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-accent);
+    }
+
+    .sales-card h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .sale-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--color-gray-light, #f0f0f0);
+    }
+
+    .sale-item:last-child {
+        border-bottom: none;
+    }
+
+    .sale-title {
+        font-weight: 500;
+        color: var(--primary-text-color);
+    }
+
+    .sale-clicks {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--primary-text-color);
+    }
+
+    .sale-item-wrapper {
+        padding: 1rem;
+        border-bottom: 1px solid var(--color-gray-light, #f0f0f0);
+    }
+    .sale-item-wrapper:last-child {
+        border-bottom: none;
+    }
+    .sale-date {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--secondary-text-color, #6b7280);
+        margin-top: 0.25rem;
+    }
+    .sale-item-wrapper {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .sale-item-wrapper:hover { background-color: #f9f9f9; }
+
+/* ============  EDIT MODAL STYLES  ============ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+.modal-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 550px;
+    max-height: 80vh; /* Set max height */
+    overflow-y: auto; /* Make content scrollable */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-card .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.modal-card .btn-danger {
+    color: var(--color-error) !important; 
+    background-color: var(--color-error-background) !important;
+}
+.btn-danger:hover {
+    background-color: var(--color-error-background) !important;
+}
+
+.modal-card .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    cursor: pointer;
+}
+
+.modal-card h3 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.modal-card .form-group {
+    margin-bottom: .5rem;
+    position: relative; /* This is the fix */
+}
+
+.modal-card .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.modal-card .form-group input,
+.modal-card .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Apply floating label styles to the edit modal */
+.modal-card .floating-label input,
+.modal-card .floating-label textarea {
+    padding: 1rem; /* Match create form padding */
+    background-color: var(--color-white);
+    font-family: inherit;
+}
+
+/* Apply floating label logic to the edit modal */
+.modal-card .floating-label label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--secondary-text-color, #6b7280);
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+    background-color: var(--color-white);
+    padding: 0 0.25rem;
+}
+.modal-card .floating-label input:focus + label,
+.modal-card .floating-label input:not(:placeholder-shown) + label,
+.modal-card .floating-label textarea:focus + label,
+.modal-card .floating-label textarea:not(:placeholder-shown) + label {
+    top: -0.75rem;
+    left: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--color-accent, #3B82F6);
+}
+
+/* --- Action Toggler Styles --- */
+.store-action-container .actions-header {
+    display: flex;
+    align-items: center;
+    /* justify-content: space-between; <-- This is no longer needed */
+    cursor: pointer;
+    padding: 0.75rem; /* Added a bit more padding */
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    width: fit-content; /* Make header only as wide as its content */
+}
+
+.store-action-container .actions-header:hover {
+    background-color: var(--color-accent-lighter);
+}
+
+.actions-header__title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* This now puts space between "Acties" and the chevron */
+}
+
+.actions-header__title-group h3 {
+    margin: 0; /* Reset margin from h3 */
+}
+
+/* This is the new wrapper div */
+.actions-title-with-badge {
+    position: relative; /* This is the anchor for positioning the badge */
+}
+
+.actions-badge {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent);
+    font-size: 0.75rem;   /* Made font smaller */
+    font-weight: 600;
+    width: 20px;         /* Made badge smaller */
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* --- This is the key change --- */
+    position: absolute;
+    top: -8px;           /* Adjust to move it up */
+    right: -10px;        /* Adjust to move it right */
+}
+
+.actions-toggle-icon {
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+    color: var(--secondary-text-color);
+}
+
+.store-action-container.actions-visible .actions-toggle-icon {
+    transform: rotate(180deg);
+    /* color: var(--color-accent) */
+}
+
+/* --- Roll-out Animation --- */
+.actions-collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding-top 0.4s ease-out;
+}
+
+.store-action-container.actions-visible .actions-collapsible-content {
+    max-height: 500px; /* Set to a height larger than the content */
+    padding-top: 1.5rem; /* Add space when opened */
+}
+
+/* == Generic Action Button Style == */
+.action-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-accent);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+    box-sizing: border-box; /* Add this for consistent padding */
+}
+
+.action-btn:hover {
+    background-color: var(--color-accent-hover) !important;
+}
+
+.btn-danger:hover {
+    background-color: var(--color-error-background) !important;
+}
+
+.action-btn:disabled {
+    background-color: var(--color-accent-light) !important;
+    cursor: not-allowed;
+}
+/* ============  /EDIT MODAL STYLES  ============ */
+
+
+/* ============  NEW ACTION CONTAINER STYLES  ============ */
+.store-action-container {
+    margin-top: 2.5rem;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 2rem;
+}
+
+.store-action-container h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: left;
+    color: #111;
+}
+
+.store-action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.store-action-card {
+    background: white;
+    /* max-width: calc(50% - 1rem); */
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inactive-store-card {
+    opacity: 0;
+    border: none;
+}
+
+.store-action-card__text {
+    margin: 0 0 0.5rem 0;
+    color: #4b5563;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+/* --- Floating Label Styles (from login.html) --- */
+.store-action-card .form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+.store-action-card .floating-label input {
+    width: 100%;
+    padding: 0.75rem;
+    padding: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    background-color: var(--color-white);
+}
+.store-action-card .floating-label label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--secondary-text-color);
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+}
+.store-action-card .floating-label input:focus + label,
+.store-action-card .floating-label input:not(:placeholder-shown) + label {
+    top: -0.75rem;
+    left: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    background-color: var(--color-white);
+    padding: 0 0.25rem;
+}
+.store-action-card .floating-label input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+/* --- Password Visibility --- */
+.store-action-card .password-toggle-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z' /%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' /%3E%3C/svg%3E");
+    background-size: contain;
+    opacity: 0.6;
+}
+.store-action-card .password-toggle-icon.visible {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23888' class='w-6 h-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L6.228 6.228' /%3E%3C/svg%3E");
+}
+/* Helper class for screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+
+/* --- Checkbox/Radio Styles --- */
+.store-action-container .radio-group {
+    display: flex;
+    justify-content: flex-start; /* Aligns checkbox to the left */
+    gap: 1.5rem;
+    margin-bottom: 1rem; /* Give space before button */
+}
+
+.store-action-container .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--primary-text-color);
+    cursor: pointer;
+}
+
+.store-action-container input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-gray-medium);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 0; 
+}
+
+.store-action-container input[type="checkbox"]:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+}
+
+.store-action-container input[type="checkbox"]:checked::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+/* ============  /ACTION CONTAINER STYLES  ============ */
+
+</style>
+
+
+<!-- Sales managing section -->
+<style>
+    /* --- NEW Planned Sales Card Styles --- */
+    .planned-sale-item {
+        background: white;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        overflow: hidden; /* Ensures border-top is contained */
+
+        /* Animation properties */
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out, box-shadow 0.2s ease;
+    }
+
+    .planned-sale-item.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .planned-sale-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+    }
+
+    .planned-sale-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex-grow: 1;
+    }
+
+    .planned-sale-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .planned-sale-header h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--primary-text-color);
+        line-height: 1.3;
+    }
+
+    .planned-sale-grabber {
+        color: var(--secondary-text-color);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .planned-sale-footer {
+        margin-top: auto; /* Pushes footer to the bottom */
+        padding-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--secondary-text-color);
+    }
+
+    .planned-sale-date {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .planned-sale-date i {
+        font-size: 1.1rem;
+    }
+
+    /* --- End NEW Styles --- */
+    .planned-sales-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .planned-sales-container{
+        margin-bottom: 2.5rem;
+    }
+
+    .info-card{
+        /* background-color: var(--color-gray-lighter); */
+        padding: 1rem;
+        margin-bottom: 2.5rem;
+        border-radius: 12px;
+        border: 2.5px solid var(--color-error-background);
+    }
+
+    .planned-sales-container h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 1.5rem 0;
+        color: #111;
+    }
+    .planned-sales-grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    .review-status {
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        white-space: nowrap;
+    }
+    .review-status.rejected {
+        color: var(--color-error);
+        background-color: var(--color-error-background);
+    }
+    .review-status.reviewed {
+        color: var(--color-succes);
+        background-color: var(--color-succes-background);
+    }
+    .review-status.not-reviewed {
+        color: var(--color-error);
+        background-color: var(--color-error-background);
+    }
+
+    /* --- Flip Card Styles for Rejected Sales --- */
+    .planned-sale-item.is-rejected {
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.6s;
+        min-height: 100px;
+    }
+    .planned-sale-item.is-rejected.is-flipped {
+        transform: rotateY(180deg);
+        z-index: 1;
+    }
+    .planned-sale-item.is-rejected.is-flipped .pass-reason {
+        backface-visibility: visible;
+    }
+    
+    /* Apply absolute positioning and backface visibility only to the direct children (front and back faces) of a rejected card */
+    .planned-sale-item.is-rejected > .planned-sale-content,
+    .planned-sale-item.is-rejected > .pass-reason {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        top: 0;
+        left: 0;
+    }
+    /* Apply backface rotation only to the rejected card's reason */
+    .planned-sale-item.is-rejected > .pass-reason {
+        transform: rotateY(180deg);
+        background-color: var(--color-error-background);
+        color: var(--color-error);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        text-align: center;
+        border-radius: 12px;
+    }
+    .pass-reason h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+
+    .create-sales-container {
+        margin-bottom: 2.5rem;
+    }
+
+    .create-sales-container h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #111;
+    }
+
+    /* Style the form itself */
+    #create-sale-message-form {
+        margin: 0 auto; /* Center the form */
+        padding: 2rem;
+        background: white;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    /* --- Floating Label Styles (Adapted for this form) --- */
+    /* NOTE: For these styles to work, your Django form fields 
+       (e.g., title, grabber) must be rendered with a 'placeholder=" "' 
+       attribute, just like in your password reset form. 
+    */
+    #create-sale-message-form .form-group {
+        position: relative;
+        /* margin-bottom: 1rem; */
+    }
+
+    #create-sale-message-form .floating-label input,
+    #create-sale-message-form .floating-label textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+        background-color: var(--color-white);
+        font-family: inherit; /* Ensure consistent font */
+    }
+    /* Hide placeholder by default */
+    .create-sales-grid .floating-label input::placeholder,
+    .create-sales-grid .floating-label textarea::placeholder {
+        color: transparent;
+    }
+
+    /* Show placeholder only on focus */
+    .create-sales-grid .floating-label input:focus::placeholder,
+    .create-sales-grid .floating-label textarea:focus::placeholder {
+        color: #9ca3af; /* Or your desired placeholder color */
+    }
+
+    #create-sale-message-form .floating-label textarea {
+        min-height: 120px; /* Give textarea some height */
+        resize: vertical;
+    }
+
+    #create-sale-message-form .floating-label label {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        color: var(--secondary-text-color, #6b7280);
+        pointer-events: none;
+        transition: all 0.2s ease-out;
+        background-color: var(--color-white); /* Ensures label neatly overlaps border */
+        padding: 0 0.25rem;
+    }
+
+    .create-sales-grid .hidden{
+        display: none !important;
+    }
+
+    /* The "float" logic */
+    #create-sale-message-form .floating-label input:focus + label,
+    #create-sale-message-form .floating-label input:not(:placeholder-shown) + label,
+    #create-sale-message-form .floating-label textarea:focus + label,
+    #create-sale-message-form .floating-label textarea:not(:placeholder-shown) + label {
+        top: -0.75rem;
+        left: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--color-accent, #3B82F6);
+    }
+
+    /* Specific rule for datetime-local input, which is never "empty" */
+    #create-sale-message-form .floating-label input[type="datetime-local"] + label {
+        top: -0.75rem;
+        left: 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    /* Focus styles */
+    #create-sale-message-form .floating-label input:focus,
+    #create-sale-message-form .floating-label textarea:focus {
+        outline: none;
+        border-color: var(--color-accent, #3B82F6);
+    }
+    
+    /* --- Error & Feedback Messages --- */
+    .error-message-form {
+        color: var(--color-error, #D9534F);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: block; /* Or 'none' if you show/hide with JS */
+        min-height: 1em; /* Prevents layout shift */
+    }
+
+    #create-sale-message-feedback {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        text-align: center;
+        min-height: 1.2em;
+    }
+
+    .error{
+        color: var(--color-error)
+    }
+
+    /* The .action-btn style is already defined globally in your file, 
+      so it will be applied to your "Sale Bericht Aanmaken" button automatically.
+    */
+
+    /* --- New styles for the explainer section --- */
+    .sale-creation-wrapper {
+        display: grid;
+        grid-template-columns: 1fr; /* Default to single column */
+        gap: 2.5rem;
+        align-items: start;
+    }
+
+    @media (min-width: 992px) { /* On large screens, use two columns */
+        .sale-creation-wrapper {
+            grid-template-columns: 1fr 0.6fr; /* Make the second column (Voordelen) smaller */
+        }
+    }
+
+    @media (max-width: 992px){
+        #create-sale-message-form{
+            max-width: 600px;
+        }
+    }
+
+    .sale-reason-explainer {
+        background-color: var(--color-white);
+        border-radius: var(--border-radius-large, 12px);
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+    }
+
+    .sale-reason-explainer h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: var(--primary-text-color);
+    }
+
+    .sale-reason-explainer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sale-reason-explainer i{
+        margin-right: 5px;
+    }
+
+    .sale-reason-explainer li {
+        margin-bottom: 1.5rem;
+    }
+
+    .sale-reason-explainer li strong {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .sale-reason-explainer li strong i {
+        color: var(--color-accent);
+        font-size: 1.2rem;
+    }
+
+    .sale-reason-explainer li p {
+        line-height: 1.6;
+        margin: 0;
+        color: var(--secondary-text-color);
+    }
+
+    /* --- Voordelen Cards --- */
+    .voordelen-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Stack on mobile by default */
+        gap: 1rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .voordelen-grid {
+            grid-template-columns: repeat(3, 1fr); /* 3 columns on tablet */
+        }
+    }
+
+    .voordeel-card {
+        background-color: #fafafa;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    /* --- Animation for Voordelen cards --- */
+    .voordeel-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .voordeel-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+
+
+    /* --- Support Card Styles --- */
+    .support-container {
+        padding: 2.5rem 1.5rem;
+        /* background-color: #f9fafb; */
+    }
+
+    .support-card {
+        max-width: 800px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, var(--color-white) 0%, #fdfdff 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+        border: 1px solid #f0f0f0;
+    }
+
+    .support-card .support-icon {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+        margin-bottom: 1rem;
+    }
+
+    .support-card h3 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+    }
+
+    .support-card p {
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+
+    .char-counter {
+        display: block;
+        text-align: right;
+        font-size: 0.8rem;
+        color: var(--secondary-text-color);
+        margin-top: 0.25rem;
+    }
+
+    /* --- Button Loader Styles --- */
+    .action-btn {
+        position: relative;
+    }
+    .action-btn .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    .action-btn.loading{
+        background-color: var(--color-accent-light) !important;
+        cursor: not-allowed;
+    }
+    .action-btn.loading .spinner {
+        display: block;
+    }
+    .action-btn.loading .btn-text {
+        visibility: hidden;
+    }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+
+</style>
+
+
+<!-- sale modal/overlay styles -->
+<style>
+    :root {
+        --product-detail-background: var(--color-white, #fff);
+        --product-detail-border: var(--color-gray-light, #f0f0f0);
+        --product-detail-shadow: rgba(0, 0, 0, 0.15);
+        --product-highlight-bg: var(--color-gray-lighter, #f9f9f9);
+    }
+
+    .action-btn-pop-up {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0 auto;
+    }
+    /* --- Product Overlay (mobile) --- */
+.product-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1100;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.product-overlay.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.product-content-wrapper {
+    background-color: var(--product-detail-background);
+    width: 100%;
+    max-height: 90%;
+    border-top-left-radius: var(--border-radios);
+    border-top-right-radius: var(--border-radios);
+    padding: 1.5rem;
+    box-shadow: 0 -4px 15px var(--product-detail-shadow);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.product-overlay.show .product-content-wrapper {
+    transform: translateY(0);
+}
+
+.product-scroll-area {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    padding-right: 10px;
+    margin-bottom: 70px;
+}
+
+/* --- Modal (large screen) --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-backdrop.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.product-modal {
+    background-color: var(--product-detail-background);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    border-radius: var(--border-radios);
+    box-shadow: 0 8px 20px var(--product-detail-shadow);
+    transform: scale(0.9);
+    transition: transform 0.3s ease-out;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-backdrop.show .product-modal {
+    transform: scale(1);
+}
+
+/* --- Shared Detail Styles --- */
+.product-close-btn {
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: var(--color-accent);
+    transition: color 0.2s ease;
+}
+
+.product-close-btn:hover {
+    color: var(--color-accent-hover);
+}
+
+.product-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.product-title {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary-text-color);
+}
+
+.product-grabber {
+    font-size: 1.1em;
+    color: var(--secondary-text-color);
+}
+
+.product-details {
+    flex-grow: 1;
+    padding-bottom: 1rem;
+}
+
+.product-description {
+    font-size: 1em;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: var(--primary-text-color);
+}
+
+/* --- Highlighted Products --- */
+.highlighted-products-section {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--product-detail-border);
+}
+
+.highlighted-products-section h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-text-color);
+}
+
+.highlighted-products-slider {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gray-medium) transparent;
+}
+
+.highlighted-products-slider::-webkit-scrollbar {
+    height: 6px;
+}
+
+.highlighted-products-slider::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-medium);
+    border-radius: 10px;
+}
+
+.highlighted-products-slider::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.highlighted-product-item {
+    flex-shrink: 0;
+    width: 120px;
+    text-align: center;
+    background-color: var(--product-highlight-bg);
+    border-radius: var(--border-radios);
+    padding: 0.8rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.highlighted-product-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--border-radios);
+    margin-bottom: 0.5rem;
+}
+
+.product-item-name {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--primary-text-color);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-item-price {
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+    font-weight: 400;
+}
+
+.no-products-message {
+    text-align: center;
+    color: var(--secondary-text-color);
+    font-style: italic;
+    width: 100%;
+    padding: 1rem;
+}
+
+/* --- Store Info --- */
+.store-info {
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--product-detail-border);
+}
+
+.store-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    border: 1px solid var(--color-gray-light);
+}
+
+.store-name-detail {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--primary-text-color);
+}
+
+/* Modal visibility logic */
+@media (min-width: 768px) {
+    .product-overlay {
+        display: none;
+    }
+
+    .modal-backdrop {
+        display: flex;
+    }
+}
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+<div id="dashboard">
+    <div class="dashboard-container">
+        <section class="store-hero">
+        <div class="store-hero__inner">
+            <figure class="store-hero__fig">
+            <img src="https://saledrop.app{{ store.image_url }}" alt="{{ store.name }} logo">
+            </figure>
+
+            <div class="store-hero__body">
+            <div class="store-hero__top">
+                <div class="store-hero__title-group">
+                    <h1 class="store-hero__name">{{ general_store_data.name }}</h1>
+                    <button id="edit-profile-btn" class="store-hero__edit" type="button">
+                        <span class="btn-text">Bewerken</span>
+                        <span class="spinner"></span>
+                    </button>
+                </div>
+            </div>
+
+            <p><i style="color: #3B82F6" class="fa-solid fa-certificate"></i> <strong>{{ user_data.user_email }}</strong></p>
+
+            <p class="store-hero__desc">
+                {% if general_store_data.description%}
+                    {{ general_store_data.description }}
+                {% else %}
+                    Geen beschrijving beschikbaar.
+                {% endif %}
+            </p>
+
+            <p class="store-hero__since">
+                {{ general_store_data.onPlatformSince }}
+            </p>
+            </div>
+        </div>
+
+        <div class="store-action-container">
+            {% if not store_actions_container.may_use_content or not user_data.passWordSet %}
+                <div class="actions-header" id="actions-header-toggle">
+                    <div class="actions-header__title-group">
+                        
+                        <div class="actions-title-with-badge">
+                            <h3>Acties</h3>
+                            {% if pending_actions_count > 0 %}
+                                <span class="actions-badge">{{ pending_actions_count }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <i class="fa-solid fa-chevron-down actions-toggle-icon"></i>
+
+                    </div>
+                </div>
+
+                <div class="actions-collapsible-content">
+                    <div class="store-action-grid">
+                        <div class="store-action-card {% if store_actions_container.may_use_content %}inactive-store-card{% else %}active-store-card{% endif %}">
+                            {% if not store_actions_container.may_use_content %}
+                                <p class="store-action-card__text" style="margin-bottom: 0;"><strong>Geef toestemming om je content te gebruiken op ons platform. Dit kunnen foto's zijn waaronder je logo.</strong></p>
+                                <form method="POST" id="allow-content-form" action="{% url 'allow_logo_use' store.id %}">
+                                    {% csrf_token %}
+                                    <div class="radio-group">
+                                        <label for="allow-logo-checkbox">
+                                            <input type="checkbox" name="allow_logo" id="allow-logo-checkbox" required>
+                                            Ik geef toestemming
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="action-btn">
+                                        <span class="btn-text" style="color: white;">Opslaan</span>
+                                        <span class="spinner"></span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="store-action-card {% if user_data.passWordSet %}inactive-store-card{% else %}active-store-card{% endif %}">
+                            {% if not user_data.passWordSet %}
+                                <p class="store-action-card__text" style="margin-bottom: 0;">
+                                    <strong>Stel een wachtwoord in voor makkelijker inloggen in de toekomst.</strong>
+                                </p>
+                                <form method="POST" action="" class="store-action-card__form">
+                                    {% csrf_token %}
+                                    <div class="form-group floating-label">
+                                        <input type="password" name="new_password1" id="new_password1" placeholder=" " required>
+                                        <label for="new_password1">Nieuw wachtwoord</label>
+                                        <span class="password-toggle-icon"></span>
+                                    </div>
+                                    <div class="form-group floating-label">
+                                        <input type="password" name="new_password2" id="new_password2" placeholder=" " required>
+                                        <label for="new_password2">Bevestig wachtwoord</label>
+                                        <span class="password-toggle-icon"></span>
+                                    </div>
+                                    <button type="submit" class="action-btn">
+                                        <span class="btn-text" style="color: white;">Wachtwoord Instellen</span>
+                                        <span class="spinner"></span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        </section>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <h2>Totaal aantal kliks</h2>
+                <p class="stat-value">{{ total_clicks }}</p>
+            </div>
+
+            <div class="sales-card">
+                <h2>Top 3 Sales</h2>
+                {% for sale in best_sales %}
+                    <div class="sale-item-wrapper" data-sale-id="{{ sale.id }}">
+                        <div class="sale-item" style="padding: 0; border: none;">
+                            <span class="sale-title">{{ sale.title|truncatechars:40 }}</span>
+                            <span class="sale-clicks">{{ sale.clicks }} kliks</span>
+                        </div>
+                        <span class="sale-date">{{ sale.received_date }}</span>
+                    </div>
+                {% empty %}
+                    <p>Nog geen data over sales beschikbaar.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="dashboard-smoother"></div>
+</div>
+
+
+
+<div class="actions-container" style="margin-top: 2.5rem;">
+    <h1 style="text-align: center; margin-bottom: 2.5rem;">Sales beheren</h1>
+
+    <section class="planned-sales-section">
+        <div class="sale-creation-wrapper">
+            <div class="create-sales-container">
+                <div class="create-sales-grid">
+                    <form id="create-sale-message-form" method="POST" action="{% url 'create_sale_message' %}">
+                        <h3>Nieuwe sale aankondigen</h3>
+                        {% csrf_token %}
+                        {% if request.user.is_superuser %}
+                            <input type="hidden" name="store_id" value="{{ store.id }}">
+                        {% endif %}
+
+                        <div class="form-group floating-label">
+                            {{ sale_message_form.title }}
+                            <label for="{{ sale_message_form.title.id_for_label }}">{{ sale_message_form.title.label }}</label>
+                            <small id="create-title-char-count" class="char-counter">0 / 50</small>
+                            <div class="error-message-form" data-for="title"></div>
+                        </div>
+                        <div class="form-group floating-label">
+                            {{ sale_message_form.grabber }}
+                            <label for="{{ sale_message_form.grabber.id_for_label }}">{{ sale_message_form.grabber.label }}</label>
+                            <small id="create-grabber-char-count" class="char-counter">0 / 50</small>
+                            <div class="error-message-form" data-for="grabber"></div>
+                        </div>
+                        <div class="form-group floating-label">
+                            {{ sale_message_form.description }}
+                            <label for="{{ sale_message_form.description.id_for_label }}">{{ sale_message_form.description.label }}</label>
+                            <small id="create-desc-char-count" class="char-counter">0 / 300</small>
+                            <div class="error-message-form" data-for="description"></div>
+                        </div>
+                        <div class="form-group floating-label">
+                            {{ sale_message_form.link }}
+                            <label for="{{ sale_message_form.link.id_for_label }}">{{ sale_message_form.link.label }}</label>
+                            <div class="error-message-form" data-for="link"></div>
+                        </div>
+                        <div class="form-group floating-label">
+                            <input type="datetime-local" name="scheduled_at" id="id_scheduled_at" min="now" data-has-listeners="true" data-gtm-form-interact-field-id="0">
+                            <label for="{{ sale_message_form.scheduled_at.id_for_label }}">{{ sale_message_form.scheduled_at.label }}</label>
+                            <div class="error-message-form" data-for="scheduled_at"></div>
+                        </div>
+
+                        <button type="submit" class="action-btn" disabled>
+                            <span class="btn-text" style="color: white;">Sale Bericht Aanmaken</span>
+                            <span class="spinner"></span>
+                        </button>
+                        <div id="create-sale-message-feedback" class="form-feedback"></div>
+                        
+                        <div id="max-sales-info-card" class="info-card {{plannedSalesCountWarningStyle}}" style="margin-bottom: 0;">
+                            <p style="margin: 0;">Je kunt <strong>maximaal 3 sales per maand</strong> aankondigen om spam te voorkomen.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sale-reason-explainer">
+                <h3>Voordelen</h3>
+                <div class="voordelen-grid">
+                    <div class="voordeel-card">
+                        <strong><i class="fa-solid fa-star" style="color: var(--color-accent)"></i>  Val op bij shoppers</strong>
+                        <p>Jouw sale krijgt een opvallende plek in de feed, zodat klanten die op zoek zijn naar deals je sneller zien.</p>
+                    </div>
+                    <div class="voordeel-card">
+                        <strong><i class="fa-solid fa-user-check" style="color: var(--color-accent)"></i> Bereik jouw volgers</strong>
+                        <p>Gebruikers die jouw merk volgen, krijgen direct een melding zodra je een nieuwe sale aankondigt.</p>
+                    </div>
+                    <div class="voordeel-card">
+                        <strong><i class="fa-solid fa-paper-plane" style="color: var(--color-accent)"></i> Snel en flexibel posten</strong>
+                        <p>Publiceer nieuwe deals op het moment dat het jou uitkomt of plan ze vooruit.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="planned-sales-container">
+            <h3>Geplande sales</h3>
+            <div class="planned-sales-grid"> 
+                {% for sale in planned_sales %}
+                    {% comment %} Determine the card's status class and badge text {% endcomment %}
+                    {% with status_class=sale.isSent|yesno:"is-sent,"|add:sale.review_status|slice:":6"|yesno:"needs-review,is-approved,is-pending" %}
+                        <div class="planned-sale-item {% if sale.review_status == 'passed' %}is-rejected{% endif %}{% if sale.isSent == True %}is-sent{% endif %}" data-sale-id="{{ sale.id }}">
+                            <div class="planned-sale-content">
+                                <div class="planned-sale-header">
+                                    <h4>{{ sale.title }}</h4>
+                                    {% if sale.isSent %}
+                                        <span class="review-status reviewed">Verzonden</span>
+                                    {% elif sale.review_status == 'approved' %}
+                                        <span class="review-status reviewed">Goedgekeurd</span>
+                                    {% elif sale.review_status == 'pending' %}
+                                        <span class="review-status not-reviewed">In behandeling</span>
+                                    {% endif %}
+                                </div>
+                                <p class="planned-sale-grabber">{{ sale.grabber }}</p>
+                                <div class="planned-sale-footer">
+                                    <div class="planned-sale-date">
+                                        {% if sale.review_status == 'passed' %}
+                                            <span style="color: var(--color-error)">Afgekeurd</span>
+                                        {% else %}
+                                            <i class="fa-regular fa-calendar"></i>
+                                            {% if sale.isSent %}
+                                                <span>Verzonden op {{ sale.planned_date }}</span>
+                                            {% else %}
+                                                {% if sale.isScheduled %}
+                                                    <span>Gepland voor {{ sale.planned_date }}</span>
+                                                {% else %}
+                                                    <span>{{ sale.planned_date }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    {% if sale.isSent %}
+                                        <i class="fa-solid fa-paper-plane" title="Verzonden" style="color: var(--color-accent);"></i>
+                                    {% elif sale.review_status == 'passed' %}
+                                        <i class="fa-solid fa-triangle-exclamation" title="Handmatige controle vereist" style="color: var(--color-error);"></i>
+                                    {% elif sale.review_status == 'approved' %}
+                                        {% if sale.isSent %}
+                                            <i class="fa-solid fa-check-circle" title="Goedgekeurd en ingepland" style="color: #3B82F6;"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                             {% if sale.review_status == 'passed' %}
+                                 <div class="pass-reason">
+                                     <h3 style="color: var(--color-error)">Dit bericht is afgekeurd</h3>
+                                     <p style="color: var(--primary-text-color)">{{ sale.reason }}</p>
+                                 </div>
+                             {% endif %}
+                        </div>
+                    {% endwith %}
+                {% empty %}
+                    <p style="color: var(--secondary-text-color); grid-column: 1 / -1;">Er zijn geen sales gepland.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<div class="support-container">
+    <div class="support-card">
+        <i class="fa-solid fa-circle-question support-icon"></i>
+        <h3>Vragen of meer informatie?</h3>
+        <p>
+            Bekijk onze supportpagina voor meer informatie over hoe wij jouw winkel kunnen laten groeien, of neem contact met ons op voor persoonlijke ondersteuning.
+        </p>
+        <a href="{% url 'for_business' %}" class="action-btn" style="border-radius: 50px;">Naar support</a>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block pop_up_content %}
+<div id="edit-profile-modal" class="modal-overlay">
+    <div class="modal-card">
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+        <h3>Profiel Bewerken</h3>
+        <form id="edit-profile-form" method="POST" action="{% url 'edit_store_profile' store.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {# Floating label for the description textarea #}
+            <div class="form-group floating-label">
+                {{ edit_form.description }}
+                <label for="{{ edit_form.description.id_for_label }}">{{ edit_form.description.label }}</label>
+                <small id="edit-profile-desc-char-count" class="char-counter">0 / 175</small>
+                <div class="error-message-form" data-for="description"></div>
+            </div>
+ 
+            {# Corrected file input for the logo #}
+            <div class="form-group">
+                <label for="{{ edit_form.image_url.id_for_label }}">{{ edit_form.image_url.label }}</label>
+                {{ edit_form.image_url }}
+                <div class="error-message-form" data-for="image_url"></div>
+            </div>
+ 
+            <button type="submit" class="action-btn">
+                <span class="btn-text" style="color: white;">Wijzigingen Opslaan</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit/Delete Sale Message Modal -->
+<div id="edit-sale-message-modal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="close-btn">&times;</button>
+        <h3>Sale Bericht Bewerken</h3>
+        <div id="edit-sale-info-card" class="info-card">
+
+            <p style="margin: 0;">Dit bericht is goedgekeurd. Je kunt de verzenddatum aanpassen zonder nieuwe beoordeling. Als je de inhoud wijzigt, moet het bericht <strong>opnieuw worden beoordeeld</strong>.</p>
+        </div>
+        <form id="edit-sale-message-form" method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group floating-label">
+                <input type="text" id="edit_sale_title" name="title" placeholder=" " required>
+                <label for="edit_sale_title">Titel van de sale</label>
+                <small id="edit-title-char-count" class="char-counter">0 / 50</small>
+                <div class="error-message-form" data-for="title"></div>
+            </div>
+            <div class="form-group floating-label">
+                <input type="text" id="edit_sale_grabber" name="grabber" placeholder=" " required>
+                <label for="edit_sale_grabber">Pakkende actiezin</label>
+                <small id="edit-grabber-char-count" class="char-counter">0 / 50</small>
+                <div class="error-message-form" data-for="grabber"></div>
+            </div>
+            <div class="form-group floating-label">
+                <textarea id="edit_sale_description" name="description" placeholder=" " rows="5" required></textarea>
+                <label for="edit_sale_description">Omschrijving</label>
+                <small id="edit-desc-char-count" class="char-counter">0 / 300</small>
+                <div class="error-message-form" data-for="description"></div>
+            </div>
+            <div class="form-group floating-label">
+                <input type="url" id="edit_sale_link" name="link" placeholder=" " required>
+                <label for="edit_sale_link">Link naar de sale pagina</label>
+                <div class="error-message-form" data-for="link"></div>
+            </div>
+            <div class="form-group floating-label">
+                <input type="datetime-local" id="edit_sale_scheduled_at" name="scheduled_at" placeholder=" ">
+                <label for="edit_sale_scheduled_at">Verzenddatum (leeglaten om direct te versturen)</label>
+                <div class="error-message-form" data-for="scheduled_at"></div>
+            </div>
+            <div id="edit-sale-message-feedback" class="form-feedback"></div>
+            <div class="form-actions">
+                <button type="button" id="delete-sale-message-btn" class="action-btn btn-danger" style="width: 100%; display: inline-block;">Verwijderen</button>
+                <button type="submit" class="action-btn" style="width: 100%; display: inline-block;">
+                    <span class="btn-text" style="color: white;">Wijzigingen Opslaan</span>
+                    <span class="spinner"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal for Deletion -->
+<div id="confirm-delete-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 400px; text-align: center;">
+        <h3>Weet je het zeker?</h3>
+        <p>Deze actie kan niet ongedaan worden gemaakt.</p>
+        <div class="form-actions">
+            <button id="confirm-delete-btn" class="action-btn btn-danger" style="width: 100%; display: inline-block;">Ja, verwijder</button>
+            <button id="cancel-delete-btn" class="action-btn" style="background-color: #6c757d; width: 100%; display: inline-block;">Annuleren</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sale Detail Pop-up (for large screens) -->
+<div class="modal-backdrop" id="modalBackdrop">
+    <div class="product-modal">
+        <span class="product-close-btn material-icons">&times;</span>
+        <div class="product-header">
+            <h2 class="product-title"></h2>
+            <div class="store-info">
+                <img src="" alt="Store Logo" class="store-logo">
+                <p class="store-name-detail"></p>
+            </div>
+            <p class="product-grabber"></p>
+        </div>
+        <div class="product-scroll-area">
+            <div class="product-details">
+                <p class="product-description"></p>
+                <div class="highlighted-products-section">
+                    <h3>Highlighted Products</h3>
+                    <div class="highlighted-products-slider">
+                        <!-- Products will be injected here -->
+                    </div>
+                </div>
+                <div class="product-actions">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block overlay_content %}
+<!-- Sale Detail Overlay (for small screens) -->
+<div class="product-overlay" id="productOverlay">
+    <div class="product-content-wrapper">
+        <span class="product-close-btn material-icons">&times;</span>
+        <div class="product-header">
+            <h2 class="product-title"></h2>
+            <div class="store-info">
+                <img src="" alt="Store Logo" class="store-logo">
+                <p class="store-name-detail"></p>
+            </div>
+            <p class="product-grabber"></p>
+        </div>
+        <div class="product-details">
+            <p class="product-description"></p>
+            <div class="highlighted-products-section">
+                <h3>Uitgelichte producten</h3>
+                <div class="highlighted-products-slider">
+                    <!-- Products will be injected here -->
+                </div>
+            </div>
+        </div>
+        <div style="position: relative;">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script id="best-sales-data" type="application/json">
+    {{ best_sales_data_json|safe }}
+</script>
+
+<script id="unable-dates-data" type="application/json">
+    {{ unable_create_dates_json|safe }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- START: Sale Modal Logic ---
+    const productOverlay = document.getElementById('productOverlay');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const productContentWrapper = productOverlay.querySelector('.product-content-wrapper');
+    const productModal = modalBackdrop.querySelector('.product-modal');
+    const productCloseBtns = document.querySelectorAll('.product-close-btn');
+
+    function go_to_sale(link){
+        if (link) window.open(link, '_blank');
+    }
+
+    function hideProductDetails() {
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            productContentWrapper.style.transform = 'translateY(100%)';
+            productOverlay.classList.remove('show');
+        } else {
+            productModal.style.transform = 'scale(0.9)';
+            modalBackdrop.classList.remove('show');
+        }
+        document.body.style.overflow = '';
+    }
+
+    window.showProductDetails = function(dealData) {
+        const productTitleElements = document.querySelectorAll('.product-title');
+        const productGrabberElements = document.querySelectorAll('.product-grabber');
+        const productDescriptionElements = document.querySelectorAll('.product-description');
+        const storeNameDetailElements = document.querySelectorAll('.store-name-detail');
+        const storeLogoElements = document.querySelectorAll('.store-logo');
+        const highlightedProductsSliderElements = document.querySelectorAll('.highlighted-products-slider');
+
+        // Populate content for all instances (overlay and modal)
+        productTitleElements.forEach(el => el.textContent = dealData.title || 'No Title');
+        productGrabberElements.forEach(el => el.textContent = dealData.grabber || 'No Grabber');
+        productDescriptionElements.forEach(el => el.textContent = dealData.description || 'No Description');
+        storeNameDetailElements.forEach(el => el.textContent = dealData.store ? dealData.store.name : 'Unknown Store');
+        storeLogoElements.forEach(el => {
+            el.src = dealData.store && dealData.store.image_url ? dealData.store.image_url : 'https://placehold.co/50x50/F5F5F7/86868B?text=Store';
+            el.alt = dealData.store && dealData.store.name ? `${dealData.store.name} Logo` : 'Store Logo';
+        });
+
+        // Populate highlighted products
+        highlightedProductsSliderElements.forEach(slider => {
+            slider.innerHTML = ''; // Clear previous
+            const sections = document.querySelectorAll('.highlighted-products-section');
+            if (dealData.highlighted_products && Array.isArray(dealData.highlighted_products) && dealData.highlighted_products.length > 0) {
+                sections.forEach(s => s.style.display = 'block');
+                dealData.highlighted_products.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.classList.add('highlighted-product-item');
+                    let price_p = '';
+                    if (product.new_price && product.new_price !== 'N/A') {
+                        price_p = `<p class="product-item-price">€${parseFloat(product.new_price).toFixed(2)}</p>`;
+                    } else if (product.old_price && product.old_price !== 'N/A') {
+                        price_p = `<p class="product-item-price">€${parseFloat(product.old_price).toFixed(2)}</p>`;
+                    }
+
+                    productDiv.innerHTML = `
+                        <img src="${product.product_image_url || 'https://placehold.co/100x100/F5F5F7/86868B?text=Product'}" alt="${product.title || 'Product'} Image">
+                        <p class="product-item-name">${product.title || 'Onbekend'}</p>
+                        ${price_p}
+                    `;
+                    slider.appendChild(productDiv);
+                });
+            } else {
+                sections.forEach(s => s.style.display = 'none');
+            }
+        });
+
+        // Show appropriate view based on screen size
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            productOverlay.classList.add('show');
+            productContentWrapper.style.transform = 'translateY(0)';
+        } else {
+            modalBackdrop.classList.add('show');
+            productModal.style.transform = 'scale(1)';
+        }
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Event listeners for closing the modal
+    productCloseBtns.forEach(btn => btn.addEventListener('click', hideProductDetails));
+    modalBackdrop.addEventListener('click', (event) => {
+        if (event.target === modalBackdrop) {
+            hideProductDetails();
+        }
+    });
+    // Prevent clicks inside the content from closing the modal
+    productContentWrapper.addEventListener('click', (event) => event.stopPropagation());
+    productModal.addEventListener('click', (event) => event.stopPropagation());
+
+    // Swipe-down-to-close for Mobile Overlay
+    let startY = 0, diffY = 0, isSwipingDown = false;
+    productContentWrapper.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        productContentWrapper.style.transition = 'none';
+    });
+    productContentWrapper.addEventListener('touchmove', (e) => {
+        diffY = e.touches[0].clientY - startY;
+        if (productContentWrapper.scrollTop === 0 && diffY > 0) {
+            isSwipingDown = true;
+            productContentWrapper.style.transform = `translateY(${diffY}px)`;
+            e.preventDefault();
+        }
+    });
+    productContentWrapper.addEventListener('touchend', () => {
+        productContentWrapper.style.transition = 'transform 0.3s ease-out';
+        if (isSwipingDown && diffY > 50) { // 50px swipe threshold
+            hideProductDetails();
+        } else {
+            productContentWrapper.style.transform = 'translateY(0)';
+        }
+        isSwipingDown = false;
+    });
+    // --- END: Sale Modal Logic ---
+
+    // 1. Parse the sales data from the script tag
+    const salesDataElement = document.getElementById('best-sales-data');
+    const salesData = JSON.parse(salesDataElement.textContent);
+
+    // 2. Create a quick-access map of sales by their ID
+    const salesMap = new Map(salesData.map(sale => [sale.id.toString(), sale]));
+
+    // 3. Add click listeners to each sale item
+    document.querySelectorAll('.sale-item-wrapper').forEach(item => {
+        item.addEventListener('click', () => {
+            const saleId = item.dataset.saleId;
+            const saleDetails = salesMap.get(saleId);
+
+            if (saleDetails) {
+                // The showProductDetails function is available from sale_cards_modal_logic.js
+                window.showProductDetails(saleDetails);
+            }
+        });
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const editBtn = document.getElementById('edit-profile-btn');
+    const modalOverlay = document.getElementById('edit-profile-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const editForm = document.getElementById('edit-profile-form');
+
+    function openModal() {
+        // Initialize character counter when modal opens
+        const descriptionTextarea = editForm.querySelector('[name="description"]');
+        const charCountElement = document.getElementById('edit-profile-desc-char-count');
+        const MAX_CHARS = 175;
+
+        if (descriptionTextarea && charCountElement) {
+            descriptionTextarea.setAttribute('maxlength', MAX_CHARS);
+
+            const updateCount = () => {
+                const currentLength = descriptionTextarea.value.length;
+                charCountElement.textContent = `${currentLength} / ${MAX_CHARS}`;
+            };
+
+            descriptionTextarea.addEventListener('input', updateCount);
+            updateCount(); // Initial count
+        }
+
+
+        modalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    editBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
+    // --- Add loading state to action card forms ---
+    document.querySelectorAll('.store-action-card form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                // Basic validation check
+                const inputs = form.querySelectorAll('input[required]');
+                const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+                if (allFilled) {
+                    submitBtn.classList.add('loading');
+                }
+            }
+        });
+    });
+
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = editForm.querySelector('button[type="submit"]');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        const formData = new FormData(editForm);
+        const url = editForm.action;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Update the page content dynamically
+                document.querySelector('.store-hero__desc').textContent = result.new_description;
+                if (result.new_image_url) {
+                    document.querySelector('.store-hero__fig img').src = result.new_image_url;
+                }
+                window.displayMessage('success', result.message);
+                closeModal();
+            } else {
+                // Handle form errors
+                Object.keys(result.errors).forEach(field => {
+                    const errorEl = document.querySelector(`.error-message-form[data-for="${field}"]`);
+                    if (errorEl) errorEl.textContent = result.errors[field];
+                });
+                window.displayMessage('error', result.error || 'Kon het profiel niet bijwerken.');
+            }
+        } catch (error) {
+            console.error('Form submission error:', error);
+            window.displayMessage('error', 'Er is een netwerkfout opgetreden.');
+        } finally {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
+    });
+});
+</script>
+
+<!-- dashboard form handling -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const allowContentForm = document.getElementById('allow-content-form');
+    const saveBtn = allowContentForm.querySelector('button[type="submit"]');
+    // Add loading state on submit
+    allowContentForm.addEventListener('submit', function(event) {
+        saveBtn.classList.add('loading');
+        saveBtn.disabled = true;
+    });
+
+    // disable when radio is not checked
+    const allowLogoCheckbox = document.getElementById('allow-logo-checkbox');
+    if (allowLogoCheckbox) {
+        saveBtn.disabled = !allowLogoCheckbox.checked;
+        allowLogoCheckbox.addEventListener('change', function() {
+            saveBtn.disabled = !this.checked;
+        });
+    }
+
+})
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Dynamic Form Validation for "Create Sale Message" ---
+    const createForm = document.getElementById('create-sale-message-form');
+    if (createForm) {
+        const submitButton = createForm.querySelector('button[type="submit"]');
+        const requiredInputs = [
+            createForm.querySelector('[name="title"]'),
+            createForm.querySelector('[name="grabber"]'),
+            createForm.querySelector('[name="description"]'),
+            createForm.querySelector('[name="link"]')
+        ];
+
+        const checkFormValidity = () => {
+            const allValid = requiredInputs.every(input => input && input.value.trim() !== '');
+            submitButton.disabled = !allValid;
+        };
+
+        requiredInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', checkFormValidity);
+            }
+        });
+
+        // Initial check on page load
+        checkFormValidity();
+    }
+
+    const createSaleMessageForm = document.getElementById('create-sale-message-form');
+    const createSaleMessageFeedback = document.getElementById('create-sale-message-feedback');
+    const plannedSalesGrid = document.querySelector('.planned-sales-grid'); // To append new sales
+
+    if (createSaleMessageForm) {
+        createSaleMessageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = createSaleMessageForm.querySelector('button[type="submit"]');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            createSaleMessageFeedback.innerHTML = ''; // Clear previous messages
+
+            const formData = new FormData(createSaleMessageForm);
+            const url = createSaleMessageForm.action;
+
+            // Clear previous field-specific error messages
+            document.querySelectorAll('.error-message-form').forEach(el => el.textContent = '');
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    },
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    createSaleMessageFeedback.className = 'form-feedback success';
+                    createSaleMessageFeedback.textContent = result.message;
+                    window.displayMessage('success', result.message);
+                    createSaleMessageForm.reset(); // Clear the form
+
+                    // Optionally, add the new sale message to the "Geplande sales" section
+                    if (plannedSalesGrid && result.sale_message) {
+                        const sale = result.sale_message;
+                        if (result.showWarning){
+                            console.log("Showing warning message.")
+                            document.getElementById('max-sales-info-card').classList.remove('hidden');
+                            document.getElementById('max-sales-info-card').classList.add('visible');
+                        } else{
+                            console.log("hiding warning message.")
+                            document.getElementById('max-sales-info-card').classList.remove('visible');
+                            document.getElementById('max-sales-info-card').classList.add('hidden');
+                        }
+
+                        let statusClass = '';
+                        let reviewStatusText = '';
+                        let reviewStatusSpanClass = 'not-reviewed'; // Default for pending/passed
+
+                        if (sale.isSent) {
+                            statusClass = 'is-sent';
+                            reviewStatusText = 'Verzonden';
+                            reviewStatusSpanClass = 'reviewed';
+                        } else if (sale.review_status === 'approved') {
+                            statusClass = 'is-approved';
+                            reviewStatusText = 'Goedgekeurd';
+                            reviewStatusSpanClass = 'reviewed';
+                        } else if (sale.review_status === 'pending') {
+                            statusClass = 'is-pending';
+                            reviewStatusText = 'In behandeling';
+                            reviewStatusSpanClass = 'not-reviewed';
+                        } else if (sale.review_status === 'passed') {
+                            statusClass = 'is-rejected';
+                            reviewStatusText = 'Afgekeurd';
+                            reviewStatusSpanClass = 'rejected'; // Specific class for rejected
+                        }
+
+                        let footerContent = '';
+                        if (sale.review_status === 'passed') {
+                            footerContent = `<span style="color: var(--color-error)">Afgekeurd</span>`;
+                        } else {
+                            footerContent = `
+                                <i class="fa-regular fa-calendar"></i>
+                                ${sale.isSent ? `<span>Verzonden op ${sale.planned_date}</span>` : (sale.isScheduled ? `<span>Gepland voor ${sale.planned_date}</span>` : `<span>${sale.planned_date}</span>`)}
+                            `;
+                        }
+
+                        let iconContent = '';
+                        if (sale.isSent) {
+                            iconContent = `<i class="fa-solid fa-paper-plane" title="Verzonden" style="color: var(--color-accent);"></i>`;
+                        } else if (sale.review_status === 'passed') {
+                            iconContent = `<i class="fa-solid fa-triangle-exclamation" title="Handmatige controle vereist" style="color: var(--color-error);"></i>`;
+                        } else if (sale.review_status === 'approved' && sale.isSent) {
+                            // The template only shows check-circle if isSent is also true for approved.
+                            iconContent = `<i class="fa-solid fa-check-circle" title="Goedgekeurd en ingepland" style="color: #3B82F6;"></i>`;
+                        }
+
+                        let passReasonDiv = '';
+                        if (sale.review_status === 'passed' && sale.reason) {
+                            passReasonDiv = `
+                                <div class="pass-reason">
+                                    <h3 style="color: var(--color-error)">Dit bericht is afgekeurd</h3>
+                                    <p style="color: var(--primary-text-color)">${sale.reason}</p>
+                                </div>
+                            `;
+                        }
+
+                        const newSaleHtml = `
+                            <div class="planned-sale-item ${statusClass} visible" data-sale-id="${sale.id}">
+                                <div class="planned-sale-content">
+                                    <div class="planned-sale-header">
+                                        <h4>${sale.title}</h4>
+                                        <span class="review-status ${reviewStatusSpanClass}">${reviewStatusText}</span>
+                                    </div>
+                                    <p class="planned-sale-grabber">${sale.grabber}</p>
+                                    <div class="planned-sale-footer">
+                                        <div class="planned-sale-date">
+                                            ${footerContent}
+                                        </div>
+                                        ${iconContent}
+                                    </div>
+                                </div>
+                                ${passReasonDiv}
+                            </div>
+                        `;
+                        plannedSalesGrid.insertAdjacentHTML('afterbegin', newSaleHtml); // Add to top
+                    }
+                } else {
+                    createSaleMessageFeedback.className = 'form-feedback error';
+                    window.displayMessage('error', result.error || 'Er is een fout opgetreden bij het aanmaken van het bericht.')
+                    createSaleMessageFeedback.textContent = result.error || 'Er is een fout opgetreden bij het aanmaken van het bericht.';
+                    if (result.errors) {
+                        Object.keys(result.errors).forEach(field => {
+                            const errorEl = createSaleMessageForm.querySelector(
+                                `.error-message-form[data-for="${field}"]`
+                            );
+                            if (errorEl) errorEl.textContent = result.errors[field];
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                createSaleMessageFeedback.className = 'form-feedback error';
+                createSaleMessageFeedback.textContent = 'Er is een netwerkfout opgetreden.';
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    // --- Character Counter Logic ---
+    function setupCharCounter(inputId, counterId, maxLength) {
+        const input = document.getElementById(inputId);
+        const counter = document.getElementById(counterId);
+        if (input && counter) {
+            input.setAttribute('maxlength', maxLength);
+            const updateCount = () => {
+                const currentLength = input.value.length;
+                counter.textContent = `${currentLength} / ${maxLength}`;
+            };
+            input.addEventListener('input', updateCount);
+            updateCount(); // Initial count
+        }
+    }
+
+    // For the "Create Sale" form
+    setupCharCounter('{{ sale_message_form.title.id_for_label }}', 'create-title-char-count', 50);
+    setupCharCounter('{{ sale_message_form.grabber.id_for_label }}', 'create-grabber-char-count', 50);
+    setupCharCounter('{{ sale_message_form.description.id_for_label }}', 'create-desc-char-count', 300);
+
+    // For the "Edit Sale" modal
+    const MAX_CHARS = 300;
+
+    // For the "Create Sale" form
+    const createDescriptionTextarea = document.getElementById('{{ sale_message_form.description.id_for_label }}');
+    const createCharCountElement = document.getElementById('create-desc-char-count');
+
+    if (createDescriptionTextarea && createCharCountElement) {
+        createDescriptionTextarea.setAttribute('maxlength', MAX_CHARS);
+        createDescriptionTextarea.addEventListener('input', () => {
+            let currentLength = createDescriptionTextarea.value.length;
+            if (currentLength > MAX_CHARS) {
+                createDescriptionTextarea.value = createDescriptionTextarea.value.substring(0, MAX_CHARS);
+                currentLength = MAX_CHARS; // Update length after truncating
+            }
+            createCharCountElement.textContent = `${currentLength} / ${MAX_CHARS}`;
+        });
+    }
+
+    // For the "Edit Sale" modal
+    const editDescriptionTextarea = document.getElementById('edit_sale_description');
+    const editCharCountElement = document.getElementById('edit-desc-char-count');
+
+    setupCharCounter('edit_sale_title', 'edit-title-char-count', 50);
+    setupCharCounter('edit_sale_grabber', 'edit-grabber-char-count', 50);
+    
+    if (editDescriptionTextarea && editCharCountElement) {
+        editDescriptionTextarea.addEventListener('input', () => {
+            let currentLength = editDescriptionTextarea.value.length;
+            if (currentLength > MAX_CHARS) {
+                editDescriptionTextarea.value = editDescriptionTextarea.value.substring(0, MAX_CHARS);
+                currentLength = MAX_CHARS; // Update length after truncating
+            }
+            editCharCountElement.textContent = `${currentLength} / ${MAX_CHARS}`;
+        });
+    }
+    // --- End Character Counter Logic ---
+});
+
+// --- Date Input Blocking Logic with Flatpickr ---
+document.addEventListener('DOMContentLoaded', () => {
+    const unableDatesData = document.getElementById('unable-dates-data');
+    if (!unableDatesData) return;
+
+    const unableDates = JSON.parse(unableDatesData.textContent);
+
+    // Get both date input fields
+    const createDateField = document.getElementById('id_scheduled_at');
+    const editDateField = document.getElementById('edit_sale_scheduled_at');
+
+    // Flatpickr configuration
+    const flatpickrConfig = {
+        enableTime: true,
+        time_24hr: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+        minuteIncrement: 15,
+        locale: "nl", // Use Dutch locale
+        locale: {
+            firstDayOfWeek: 1 // Monday
+        },
+        disable: [
+            function(date) {
+                // Disable dates in the unableDates array
+                const dateStr = date.toISOString().substring(0, 10);
+                return unableDates.includes(dateStr);
+            }
+        ],
+        onReady: function(selectedDates, dateStr, instance) {
+            // Add custom styling to disabled dates
+            const style = document.createElement('style');
+            style.textContent = `
+                .flatpickr-day.flatpickr-disabled {
+                    background-color: var(--color-error-background) !important;
+                    color: var(--color-error) !important;
+                    cursor: not-allowed !important;
+                }
+                .flatpickr-day.flatpickr-disabled:hover {
+                    background-color: #ffcdd2 !important;
+                }
+            `;
+            document.head.appendChild(style);
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            // Update the input value in the format expected by your backend
+            if (selectedDates.length > 0) {
+                const date = selectedDates[0];
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                // Format as datetime-local format (YYYY-MM-DDTHH:MM)
+                instance.input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        }
+    };
+
+    // Initialize Flatpickr on the create date field
+    if (createDateField) {
+        flatpickr(createDateField, flatpickrConfig);
+    }
+
+    // Initialize Flatpickr on the edit date field
+    if (editDateField) {
+        flatpickr(editDateField, flatpickrConfig);
+    }
+});
+</script>
+
+<!-- Script for Edit/Delete Sale Message Modal -->
+<script>
+    const editModal = document.getElementById('edit-sale-message-modal');
+    const editForm = document.getElementById('edit-sale-message-form');
+    const deleteBtn = document.getElementById('delete-sale-message-btn');
+    const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+    let currentSaleId = null;
+
+    // Helper function to update the character count for the edit description field
+    function updateEditDescriptionCharCount() {
+        const editDescriptionTextarea = document.getElementById('edit_sale_description');
+        const editCharCountElement = document.getElementById('edit-desc-char-count');
+        const MAX_CHARS = 300; // Ensure MAX_CHARS is accessible here
+        if (editDescriptionTextarea && editCharCountElement) {
+            editCharCountElement.textContent = `${editDescriptionTextarea.value.length} / ${MAX_CHARS}`;
+        }
+    }
+
+    function openEditModal() {
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+        editModal.classList.remove('active');
+        document.body.style.overflow = '';
+        editForm.reset();
+        editForm.action = '';
+        currentSaleId = null;
+        document.querySelectorAll('#edit-sale-message-form .error-message-form').forEach(el => el.textContent = '');
+        document.getElementById('edit-sale-message-feedback').textContent = '';
+    }
+
+    // Open modal and fetch data
+    const plannedSalesGrid = document.querySelector('.planned-sales-grid');
+    if (plannedSalesGrid) {
+        plannedSalesGrid.addEventListener('click', async (e) => {
+            // Use event delegation to find the clicked sale item
+            const saleItem = e.target.closest('.planned-sale-item');
+            if (!saleItem) return; // Click was not on a sale item
+
+            // Check if the sale has been sent. If so, do not open the modal.
+            if (saleItem.classList.contains('is-sent')) {
+                window.displayMessage('error', 'Verzonden berichten kunnen niet worden bewerkt.');
+                return;
+            }
+
+            // If the card is rejected, handle the flip and stop further execution.
+            if (saleItem.classList.contains('is-rejected')) {
+                saleItem.classList.toggle('is-flipped'); // This will now be handled by the click on the card itself.
+                return;
+            }
+
+            currentSaleId = saleItem.dataset.saleId;
+            if (!currentSaleId) return;
+
+            try {
+                const response = await fetch(`/business/edit-sale-message/${currentSaleId}/`);
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const saleData = result.data;
+                    document.getElementById('edit_sale_title').value = saleData.title;
+                    document.getElementById('edit_sale_grabber').value = saleData.grabber;
+                    document.getElementById('edit_sale_description').value = saleData.description;
+                    document.getElementById('edit_sale_link').value = saleData.link;
+                    document.getElementById('edit_sale_scheduled_at').value = saleData.scheduled_at;
+
+                    // Manually trigger input event to update counters
+                    document.getElementById('edit_sale_title').dispatchEvent(new Event('input'));
+                    document.getElementById('edit_sale_grabber').dispatchEvent(new Event('input'));
+                    document.getElementById('edit_sale_description').dispatchEvent(new Event('input'));
+
+                    updateEditDescriptionCharCount(); // Initialize the character counter
+ 
+                    // Show info card if the sale is reviewed.
+                    const infoCard = document.getElementById('edit-sale-info-card');
+                    if (saleData.isReviewed) {
+                        // infoCard.classList.add('visible');
+                        infoCard.style.display = 'block';
+                    } else {
+                        // infoCard.classList.remove('visible');
+                        infoCard.style.display = 'none';
+                    }
+ 
+                    // All fields should be editable, but changing content will trigger a re-review.
+                    const fieldsToDisable = [
+                        document.getElementById('edit_sale_title'),
+                        document.getElementById('edit_sale_grabber'),
+                        document.getElementById('edit_sale_description'),
+                        document.getElementById('edit_sale_link')
+                    ];
+                    fieldsToDisable.forEach(field => field.disabled = false);
+
+                    editForm.action = `/business/edit-sale-message/${currentSaleId}/`;
+                    openEditModal();
+                } else {
+                    window.displayMessage('error', result.error || 'Kon sale data niet ophalen.');
+                }
+            } catch (error) {
+                window.displayMessage('error', 'Netwerkfout bij ophalen van sale data.');
+            }
+        });
+    }
+
+    // Handle form submission for editing
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = editForm.querySelector('button[type="submit"]');
+        const feedbackEl = document.getElementById('edit-sale-message-feedback');
+        // submitBtn.textContent = 'Opslaan...';
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        const formData = new FormData(editForm);
+        try {
+            const response = await fetch(editForm.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
+                body: formData,
+            });
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                window.displayMessage('success', result.message);
+                // Update the card in the UI
+                const saleCard = document.querySelector(`.planned-sale-item[data-sale-id="${currentSaleId}"]`);
+                if (saleCard) {
+                    saleCard.querySelector('h4').textContent = result.sale_message.title;
+                    saleCard.querySelector('.planned-sale-grabber').textContent = result.sale_message.grabber;
+                    saleCard.querySelector('.planned-sale-date').textContent = result.sale_message.planned_date;
+                    
+                    // Update the review status indicator
+                    const statusIndicator = saleCard.querySelector('.review-status');
+                    if (result.sale_message.isReviewed) {
+                        statusIndicator.textContent = 'Goedgekeurd';
+                        statusIndicator.classList.remove('not-reviewed');
+                        statusIndicator.classList.add('reviewed');
+                    } else {
+                        statusIndicator.textContent = 'In behandeling';
+                        statusIndicator.classList.remove('reviewed');
+                        statusIndicator.classList.add('not-reviewed');
+                    }
+                }
+                closeEditModal();
+            } else {
+                window.displayMessage('error', result.error || 'Er is een fout opgetreden bij het opslaan.');
+                feedbackEl.textContent = result.error || 'Fout bij opslaan.';
+                feedbackEl.className = 'form-feedback error show';
+            }
+        } catch (error) {
+            window.displayMessage('error', 'Er is een fout opgetreden bij het opslaan.');
+            feedbackEl.textContent = 'Er is een fout opgetreden bij het opslaan.';
+            feedbackEl.className = 'form-feedback error show';
+        } finally {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Handle delete button click
+    deleteBtn.addEventListener('click', () => {
+        confirmDeleteModal.classList.add('active');
+    });
+
+    document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+        confirmDeleteModal.classList.remove('active');
+    });
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+        if (!currentSaleId) return;
+
+        try {
+            const response = await fetch(`/business/delete-sale-message/${currentSaleId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+            });
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                window.displayMessage('success', result.message);
+                document.querySelector(`.planned-sale-item[data-sale-id="${currentSaleId}"]`).remove();
+                closeEditModal();
+            } else {
+                window.displayMessage('error', result.error || 'Kon het bericht niet verwijderen.');
+            }
+        } catch (error) {
+            window.displayMessage('error', 'Netwerkfout bij verwijderen.');
+        } finally {
+            confirmDeleteModal.classList.remove('active');
+        }
+    });
+
+    // Close modal listeners
+    editModal.querySelector('.close-btn').addEventListener('click', closeEditModal);
+    editModal.addEventListener('click', (e) => e.target === editModal && closeEditModal());
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const storeActionsGrid = document.querySelector('.store-action-grid');
+        
+        if (storeActionsGrid) {
+            // Get all card elements within the grid
+            const cards = Array.from(storeActionsGrid.querySelectorAll('.store-action-card'));
+
+            // Sort the cards: active cards first, then inactive
+            cards.sort((a, b) => {
+                const aIsActive = a.classList.contains('active-store-card');
+                const bIsActive = b.classList.contains('active-store-card');
+
+                // If a is active and b is not, a comes first (-1)
+                // If b is active and a is not, b comes first (1)
+                return bIsActive - aIsActive;
+            });
+
+            // Re-append the sorted cards back into the same grid container
+            cards.forEach(card => storeActionsGrid.appendChild(card));
+        }
+    });
+</script>
+
+<script>
+    // Script for toggling the actions section
+    document.addEventListener('DOMContentLoaded', () => {
+        const actionsHeader = document.getElementById('actions-header-toggle');
+        // Get the parent container
+        const actionsContainer = document.querySelector('.store-action-container'); 
+
+        if (actionsHeader && actionsContainer) { // Make sure both exist
+            actionsHeader.addEventListener('click', () => {
+                // Toggle the 'actions-visible' class on the *container*
+                actionsContainer.classList.toggle('actions-visible');
+            });
+        }
+    });
+
+    // --- Animate "Voordelen" cards on scroll ---
+    const voordeelCards = document.querySelectorAll('.voordeel-card');
+    if (voordeelCards.length > 0) {
+        const cardObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    // Get the index of the card to create a staggered delay
+                    const index = Array.from(card.parentNode.children).indexOf(card);
+                    
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, 150 * index); // 150ms delay between each card
+
+                    observer.unobserve(card); // Stop observing once it's visible
+                }
+            });
+        }, { threshold: 0.2, rootMargin: "0px 0px -50px 0px" }); // Trigger when 20% of the card is visible
+        voordeelCards.forEach(card => cardObserver.observe(card));
+    }
+
+    // --- Animate "Geplande Sales" cards on scroll ---
+    const plannedSaleCards = document.querySelectorAll('.planned-sale-item');
+    if (plannedSaleCards.length > 0) {
+        const plannedSaleObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    const index = Array.from(card.parentNode.children).indexOf(card);
+                    
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, 150 * index); // 150ms delay between each card
+
+                    observer.unobserve(card); // Stop observing once it's visible
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }); // Trigger when 10% of the card is visible
+        plannedSaleCards.forEach(card => plannedSaleObserver.observe(card));
+    }
+</script>
+<script>
+    // Password visibility toggle for the "Set Password" card
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.store-action-card .password-toggle-icon').forEach(icon => {
+            const formGroup = icon.closest('.form-group');
+            const inputField = formGroup ? formGroup.querySelector('input') : null;
+            if (!inputField) return;
+
+            const toggle = () => {
+                const isPassword = inputField.type === 'password';
+                inputField.type = isPassword ? 'text' : 'password';
+                icon.classList.toggle('visible', isPassword);
+            };
+
+            icon.addEventListener('click', toggle);
+        });
+    });
+</script>
+
+
+
+
+<!-- Background styles/script -->
+<style>
+    /* --- Animated Gradient Background --- */
+    :root {
+        --gradient-angle: 135deg;
+        --color-1: #ffd1bd;
+        --color-2: #fee8e0;
+        --color-3: #fff3b0;
+        --color-4: #fff9de;
+    }
+
+    #dashboard {
+        background: linear-gradient(
+            var(--gradient-angle),
+            var(--color-1),
+            var(--color-2),
+            var(--color-3),
+            var(--color-4)
+        );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+    }
+
+    .store-hero__edit{
+        background: linear-gradient(
+            var(--gradient-angle),
+            var(--color-1),
+            var(--color-2),
+            var(--color-3),
+            var(--color-4)
+        );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+        vertical-align: top;
+
+        appearance: none;
+        border: none;
+        /* background: #f3f4f6; */
+        color: #111;
+        padding: .5rem 1.25rem;
+        /* border-radius: 8px; */
+        font-size: .875rem;
+        /* font-weight: 500; */
+        cursor: pointer;
+        transition: .3s;
+    }
+
+    @keyframes animate-gradient-position {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.getElementById('dashboard');
+
+        const root = document.documentElement;
+
+        // We will use HSL and an oscillating value to create a smooth,
+        // controlled color shift within a specific range.
+        let time = 0;
+        // Initialize the angle based on the CSS variable
+        let angle = 135;
+
+        // This function will be called on every animation frame.
+        function updateGradientColors() {
+            // Increment a time variable to drive the color animation
+            time += 0.01;
+
+            // --- Animate the gradient angle ---
+            // Slowly increment the angle, wrapping around at 360 degrees
+            angle = (angle + 0.15) % 360;
+
+            // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
+            const sinValue = Math.sin(time);
+
+            // Map the sine value to a warm, yellowish hue range.
+            // We'll oscillate between a peachy-orange (30) and a golden-yellow (60).
+            const baseHue = 45; // Midpoint (Golden Yellow)
+            const hueRange = 15;  // Oscillation range (45 +/- 15)
+            const dynamicHue = baseHue + sinValue * hueRange;
+
+            // Create a palette based on the oscillating hue and your theme colors
+            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+            const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
+            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+            const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
+
+            // Update the CSS variables on the root element
+            root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
+            root.style.setProperty('--color-1', color1);
+            root.style.setProperty('--color-2', color2);
+            root.style.setProperty('--color-3', color3);
+            root.style.setProperty('--color-4', color4);
+
+
+            // Request the next animation frame to create a smooth loop
+            requestAnimationFrame(updateGradientColors);
+        }
+
+        // Start the color animation loop
+        requestAnimationFrame(updateGradientColors);
+    });
+</script>
+{% endblock %}

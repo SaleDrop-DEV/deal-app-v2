@@ -1,0 +1,1591 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Toegang Bedrijfsprofiel{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- base styles -->
+ <style>
+    h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: normal;
+        font-size: 2.5rem;
+        font-weight: 600;
+    }
+
+    .splitter{
+        width: 50px;
+        height: 2px;
+        background-color: black;
+        display: block;
+        margin: 2rem auto;
+    }
+
+ </style>
+
+<style>
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .page-header{
+        position: relative;
+        max-width: 1000px;
+        padding-top: var(--navbar-height);
+        padding-bottom: 4rem;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        display: flex;
+        flex-direction: column; /* Stack page-wrapper and trusted-section */
+        justify-content: center;
+        align-items: center; /* Center children horizontally */
+        min-height: 100vh;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .header-smoother{
+        /* background should vertical fade from top opacity 0 to 1 */
+        position: absolute;
+        bottom: 0;
+        height: 2.5rem;
+        width: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    }
+
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        width: 100%;
+        max-width: 1100px;
+        align-items: center;
+    }
+
+    @media (min-width: 992px) {
+        .page-wrapper {
+            grid-template-columns: 1fr 0.8fr; /* Left column wider */
+        }
+    }
+
+    @media (max-width: 991px) {
+        .access-container {
+            margin-top: 2rem;
+            max-width: 600px;
+            display: block;
+            margin: 0 auto;
+        
+        }
+        .how-it-works-container {
+            order: -1; /* Show "How it works" first on mobile */
+        }
+    }
+
+    .access-container {
+        /* max-width: 500px; <-- No longer needed, grid controls width */
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid var(--color-border, #E0E0E0);
+        border-radius: var(--border-radius-round, 8px);
+        padding: 2rem 2.5rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px); /* For Safari */
+    }
+
+    .access-container h2 {
+        /* font-size: 2rem; */
+        /* font-weight: 700; */
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: var(--primary-text-color);
+    }
+
+    .form-intro {
+        font-size: 0.95rem;
+        color: var(--secondary-text-color);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .tabs {
+        display: flex;
+        border-bottom: 2px solid var(--color-gray-light);
+        margin-bottom: 2rem;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 1rem 0.5rem;
+        font-size: 1rem;
+        text-align: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--primary-text-color);
+        border-bottom: 3px solid transparent;
+        transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        margin-bottom: -2px;
+    }
+
+    .tab-button.active {
+        color: var(--color-accent);
+        border-bottom-color: var(--color-accent);
+    }
+
+    .tab-button:not(.active):hover {
+        border-bottom-color: var(--color-accent-light);
+    }
+
+    .access-form {
+        display: none;
+        animation: fadeIn 0.4s ease forwards;
+    }
+
+    .access-form.active-form {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-group label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.875rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: var(--primary-text-color);
+    }
+
+    .info-popup-trigger {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--secondary-text-color);
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .info-popup-trigger:hover {
+        color: var(--color-accent);
+    }
+
+    .info-popup-trigger i {
+        margin-left: 0.35rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group input[type="text"] {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        font-size: 1rem;
+        border: 1px solid var(--color-border, #CCC);
+        border-radius: var(--border-radius-round, 6px);
+        background-color: var(--color-white);
+        color: var(--primary-text-color);
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-lighter);
+    }
+
+    .store-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid var(--color-border, #E0E0E0);
+        border-radius: var(--border-radius-round, 6px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        max-height: 220px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+    }
+
+    .store-search-results div {
+        padding: 0.7rem 1rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .store-search-results div:hover {
+        background-color: var(--color-gray-light);
+    }
+
+    /* ✅ Refined Allowed Domains Section — clean & minimal */
+    .allowed-domains-display-section {
+        display: none;
+        padding: 0.5rem 0;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.4s ease forwards;
+    }
+
+    .allowed-domains-display-section label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--primary-text-color);
+        margin-bottom: 0.6rem;
+    }
+
+    .allowed-domains-display-section ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .allowed-domains-display-section li {
+        background-color: var(--color-accent-lighter, #FFF5F2);
+        color: var(--color-accent, #FF7043);
+        font-weight: 500;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-accent, #FFD1BD);
+        transition: background-color 0.2s ease;
+    }
+
+
+    .btn-primary {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        color: var(--color-white);
+        background-color: var(--color-accent);
+        border: none;
+        border-radius: var(--border-radius-round, 6px);
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--color-accent-hover);
+    }
+
+    .btn-primary:disabled {
+        background-color: var(--color-accent-light);
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        display: block;
+        width: 100%;
+        padding: 0.9rem;
+        font-size: 0.95rem;
+        text-align: center;
+        color: var(--secondary-text-color);
+        background-color: var(--color-gray-light);
+        border: 1px solid var(--color-border, #E0E0E0);
+        border-radius: var(--border-radius-round, 6px);
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #E9E9EB;
+        color: var(--primary-text-color);
+    }
+
+    .code-inputs-container {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .code-digit {
+        width: 48px;
+        height: 56px;
+        font-size: 1.75rem;
+        text-align: center;
+        border: 2px solid var(--color-border, #CCC);
+        border-radius: var(--border-radius-round, 6px);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        caret-color: var(--color-accent);
+    }
+
+    .code-digit:hover {
+        border-color: var(--color-gray-dark, #AAA);
+    }
+
+    .code-digit:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-lighter);
+    }
+
+    .code-digit::-webkit-outer-spin-button,
+    .code-digit::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .info-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .info-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .info-modal-content {
+        background-color: var(--color-white);
+        padding: 2rem 2.5rem;
+        border-radius: var(--border-radius-round, 8px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        max-width: 450px;
+        width: 90%;
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+
+    .info-modal-overlay.active .info-modal-content {
+        transform: scale(1);
+    }
+
+    .info-modal-content h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-text-color);
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .info-modal-content p {
+        font-size: 0.95rem;
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .info-modal-content p:last-of-type {
+        margin-bottom: 2rem;
+    }
+
+    #close-domain-info-modal {
+        width: 100%;
+    }
+
+    .link {
+        color: var(--color-accent);
+        cursor: pointer;
+    }
+
+    .link:hover {
+        color: var(--color-accent);
+        text-decoration: underline;
+    }
+    
+    /* --- How It Works Section --- */
+    .how-it-works-container {
+        color: var(--primary-text-color);
+    }
+
+    .how-it-works-container h2 {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+    .how-it-works-container .intro-p {
+        /* font-size: 1.1rem; */
+        color: var(--secondary-text-color);
+        /* line-height: 1.6; */
+        margin-bottom: 2.5rem;
+        max-width: 500px;
+    }
+
+    .how-it-works-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 576px) and (max-width: 991px) {
+        .how-it-works-grid {
+            grid-template-columns: 1fr 1fr; /* Two columns on tablet */
+        }
+    }
+
+    .how-it-works-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+    
+    .how-it-works-card {
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+        transition: 
+            opacity 1.3s ease,
+            transform 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+    }
+
+    .how-it-works-card.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .how-it-works-card__icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-accent-light);
+        color: var(--color-accent);
+        font-size: 1.5rem;
+    }
+
+    .how-it-works-card__icon i{
+        color: var(--color-accent)
+    }
+
+    .how-it-works-card__text h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+    }
+
+    /* --- Trusted By Section --- */
+    .trusted-by-section {
+        width: 100%;
+        max-width: 900px; /* A bit wider to accommodate text */
+        margin: 4rem auto 0 auto;
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
+
+    .trusted-by-section .section-subtitle {
+        font-size: 1.1rem;
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .trusted-stores-grid {
+        display: grid;
+    }
+
+    /* Animation will now be applied to cards, not the whole section */
+    .trusted-store-card {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease;
+    }
+
+    .trusted-by-section h2 {
+        /* color: var(--primary-text-color); */
+        margin-bottom: 2rem;
+        text-transform: none; /* Changed from uppercase for a softer look */
+    }
+
+    .trusted-stores-grid {
+        display: grid;
+        /* Updated grid for better spacing */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 2rem;
+        align-items: center;
+    }
+
+    /* NOTE: The base styles for opacity/transform are on .trusted-store-card 
+      (which is not shown here but is in your JS). 
+      The .visible class adds the visual properties.
+    */
+    .trusted-store-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Center content vertically */
+        
+        /* New Card Look */
+        background-color: var(--color-white, #fff);
+        border: 1px solid var(--color-border, #E0E0E0);
+        border-radius: 12px; /* Softer radius */
+        padding: 1.5rem 1rem;
+        height: 160px; /* Give cards a uniform height */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04); /* Softer shadow */
+
+        /* Updated Transitions */
+        transition: 
+            transform 0.3s ease, 
+            box-shadow 0.3s ease, 
+            border-color 0.3s ease,
+            /* Base animation properties (from your JS) */
+            opacity 0.6s ease-out, 
+            transform 0.6s ease-out;
+    }
+
+    .trusted-store-card:hover {
+        transform: translateY(-6px); /* A more noticeable "lift" */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border-color: var(--color-accent-light, #FFD1BD); /* Accent border on hover */
+    }
+
+    .trusted-store-card img {
+        width: 70px; /* Fixed width for perfect circle */
+        height: 70px;         /* Fixed height for perfect circle */
+        object-fit: contain;  /* Keeps aspect ratio */
+        margin-bottom: 1rem;
+        border-radius: 50%;     /* Makes the image circular! */
+        background-color: var(--color-white); /* Subtle white background for logos */
+        border: 1px solid var(--color-border-light, #f0f0f0); /* Light border */
+        padding: 0.5rem; /* Add some padding inside the circle */
+
+        /* Grayscale by default */
+        filter: grayscale(100%);
+        opacity: 0.8;
+        
+        /* Animate the filter/opacity */
+        transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease; /* Added transform for a subtle hover effect */
+    }
+
+    .trusted-store-card:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+        transform: scale(1.05); /* Slightly enlarge on hover */
+    }
+
+    .trusted-store-card h3 {
+        font-size: 0.9rem; /* Slightly smaller text */
+        font-weight: 500;  /* Lighter weight by default */
+        color: var(--secondary-text-color, #555);
+        margin: 0;
+        text-align: center;
+        transition: color 0.3s ease, font-weight 0.3s ease;
+    }
+
+    /* Make text pop on hover too */
+    .trusted-store-card:hover h3 {
+        color: var(--primary-text-color, #000);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .trusted-stores-grid { 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 1.5rem; /* A bit more gap for mobile */
+        }
+        .trusted-store-card.visible {
+            height: 140px; /* Slightly shorter card on mobile */
+        }
+        .trusted-store-card img {
+             height: 60px; /* Slightly smaller logo on mobile */
+        }
+        .trusted-by-section { 
+            margin-top: 5rem; 
+        }
+    }
+
+    /* --- Animated Gradient Background --- */
+    :root {
+        --gradient-angle: 135deg;
+        --color-1: #ffd1bd;
+        --color-2: #fee8e0;
+        --color-3: #fff3b0;
+        --color-4: #fff9de;
+    }
+
+    .page-header {
+        background: linear-gradient(
+            var(--gradient-angle),
+            var(--color-1),
+            var(--color-2),
+            var(--color-3),
+            var(--color-4)
+        );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+    }
+
+    @keyframes animate-gradient-position {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
+
+    /* --- Premium Store Count Card --- */
+    .premium-store-count-card {
+        background: url('https://saledrop.app{{ statCard.image_url }}');
+        background-size: cover;          /* Fills the container, may crop */
+        background-position: center;   /* Centers the image */
+        background-repeat: no-repeat;  /* Prevents tiling */
+        color: var(--color-white);
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 400px;
+        margin: 0 auto 2rem auto;
+        /* box-shadow: 0 10px 30px rgba(255, 77, 0, 0.3); */
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+
+    .premium-store-count-card.visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .premium-store-count-card #storeCount {
+        font-size: 4rem;
+        font-weight: 700;
+        display: block;
+    }
+</style>
+
+<!-- Support Card styles from dashboard.html -->
+<style>
+    .support-container {
+        padding: 2.5rem 1.5rem;
+        /* background-color: #f9fafb; */
+    }
+
+    .support-card {
+        max-width: 800px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, var(--color-white) 0%, #fdfdff 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+        border: 1px solid #f0f0f0;
+    }
+
+    .support-card .support-icon {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+        margin-bottom: 1rem;
+    }
+
+    .support-card h3 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+    }
+
+    .support-card p {
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+
+    .support-container a{
+        width: fit-content !important;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+
+<!-- promo section -->
+<style>
+/* --- Promo Section --- */
+.promo-section {
+    padding: 6rem 1.5rem 4rem;
+    background: var(--color-white);
+    text-align: center;
+}
+
+.promo-section h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.75rem;
+    font-weight: 600;
+    color: var(--primary-text-color);
+    margin-bottom: 1rem;
+}
+
+.promo-card {
+    margin: 3rem auto 0;
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    /* background: linear-gradient(135deg, #fff9f5 0%, #fff 100%); */
+    background-color: var(--color-gray-lighter);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-border-light, #f5f5f5);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.promo-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+.container-left img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 16px;
+    object-fit: cover;
+    /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07); */
+    transition: transform 0.4s ease;
+}
+
+.promo-card:hover .container-left img {
+    transform: scale(1.03);
+}
+
+.container-right {
+    text-align: left;
+}
+
+.container-right h3 {
+    font-family: 'Poppins', sans-serif;
+    /* font-size: 2rem; */
+    /* font-weight: 600; */
+    color: var(--primary-text-color);
+    margin-bottom: 1rem;
+}
+
+.container-right p {
+    font-size: 1.1rem;
+    /* line-height: 1.7; */
+    color: var(--secondary-text-color);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .promo-card {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+    }
+    .container-right {
+        text-align: center;
+    }
+}
+</style>
+
+
+<style>
+    .action-btn-load{
+        position: relative;
+    }
+    .action-btn-load .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    .action-btn-load.loading .spinner {
+        display: block;
+    }
+    .action-btn-load.loading .btn-text {
+        visibility: hidden;
+    }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-wrapper">
+        <div class="how-it-works-container">
+            <h2>Aan de slag met je winkel.</h2>
+            <p class="intro-p" style="max-width: 75%; margin: 1rem 0 2.5rem 0; font-size: 1.1rem; color: var(--secondary-text-color); background-color: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 1.5rem 2rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                Krijg direct toegang tot je persoonlijke dashboard. Kondig sales aan, beheer je profiel en volg je resultaten - allemaal op één plek.
+            </p>
+            <div class="how-it-works-grid">
+                <div class="how-it-works-card">
+                    <div class="how-it-works-card__icon"><i class="fas fa-search"></i></div>
+                    <div class="how-it-works-card__text">
+                        <h3>1. Zoek je winkel</h3>
+                        <p>Staat je merk al in de lijst? Selecteer hem om verder te gaan.</p>
+                    </div>
+                </div>
+                <div class="how-it-works-card">
+                    <div class="how-it-works-card__icon"><i class="fas fa-envelope"></i></div>
+                    <div class="how-it-works-card__text">
+                        <h3>2. Verifeer je e-mail</h3>
+                        <p>We sturen je direct een code om je toegang te bevestigen.</p>
+                    </div>
+                </div>
+                <div class="how-it-works-card">
+                    <div class="how-it-works-card__icon"><i class="fas fa-key"></i></div>
+                    <div class="how-it-works-card__text">
+                        <h3>3. Toegang tot het portaal</h3>
+                        <p>Gebruik je unieke code en open je dashboard.</p>
+                    </div>
+                </div>
+                <div class="how-it-works-card">
+                    <div class="how-it-works-card__icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="how-it-works-card__text">
+                        <h3>4. Bereik meer shoppers</h3>
+                        <p>Kondig sales aan, houd je prestaties bij en maak het makkelijker voor klanten om jouw merk te vinden.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="access-container">
+            <h2>Winkel portaal</h2>
+            
+            <div class="tabs">
+                <button id="tab-code" class="tab-button active">Met Code</button>
+                <button id="tab-account" class="tab-button">Met Account</button>
+            </div>
+        
+            <form id="code-login-form" class="access-form active-form">
+                <div id="code-step-1">
+                    <p class="form-intro">Zoek je winkel en vul je zakelijke e-mailadres in. We sturen een code om toegang te krijgen tot het bedrijfsprofiel.</p>
+                    
+                    <div class="form-group">
+                        <label for="store-search-input">Winkel</label>
+                        <input type="text" id="store-search-input" placeholder="Zoek winkel..." autocomplete="off">
+                        <div id="store-results-list" class="store-search-results"></div>
+                        <input type="hidden" id="store-select" name="store_id" required>
+                    </div>
+        
+                    <div class="allowed-domains-display-section">
+                        <label for="">Geverifieerde domeinen</label>
+                        <ul id="allowedDomainList">
+                            <!-- Fill dynamically -->
+                        </ul>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="code-email">Zakelijk e-mailadres
+                            <span class="info-popup-trigger link" id="domain-info-trigger">
+                                Geverifieerde domeinen info <i class="fas fa-question-circle"></i>
+                            </span>
+                        </label>
+                        <input type="email" id="code-email" name="email" placeholder="jouw.naam@winkel.com" required>
+                    </div>
+        
+                    <button type="button" id="send-code-btn" class="btn-primary action-btn-load">
+                        <span class="btn-text" style="color: white">Stuur Code</span>
+                        <span class="spinner"></span>
+                    </button>
+                </div>
+        
+                <div id="code-step-2" style="display: none;">
+                    <p class="form-intro">We hebben een 6-cijferige code gestuurd naar <strong id="sent-email-display"></strong>. Voer deze hieronder in.</p>
+                    
+                    <div class="form-group">
+                        <label for="code-input">Verificatiecode</label>
+                        <div id="code-inputs" class="code-inputs-container">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                            <input type="text" class="code-digit" maxlength="1" pattern="\d" inputmode="numeric">
+                        </div>
+                        <input type="hidden" id="code-input" name="code" required>
+                    </div>
+                    
+                    <button type="button" id="verify-code-btn" class="btn-primary action-btn-load">
+                        <span class="btn-text" style="color: white;">Verifieer en Log In</span>
+                        <span class="spinner"></span>
+                    </button>
+                    <button type="button" id="back-to-step-1-btn" class="btn-secondary">Terug</button>
+                </div>
+            </form>
+        
+            <form id="account-login-form" class="access-form">
+                <p class="form-intro">Log in met je bestaande bedrijfsaccount.</p>
+        
+                <div class="form-group">
+                    <label for="account-email">E-mailadres</label>
+                    <input type="email" id="account-email" name="email" required>
+                </div>
+        
+                <div class="form-group">
+                    <label for="account-password">Wachtwoord</label>
+                    <input type="password" id="account-password" name="password" required>
+                </div>
+        
+                <button type="button" id="account-login-btn" class="btn-primary action-btn-load">
+                    <span class="btn-text" style="color: white;">Inloggen</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="header-smoother"></div>
+</div>
+
+<section class="promo-section">
+    <h1>Promotie</h1>
+    <!-- <div class="splitter"></div> -->
+
+    <div class="promo-card">
+        <div class="container-left">
+            <img src="https://saledrop.app{{ promoPhoto.image_url }}" alt="Foto van een uitgelichte sale op de feed.">
+        </div>
+        <div class="container-right">
+            <h3>Laat jouw sale opvallen</h3>
+            <p>
+                SaleDrop staat nog aan het begin, en we willen de eerste merken graag extra ondersteunen.
+                Winkels die zich nu aanmelden krijgen tijdelijk een plek in de spotlight, zodat meer shoppers jouw aanbiedingen ontdekken. Een mooie kans om direct in beeld te komen bij je doelgroep.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="trusted-by-section">
+    <h2>Sluit je bij ons aan</h2>
+    <p class="section-subtitle">
+        Word onderdeel van een groeiend netwerk van premium merken. Sluit je aan en vergroot je zichtbaarheid bij shoppers die actief op zoek zijn naar de beste sales. Neem <a href="{% url 'for_business' %}" class="link">contact</a> met ons op als je hier onderdeel van wilt worden.
+    </p>
+
+    <div class="premium-store-count-card">
+        <p style="font-weight: bold; color: var(--color-accent) !important;">Premium merken op SaleDrop</p>
+        <div>
+            <span id="storeCount" style="color: var(--color-accent);">{{ premium_stores_count }}</span>
+        </div>
+    </div>
+
+    <h3 style="margin-top: 4rem;">Vertrouwd door</h3>
+
+    <div class="splitter"></div>
+
+    <div class="trusted-stores-grid">
+
+        {% if trusted_stores|length == 1 %}
+            <div class="trusted-store-card" style="opacity: 0;">
+            </div>
+            {% for store in trusted_stores %}
+                <div class="trusted-store-card">
+                    <img src="https://saledrop.app{{ store.image_url }}" alt="{{ store.name }} Logo">
+                    <h3>{{ store.name }}</h3>
+                </div>
+            {% endfor %}
+            <div class="trusted-store-card" style="opacity: 0;">
+            </div>
+        {% else %}
+            {% for store in trusted_stores %}
+                <div class="trusted-store-card">
+                    <img src="https://saledrop.app{{ store.image_url }}" alt="{{ store.name }} Logo">
+                    <h3>{{ store.name }}</h3>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+    
+</section>
+
+<div class="support-container">
+    <div class="support-card">
+        <i class="fa-solid fa-circle-question support-icon"></i>
+        <h3>Vragen of meer informatie?</h3>
+        <p>
+            Bekijk onze supportpagina voor meer informatie over hoe wij jouw winkel kunnen laten groeien, of neem contact met ons op voor persoonlijke ondersteuning.
+        </p>
+        <a href="{% url 'for_business' %}" class="action-btn">Naar support</a>
+    </div>
+</div>
+
+<script id="stores-data" type="application/json">
+    {{ stores_json|safe }}
+</script>
+
+<div id="domain-info-modal" class="info-modal-overlay">
+    <div class="info-modal-content">
+        <h2>Geverifieerde domeinen</h2>
+        <p>Om de veiligheid en authenticiteit van bedrijfsprofielen te waarborgen, accepteren we alleen e-mailadressen van domeinen die door ons zijn gecontroleerd.</p>
+        <p>Dit helpt fraude te voorkomen en zorgt ervoor dat alleen geautoriseerd personeel toegang krijgt tot het bedrijfsprofiel.</p>
+        <p>Als je e-mailadres niet van een geverifieerd domein is, neem dan <a class="link" href="{% url 'for_business' %}">contact</a> op met SaleDrop om de email te laten verifiëren.</p>
+        <button type="button" class="btn-primary" id="close-domain-info-modal">Begrepen</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Animated Number Counter ---
+    const storeCountCard = document.querySelector('.premium-store-count-card');
+    const storeCountElement = document.getElementById('storeCount');
+
+    const animateCount = (element, start, end, duration) => {
+        let startTime = null;
+
+        const step = (currentTime) => {
+            if (!startTime) startTime = currentTime;
+            const progress = Math.min((currentTime - startTime) / duration, 1);
+            // Apply an ease-out function to the progress
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            element.textContent = Math.floor(easedProgress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                element.textContent = end; // Ensure it ends on the exact number
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    const countObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const targetElement = entry.target;
+                const countElement = targetElement.querySelector('#storeCount');
+                const endValue = parseInt(countElement.textContent, 10);
+
+                // Make the card visible
+                targetElement.classList.add('visible');
+                
+                // Start the animation
+                animateCount(countElement, 0, endValue, 2000); // Animate over 2 seconds
+
+                // Stop observing after the animation has been triggered
+                observer.unobserve(targetElement);
+            }
+        });
+    }, { threshold: 0.5 }); // Trigger when 2/3 of the element is visible
+
+    if (storeCountCard) {
+        countObserver.observe(storeCountCard);
+    }
+});
+// ----- MERGED DOMContentLoaded Listener -----
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Animate "How it works" cards on load ---
+    const trustedCards = document.querySelectorAll('.trusted-store-card');
+    if (trustedCards.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    // Stagger the animation based on the card's index within its parent
+                    const index = Array.from(card.parentNode.children).indexOf(card);
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, 150 * index);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+        trustedCards.forEach(card => observer.observe(card));
+    }
+
+    const howItWorksCards = document.querySelectorAll('.how-it-works-card');
+
+    if (howItWorksCards.length > 0) {
+    // Wait a short time to ensure layout is stable
+    setTimeout(() => {
+        howItWorksCards.forEach((card, index) => {
+        // Exponential delay curve: faster at first, slower later
+        const delay = 250 * Math.pow(index, 1.4); // tweak exponent for feel (1.3–1.6 works well)
+
+        setTimeout(() => {
+            card.classList.add('visible');
+        }, delay);
+        });
+    }, 300);
+    }
+    // -----------------------------
+    // CSRF Token Utility
+    // -----------------------------
+    function getCSRFToken() {
+        let name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // -----------------------------
+    // Utility: simple feedback
+    // -----------------------------
+    function showError(msg) {
+        window.displayMessage('error', msg)
+        console.log(msg)
+    }
+
+    function showSuccess(msg) {
+        window.displayMessage('success', msg)
+        console.log(msg)
+    }
+
+    // -----------------------------
+    // Store search
+    // -----------------------------
+    const storesData = JSON.parse(document.getElementById('stores-data').textContent || '[]');
+    const storeSearchInput = document.getElementById('store-search-input');
+    const storeResultsList = document.getElementById('store-results-list');
+    const hiddenStoreSelect = document.getElementById('store-select');
+    const allowedDomainsSection = document.querySelector('.allowed-domains-display-section');
+    const allowedDomainList = document.getElementById('allowedDomainList');
+
+    function renderStoreResults(filter = '') {
+        storeResultsList.innerHTML = '';
+        const filtered = storesData.filter(store =>
+            store.name.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            storeResultsList.innerHTML = '<div>Geen resultaten</div>';
+        } else {
+            filtered.forEach(store => {
+                const div = document.createElement('div');
+                div.textContent = store.name;
+                div.dataset.id = store.id;
+                // Store domains on the element to be picked up later
+                div.dataset.domains = JSON.stringify(store.domains || []);
+
+                div.addEventListener('click', () => {
+                    storeSearchInput.value = store.name;
+                    hiddenStoreSelect.value = store.id;
+                    storeResultsList.style.display = 'none';
+
+                    // Update the allowed domains list
+                    allowedDomainsSection.style.display = 'none'; // Hide by default
+                    const domains = JSON.parse(div.dataset.domains);
+                    allowedDomainList.innerHTML = ''; // Clear previous list
+                    if (domains.length > 0) {
+                        domains.forEach(domain => {
+                            allowedDomainList.innerHTML += `<li>${domain}</li>`;
+                        });
+                        // Only show the section if there are domains to display
+                        allowedDomainsSection.style.display = 'block';
+                    }
+
+                    // --- NEW: Update email placeholder ---
+                    const emailInput = document.getElementById('code-email');
+                    if (emailInput && domains.length > 0) {
+                        // Use the first (and usually primary) domain for the placeholder
+                        emailInput.placeholder = `jouw.naam@${domains[0]}`;
+                    }
+                    // ------------------------------------
+                });
+                storeResultsList.appendChild(div);
+            });
+        }
+        storeResultsList.style.display = 'block';
+    }
+
+    if (storeSearchInput) {
+        storeSearchInput.addEventListener('focus', () => renderStoreResults(''));
+        storeSearchInput.addEventListener('input', e => {
+            hiddenStoreSelect.value = '';
+            allowedDomainsSection.style.display = 'none'; // Hide on new input
+            allowedDomainList.innerHTML = ''; // Clear domains on new input
+            renderStoreResults(e.target.value);
+        });
+        document.addEventListener('click', e => {
+            if (storeResultsList && !storeResultsList.contains(e.target) && e.target !== storeSearchInput) {
+                storeResultsList.style.display = 'none';
+            }
+        });
+    }
+
+    // -----------------------------
+    // Tabs
+    // -----------------------------
+    const tabCode = document.getElementById('tab-code');
+    const tabAccount = document.getElementById('tab-account');
+    const formCode = document.getElementById('code-login-form');
+    const formAccount = document.getElementById('account-login-form');
+
+    if (tabCode && tabAccount && formCode && formAccount) {
+        tabCode.addEventListener('click', () => {
+            tabCode.classList.add('active');
+            tabAccount.classList.remove('active');
+            formCode.classList.add('active-form');
+            formAccount.classList.remove('active-form');
+        });
+        tabAccount.addEventListener('click', () => {
+            tabAccount.classList.add('active');
+            tabCode.classList.remove('active');
+            formAccount.classList.add('active-form');
+            formCode.classList.remove('active-form');
+        });
+    }
+
+    // -----------------------------
+    // Code login flow
+    // -----------------------------
+    const codeStep1 = document.getElementById('code-step-1');
+    const codeStep2 = document.getElementById('code-step-2');
+    const sendCodeBtn = document.getElementById('send-code-btn');
+    const verifyCodeBtn = document.getElementById('verify-code-btn');
+    const backBtn = document.getElementById('back-to-step-1-btn');
+    const codeEmailInput = document.getElementById('code-email');
+    const codeInput = document.getElementById('code-input'); // The hidden input
+    const sentEmailDisplay = document.getElementById('sent-email-display');
+    const firstDigitInput = document.querySelector('.code-digit'); // The first visible input
+
+    // Step 1: Send code
+    if (sendCodeBtn) {
+        sendCodeBtn.addEventListener('click', async () => {
+            const email = codeEmailInput.value.trim().toLowerCase();
+            let storeId = hiddenStoreSelect.value;
+            const searchText = storeSearchInput.value.trim().toLowerCase();
+
+            if (!storeId && searchText) {
+                const matches = storesData.filter(s => s.name.toLowerCase().includes(searchText));
+                if (matches.length === 1) {
+                    storeId = matches[0].id;
+                    hiddenStoreSelect.value = storeId;
+                    storeSearchInput.value = matches[0].name;
+                }
+            }
+
+            if (!email || !storeId) {
+                showError('Selecteer een winkel en vul een e-mailadres in.');
+                return;
+            }
+
+            sendCodeBtn.classList.add('loading');
+            sendCodeBtn.disabled = true; // Prevent multiple submissions
+
+            try {
+                const response = await fetch(window.location.pathname, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        access_method: 'code',
+                        step: 'send_code',
+                        email,
+                        store_id: storeId
+                    })
+                });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // showSuccess(result.message || 'Code verstuurd!');
+                    sentEmailDisplay.textContent = email;
+                    codeStep1.style.display = 'none';
+                    codeStep2.style.display = 'block';
+                    if (firstDigitInput) firstDigitInput.focus(); // <-- FIX: Focus first visible input
+                } else {
+                    showError(result.error || 'Er is een onbekende fout opgetreden.');
+                }
+            } catch (err) {
+                console.error('Send code error:', err);
+                showError('Netwerkfout. Controleer je verbinding.');
+            } finally {
+                sendCodeBtn.classList.remove('loading');
+                sendCodeBtn.disabled = false; // Re-enable button
+            }
+        });
+    }
+
+    // Step 2: Verify code
+    if (verifyCodeBtn) {
+        verifyCodeBtn.addEventListener('click', async () => {
+            const email = codeEmailInput.value.trim().toLowerCase();
+            const storeId = hiddenStoreSelect.value;
+            const code = codeInput.value.trim();
+
+            if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+                showError('De code moet precies 6 cijfers bevatten.');
+                return;
+            }
+
+            verifyCodeBtn.classList.add('loading');
+            verifyCodeBtn.disabled = true; // Prevent multiple submissions
+
+            try {
+                const response = await fetch(window.location.pathname, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        access_method: 'code',
+                        step: 'verify_code',
+                        email,
+                        store_id: storeId,
+                        code
+                    })
+                });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showSuccess('Gebruiker geverifieerd en ingelogd.');
+                    window.location.href = result.redirect_url || '/business/dashboard/';
+                } else {
+                    showError(result.error || 'Verificatie mislukt.');
+                }
+            } catch (err) {
+                console.error('Verify code error:', err);
+                showError('Netwerkfout. Controleer je verbinding.');
+            } finally {
+                verifyCodeBtn.classList.remove('loading');
+                verifyCodeBtn.disabled = false; // Re-enable button
+            }
+        });
+    }
+
+    // Back button
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            codeStep2.style.display = 'none';
+            codeStep1.style.display = 'block';
+            codeInput.value = '';
+            document.querySelectorAll('.code-digit').forEach(input => input.value = '');
+            codeEmailInput.focus();
+        });
+    }
+
+    // -----------------------------
+    // 6-Digit Code Input Logic
+    // -----------------------------
+    const codeInputsContainer = document.getElementById('code-inputs');
+    if (codeInputsContainer) {
+        const digitInputs = [...codeInputsContainer.querySelectorAll('.code-digit')];
+        const hiddenCodeInput = document.getElementById('code-input');
+
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('input', () => {
+                const value = input.value;
+                if (value.match(/^\d$/)) {
+                    if (index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+                } else {
+                    input.value = ''; 
+                }
+                updateHiddenCodeInput();
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').trim();
+                if (pasteData.match(/^\d{6}$/)) {
+                    pasteData.split('').forEach((char, i) => {
+                        if (digitInputs[i]) {
+                            digitInputs[i].value = char;
+                        }
+                    });
+                    digitInputs[5].focus();
+                    updateHiddenCodeInput();
+                }
+            });
+        });
+
+        function updateHiddenCodeInput() {
+            const code = digitInputs.map(input => input.value).join('');
+            hiddenCodeInput.value = code;
+            
+            // Auto-submit if 6 digits are entered
+            if (code.length === 6) {
+                verifyCodeBtn.click();
+            }
+        }
+    }
+    
+    // -----------------------------
+    // Account login flow
+    // -----------------------------
+    const accountLoginForm = document.getElementById('account-login-form');
+    const accountLoginBtn = document.getElementById('account-login-btn');
+
+    if (accountLoginBtn && accountLoginForm) {
+        const handleAccountLogin = async () => {
+            const emailInput = document.getElementById('account-email');
+            const passwordInput = document.getElementById('account-password');
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showError('Vul zowel e-mailadres als wachtwoord in.');
+                return;
+            }
+
+            accountLoginBtn.classList.add('loading');
+            accountLoginBtn.disabled = true; // Prevent multiple submissions
+
+            try {
+                const response = await fetch(window.location.pathname, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        access_method: 'account',
+                        email,
+                        password
+                    })
+                });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showSuccess('Ingelogd.')
+                    window.location.href = result.redirect_url || '/business/dashboard/';
+                } else {
+                    showError(result.error || 'Inloggen mislukt.');
+                }
+            } catch (err) {
+                console.error('Account login error:', err);
+                showError('Netwerkfout. Controleer je verbinding.');
+            } finally {
+                accountLoginBtn.classList.remove('loading');
+                accountLoginBtn.disabled = false; // Re-enable button
+            }
+        };
+
+        accountLoginBtn.addEventListener('click', handleAccountLogin);
+        accountLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAccountLogin();
+        });
+    }
+
+    // -----------------------------
+    // Domain Info Pop-up Logic (MOVED & FIXED)
+    // -----------------------------
+    const domainInfoTrigger = document.getElementById('domain-info-trigger');
+    const domainInfoTrigger1 = document.getElementById('domain-info-trigger1');
+    const domainInfoModal = document.getElementById('domain-info-modal');
+    const closeDomainInfoModalBtn = document.getElementById('close-domain-info-modal');
+
+    domainInfoTrigger.addEventListener('click', () => {
+        domainInfoModal.classList.add('active');
+    });
+
+    domainInfoModal.addEventListener('click', (e) => {
+        if (e.target === domainInfoModal) {
+            domainInfoModal.classList.remove('active');
+        }
+    });
+
+    closeDomainInfoModalBtn.addEventListener('click', () => {
+        domainInfoModal.classList.remove('active');
+    });
+
+}); // <-- End of single DOMContentLoaded listener
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.getElementsByClassName('page-header')[0];
+        const root = document.documentElement;
+
+        // We will use HSL and an oscillating value to create a smooth,
+        // controlled color shift within a specific range.
+        let time = 0;
+        // Initialize the angle based on the CSS variable
+        let angle = 135;
+
+        // This function will be called on every animation frame.
+        function updateGradientColors() {
+            // Increment a time variable to drive the color animation
+            time += 0.01;
+
+            // --- Animate the gradient angle ---
+            // Slowly increment the angle, wrapping around at 360 degrees
+            angle = (angle + 0.15) % 360;
+
+            // Use Math.sin to create a smooth wave that oscillates between -1 and 1.
+            const sinValue = Math.sin(time);
+
+            // Map the sine value to a warm, yellowish hue range.
+            // We'll oscillate between a peachy-orange (30) and a golden-yellow (60).
+            const baseHue = 45; // Midpoint (Golden Yellow)
+            const hueRange = 15;  // Oscillation range (45 +/- 15)
+            const dynamicHue = baseHue + sinValue * hueRange;
+
+            // Create a palette based on the oscillating hue and your theme colors
+            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+            const color2 = '#ffd1bd'; // Your light accent color provides a warm, stable anchor
+            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+            const color4 = '#fee8e0'; // Your lightest accent color brightens the mix
+
+            // Update the CSS variables on the root element
+            root.style.setProperty('--gradient-angle', `${angle}deg`); // This now updates continuously
+            root.style.setProperty('--color-1', color1);
+            root.style.setProperty('--color-2', color2);
+            root.style.setProperty('--color-3', color3);
+            root.style.setProperty('--color-4', color4);
+
+
+            // Request the next animation frame to create a smooth loop
+            requestAnimationFrame(updateGradientColors);
+        }
+
+        // Start the color animation loop
+        requestAnimationFrame(updateGradientColors);
+    });
+</script>
+{% endblock %}

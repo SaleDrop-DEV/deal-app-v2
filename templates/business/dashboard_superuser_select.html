@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Business Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    main {
+        padding-top: calc(var(--navbar-height) + 2rem);
+        padding-bottom: 3rem;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--color-white);
+        border-radius: var(--border-radius-large, 12px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .store-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .store-list-item {
+        margin-bottom: 0.75rem;
+    }
+    .store-list-item a {
+        display: block;
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: var(--border-radius-round, 6px);
+        text-decoration: none;
+        color: var(--primary-text-color);
+        font-weight: 500;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+    .store-list-item a:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Selecteer een Bedrijfsdashboard</h1>
+    <ul class="store-list">
+        {% for store in stores %}
+            <li class="store-list-item"><a href="{% url 'business_dashboard' %}?store_id={{ store.id }}">{{ store.name }}</a></li>
+        {% empty %}
+            <p>No stores with business profiles found.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

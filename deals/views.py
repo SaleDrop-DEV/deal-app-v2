@@ -947,42 +947,44 @@ from deals.models import Click, ClickNoAuth
 from django.http import Http404
 
 def visit_sale_view(request, gmail_analysis_id, user_id):
-    # 1. Get the analysis object or return 404 if not found.
-    gmail_analysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
+    try:
+        gmail_analysis_id = int(gmail_analysis_id)
+    except ValueError:
+        return redirect('public_deals')
 
-    # 2. Validate that the analysis has a store and a main link.
-    if not (gmail_analysis.message.store and gmail_analysis.main_link):
-        return Http404()
-
-    # 3. Determine the final redirect URL.
-    redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
-    
-    # 4. Find the corresponding Url object if it exists.
-    url_object = Url.objects.filter(general_url=redirect_url_string).first()
-
-    # 5. Handle authenticated vs. unauthenticated users.
-    if user_id == 0:
-        # Unauthenticated user: Record a ClickNoAuth event.
-        ClickNoAuth.objects.create(
-            analysis=gmail_analysis,
-            store=gmail_analysis.message.store,
-            url=url_object  # Can be None, which is fine.
-        )
-    else:
-        # Authenticated user: Fetch the user object.
-        user = get_object_or_404(User, id=user_id)
+    if gmail_analysis_id > 0:
+        if user_id == 0:
+            # Anonymous user
+            redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
+            url_object = Url.objects.filter(general_url=redirect_url_string).first()
+            return redirect(redirect_url_string)
         
-        # If a Url object was found, record the user's visit to it.
+        user = get_object_or_404(User, id=user_id)
+        gmail_analysis = get_object_or_404(GmailSaleAnalysis, id=gmail_analysis_id)
+
+        if not (gmail_analysis.message.store and gmail_analysis.main_link):
+            return Http404()
+
+        redirect_url_string = get_sale_page_url(gmail_analysis.message.store, gmail_analysis.main_link)
+        url_object = Url.objects.filter(general_url=redirect_url_string).first()
+
+        click_url_to_save = None
         if url_object:
             url_object.add_visit(user=user)
+            click_url_to_save = url_object
+
+        Click.objects.create(
+            user=user,
+            analysis=gmail_analysis,
+            store=gmail_analysis.message.store,
+            url=click_url_to_save
+        )
+
+        return redirect(redirect_url_string)
+    else:
+        # path('sale-click/<int:sale_id>/<int:user_id>/', views.visit_sale_view, name='sale_message_click'), # New URL
+        return redirect('sale_message_click', sale_id=-gmail_analysis_id, user_id=user_id)
         
-        # Record the click event for the authenticated user.
-        Click.objects.create(user=user, analysis=gmail_analysis, store=gmail_analysis.message.store, url=url_object)
-    
-    # 6. Redirect the user to the sale page.
-    return redirect(redirect_url_string)
-
-
 
 
 

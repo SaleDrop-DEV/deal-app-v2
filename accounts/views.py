@@ -21,6 +21,8 @@ from .forms import CustomAuthenticationForm
 from django.http import HttpResponseRedirect
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from pages.models import StaticContent
+
 
 
 def get_store_logo(store_name):
@@ -144,10 +146,23 @@ def signup_view(request):
                 'description': f"{d1} {d2}\n{d3} {d4}"
             }
             return render(request, 'account/message_template.html', context=data)
+        else:
+            # If the form is invalid, re-render the page with the form,
+            # which now contains the error messages.
+            print("Form errors:", form.errors)
+            sharingPhoto = StaticContent.objects.get(content_name="sharingPhoto")
+            appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+            return render(request, 'account/signup.html', {
+                'form': form,
+                'page': 'signup',
+                'sharingPhoto': sharingPhoto,
+                'appStoreImage': appStoreImage,
+            })
     else:
         form = CustomUserCreationForm()
-
-    return render(request, 'account/signup.html', {'form': form, 'page': 'signup'})
+    sharingPhoto = StaticContent.objects.get(content_name="sharingPhoto")
+    appStoreImage = StaticContent.objects.get(content_name="Download In Appstore")
+    return render(request, 'account/signup.html', {'form': form, 'page': 'signup', 'sharingPhoto': sharingPhoto, 'appStoreImage': appStoreImage})
 
 
 def activate(request, uidb64, token):

@@ -70,10 +70,12 @@ def general_terms(request):
     })
 
 def contact(request):
+    sharingPhoto = StaticContent.objects.get(content_name="sharingPhoto")
     return render(request, 'pages/contact.html', {
         'page': 'contact',
         'email': settings.EMAIL_HOST_USER,
-        'instagram': settings.INSTA_URL
+        'instagram': settings.INSTA_URL,
+        'sharingPhoto': sharingPhoto
     })
 
 def delete_account_policy(request):

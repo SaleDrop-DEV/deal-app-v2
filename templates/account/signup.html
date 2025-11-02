@@ -11,7 +11,7 @@
 
 <meta property="og:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta property="og:description" content="Maak gratis een account aan en ontvang meldingen van nieuwe aanbiedingen bij je favoriete winkels.">
-<meta property="og:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+<meta property="og:image" content="https://saledrop.app{{ sharingPhoto.image.url }}">
 <meta property="og:url" content="https://www.saledrop.app/accounts/sign-up/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nl_NL">
@@ -19,7 +19,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Registreer bij SaleDrop - Ontvang direct de beste sales en deals">
 <meta name="twitter:description" content="Meld je gratis aan en mis nooit meer korting!">
-<meta name="twitter:image" content="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
+<meta name="twitter:image" content="https://saledrop.app{{ sharingPhoto.image.url }}">
 
 <script type="application/ld+json">
 {
@@ -31,15 +31,130 @@
 }
 </script>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+    /* --- Page Layout & Gradient Background (from access.html) --- */
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .page-header {
+        position: relative;
+        padding-top: var(--navbar-height);
+        padding-bottom: 4rem;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+    }
+
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        width: 100%;
+        max-width: 1100px;
+        align-items: center;
+    }
+
+    @media (max-width: 791px) {
+        .page-wrapper {
+            gap: 1rem;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .page-wrapper {
+            grid-template-columns: 0.8fr 1fr; /* Left column for benefits, right for form */
+        }
+    }
+
+    :root {
+        --gradient-angle: 135deg;
+        --color-1: #ffd1bd;
+        --color-2: #fee8e0;
+        --color-3: #fff3b0;
+        --color-4: #fff9de;
+    }
+
+    .page-header {
+        background: linear-gradient(
+            var(--gradient-angle),
+            var(--color-1),
+            var(--color-2),
+            var(--color-3),
+            var(--color-4)
+        );
+        background-size: 400% 400%;
+        animation: animate-gradient-position 10s ease infinite alternate;
+    }
+
+    @keyframes animate-gradient-position {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
+
+    /* --- Benefits Section (Left Column) --- */
+    .benefits-container h1 {
+        font-family: 'Poppins', sans-serif;
+        font-size: clamp(2.5rem, 6vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        color: var(--primary-text-color);
+    }
+
+    .benefits-container img {
+        width: 60%;
+    }
+
+    .benefits-container .intro-p {
+        font-size: 1.1rem;
+        color: var(--secondary-text-color);
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+        max-width: 450px;
+    }
+
+    @media (max-width: 991px) {
+        .benefits-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .benefits-container .intro-p {
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 1rem;
+        }
+    }
+
     /* --- Base Card & Form Styling --- */
     .signup-card {
         background-color: var(--color-white);
+        border: 1px solid #e5e7eb;
         padding: 2.5rem;
-        border-radius: var(--border-radius-round);
+        border-radius: 16px;
         box-shadow: 0 8px 25px rgba(5, 32, 74, 0.08);
         max-width: 500px;
-        margin: 2rem auto;
+        margin: 0 auto; /* Centered within its grid column */
+        width: 100%;
     }
     .signup-card h3 {
         text-align: center;
@@ -188,72 +303,216 @@
     .login-link { text-align: center; margin-top: 1.5rem; font-size: 0.95rem; }
     .login-link-a { color: var(--color-accent); text-decoration: none; transition: 0.3s; }
     .login-link-a:hover { text-decoration: underline; color: var(--color-accent);}
+
+
+    .header-smoother{
+        /* background should vertical fade from top opacity 0 to 1 */
+        position: absolute;
+        bottom: 0;
+        height: 2.5rem;
+        width: 100%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+        z-index: 1;
+        left: 0;
+    }
+
+        /* --- Testimonials Section --- */
+    .testimonials-section {
+        padding: 4rem 1.5rem;
+        background-color: var(--color-white);
+    }
+
+    .testimonials-section h1 {
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 3rem;
+        color: var(--primary-text-color);
+    }
+
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+        .testimonials-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .testimonial-card {
+        background-color: var(--color-white);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        text-align: left;
+        position: relative;
+        /* Animation properties */
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .testimonial-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .testimonial-card::before {
+        content: '“';
+        position: absolute;
+        top: -10px;
+        left: 15px;
+        font-size: 5rem;
+        font-weight: 700;
+        color: var(--color-accent-lighter);
+        z-index: 1;
+    }
+
+    .testimonial-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 2;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="signup-card">
-        <h3>Maak je gratis account</h3>
-        <form id="signup-form" method="post" action="{% url 'signup_view' %}" novalidate>
-            {% csrf_token %}
+<div class="page-header">
+    <div class="page-wrapper">
+        <!-- Left Column: Benefits -->
+        <div class="benefits-container">
+            <h1>De toekomst van besparen begint hier</h1>
+            <p class="intro-p">
+                Maak een gratis account aan en krijg als eerste toegang tot de beste deals. Volg je favoriete merken en mis nooit meer een sale.
+            </p>
+            <a target="_blank" href="https://apps.apple.com/nl/app/saledrop/id6751799791" style="display: inline-block;">
+                <img class="image-large-screen" src="https://saledrop.app{{ appStoreImage.image_url }}" alt="Download in de App Store" style="height: auto;">
+            </a>
+            <!-- You can add benefit cards here if you want, similar to index.html -->
+        </div>
 
-            {% if form.non_field_errors %}
-                <div class="error non-field-errors">{{ form.non_field_errors|striptags }}</div>
-            {% endif %}
+        <!-- Right Column: Signup Form -->
+        <div class="signup-card">
+            <h3>Maak je gratis account</h3>
+            <form id="signup-form" method="post" action="{% url 'signup_view' %}" novalidate>
+                {% csrf_token %}
 
-            {% for field in form %}
-                {% if field.name == 'gender' %}
-                    {# This field is rendered manually below #}
-                {% else %}
-                    <div class="form-group floating-label">
-                        {{ field }}
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-
-                        {% if field.name == 'password' or field.name == 'password2' %}
-                            <span class="password-toggle-icon"></span>
-                        {% endif %}
-
-                        <div class="error-message-form" data-for="{{ field.name }}">
-                            {% if field.errors %}{{ field.errors|striptags }}{% endif %}
-                        </div>
-                    </div>
+                {% if form.non_field_errors %}
+                    <div class="error non-field-errors">{{ form.non_field_errors|striptags }}</div>
                 {% endif %}
-            {% endfor %}
 
-            <div class="form-group">
-                <label class="static-label">Geslacht:</label>
-                <div class="radio-group" id="id_gender">
-                    {% for subwidget in form.gender %}
-                        <label for="{{ subwidget.id_for_label }}">
-                            {{ subwidget.tag }} {{ subwidget.choice_label }}
-                        </label>
-                    {% endfor %}
+                {% for field in form %}
+                    {% if field.name == 'gender' %}
+                        {# This field is rendered manually below #}
+                    {% else %}
+                        <div class="form-group floating-label">
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                            {% if field.name == 'password' or field.name == 'password2' %}
+                                <span class="password-toggle-icon"></span>
+                            {% endif %}
+
+                            <div class="error-message-form" data-for="{{ field.name }}">
+                                {% if field.errors %}{{ field.errors|striptags }}{% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="form-group">
+                    <label class="static-label">Geslacht:</label>
+                    <div class="radio-group" id="id_gender">
+                        {% for subwidget in form.gender %}
+                            <label for="{{ subwidget.id_for_label }}">
+                                {{ subwidget.tag }} {{ subwidget.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                     <div class="error-message-form" data-for="gender">
+                        {% if form.gender.errors %}{{ form.gender.errors|striptags }}{% endif %}
+                    </div>
                 </div>
-                 <div class="error-message-form" data-for="gender">
-                    {% if form.gender.errors %}{{ form.gender.errors|striptags }}{% endif %}
+
+                <div class="form-group privacy-group">
+                    <label>
+                        <input type="checkbox" id="accept-privacy" name="accept_privacy">
+                        Ik accepteer het <a href="{% url 'privacy_policy' %}" target="_blank">privacybeleid</a>
+                    </label>
                 </div>
-            </div>
 
-            <div class="form-group privacy-group">
-                <label>
-                    <input type="checkbox" id="accept-privacy" name="accept_privacy">
-                    Ik accepteer het <a href="{% url 'privacy_policy' %}" target="_blank">privacybeleid</a>
-                </label>
-            </div>
+                <button type="submit" class="action-btn-special" disabled>
+                    <span class="btn-text" style="color: white;">Registreren</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
 
-            <button type="submit" class="action-btn-special" disabled>
-                <span class="btn-text" style="color: white;">Registreren</span>
-                <span class="spinner"></span>
-            </button>
-        </form>
-
-        <p class="login-link">Heb je al een account? <a class="login-link-a" href="{% url 'login' %}">Inloggen</a></p>
+            <p class="login-link">Heb je al een account? <a class="login-link-a" href="{% url 'login' %}">Inloggen</a></p>
+        </div>
     </div>
+    <div class="header-smoother"></div>
 </div>
+
+<section class="testimonials-section">
+    <h1>Ervaringen</h1>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <h3>Eindelijk op tijd voor de sale!</h3>
+            <p>Ik was altijd te laat voor de beste deals bij mijn favoriete winkels. Dankzij SaleDrop krijg ik nu een melding en kan ik meteen toeslaan. Echt een uitkomst!</p>
+        </div>
+        <div class="testimonial-card">
+            <h3>Super handig en overzichtelijk</h3>
+            <p>De app is heel makkelijk in gebruik. Ik volg een paar merken en zie alleen de sales die voor mij relevant zijn. Geen onnodige spam, gewoon de deals die ik wil.</p>
+        </div>
+        <div class="testimonial-card">
+            <h3>Mijn nieuwe favoriete shopping-app</h3>
+            <p>Ik heb al zoveel geld bespaard sinds ik SaleDrop gebruik. Het is geweldig om alle kortingen op één plek te hebben. Een absolute aanrader voor elke koopjesjager.</p>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Animated Gradient Logic (from access.html)
+    document.addEventListener('DOMContentLoaded', () => {
+        const root = document.documentElement;
+        let time = 0;
+        let angle = 135;
+
+        function updateGradientColors() {
+            time += 0.01;
+            angle = (angle + 0.15) % 360;
+            const sinValue = Math.sin(time);
+            const baseHue = 45;
+            const hueRange = 15;
+            const dynamicHue = baseHue + sinValue * hueRange;
+
+            const color1 = `hsl(${dynamicHue}, 95%, 88%)`;
+            const color2 = '#ffd1bd';
+            const color3 = `hsl(${(dynamicHue + 25) % 360}, 95%, 90%)`;
+            const color4 = '#fee8e0';
+
+            root.style.setProperty('--gradient-angle', `${angle}deg`);
+            root.style.setProperty('--color-1', color1);
+            root.style.setProperty('--color-2', color2);
+            root.style.setProperty('--color-3', color3);
+            root.style.setProperty('--color-4', color4);
+
+            requestAnimationFrame(updateGradientColors);
+        }
+        requestAnimationFrame(updateGradientColors);
+    });
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('signup-form');
@@ -318,9 +577,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!rule) return true;
 
         const isValid = rule(input.value);
+
+        // Don't show a client-side error if the field is empty but not yet interacted with.
+        // However, if a server-side error already exists, leave it there.
         if (input.value.trim() === '') {
             input.classList.remove('valid', 'invalid');
-            if (errorEl) errorEl.textContent = '';
+            if (errorEl && !errorEl.textContent) { // Only clear if no server error is present
+                 errorEl.textContent = '';
+            }
         } else if (isValid) {
             input.classList.add('valid');
             input.classList.remove('invalid');
@@ -350,7 +614,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- 5. ATTACH EVENT LISTENERS ---
     allInputs.forEach(input => {
-        input.addEventListener('input', checkFormValidity);
+        // We run validation on 'input' to give real-time feedback as the user types.
+        input.addEventListener('input', () => {
+            validateField(input); // Validate the specific field on input
+            if (input.name === 'password') validateField(password2Input); // Re-validate password2 if password changes
+            checkFormValidity(); // Check the whole form to enable/disable the submit button
+        });
     });
     privacyCheckbox.addEventListener('change', checkFormValidity);
 
@@ -363,7 +632,45 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Initial check in case of browser autofill
-    checkFormValidity();
+    // We only check the button state here, without running field validation,
+    // to prevent clearing server-side errors on page load.
+    const isInitiallyValid = Array.from(allInputs).every(input => input.value.trim() !== '') && privacyCheckbox.checked;
+    submitButton.disabled = !isInitiallyValid;
+
+    // --- 7. REWRITE SERVER-SIDE ERROR MESSAGES ---
+    // This part runs after the page loads and rewrites specific Django errors to be more user-friendly.
+    const emailErrorEl = form.querySelector('.error-message-form[data-for="email"]');
+    if (emailErrorEl && emailErrorEl.textContent.includes('Er bestaat al een User met eenzelfde Email.')) {
+        // Create a more helpful message with a link to the login page.
+        const loginUrl = document.querySelector('.login-link-a').href;
+        emailErrorEl.innerHTML = `Dit e-mailadres is al in gebruik. <a href="${loginUrl}" class="login-link-a">Probeer in te loggen</a>.`;
+    }
+
+
+});
+
+// --- Animate Testimonial cards on scroll ---
+document.addEventListener('DOMContentLoaded', () => {
+    const testimonialCards = document.querySelectorAll('.testimonial-card');
+    if (testimonialCards.length > 0) {
+        const cardObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    // Get the index of the card to create a staggered delay
+                    const index = Array.from(card.parentNode.children).indexOf(card);
+                    
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, 150 * index); // 150ms delay between each card
+
+                    observer.unobserve(card); // Stop observing once it's visible
+                }
+            });
+        }, { threshold: 0.2, rootMargin: "0px 0px -50px 0px" }); // Trigger when 20% of the card is visible
+
+        testimonialCards.forEach(card => cardObserver.observe(card));
+    }
 });
 </script>
 {% endblock %}

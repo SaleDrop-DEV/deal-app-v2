@@ -257,7 +257,7 @@ def get_access_to_business_profile_page_view(request):
                 return JsonResponse({'error': 'Invalid access method specified.'}, status=400)
 
     except Exception as e:
-        print(e)
+        API_Errors_Site.objects.create(task="get_access_to_business_profile_page_view", error=str(e))
         return JsonResponse({'error': 'An unexpected server error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
@@ -336,8 +336,7 @@ def handle_code_login(request, data):
         )
         email_message.content_subtype = "html"  # This is crucial for sending HTML emails
         # DEBUG FIX
-        # email_message.send(fail_silently=False)
-        print(f"Code: '{code}'")
+        email_message.send(fail_silently=False)
 
         return JsonResponse({'success': True, 'message': 'Er is een 6-cijferige code verstuurd. Controleer je e-mailadres.'})
 
@@ -592,7 +591,7 @@ def visit_sale_view(request, sale_id, user_id):
 
         redirect(sale_message.link)
     except Exception as e:
-        print(e)
+        API_Errors_Site.objects.create(task="visit_sale_view", error=str(e))
         return redirect('/')
 
 
@@ -670,7 +669,7 @@ def edit_store_profile_view(request, store_id):
         return JsonResponse({'error': 'Winkel niet gevonden of geen permissie.'}, status=404)
     except Exception as e:
         # API_Errors_Site.objects.create(task="edit_store_profile_view", error=str(e))
-        print(e)
+        API_Errors_Site.objects.create(task="edit_store_profile_view", error=str(e))
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
 @login_required
@@ -808,8 +807,7 @@ def create_sale_message_view(request):
     except (Store.DoesNotExist, BusinessProfile.DoesNotExist):
         return JsonResponse({'error': 'Winkel niet gevonden of geen permissie.'}, status=404)
     except Exception as e:
-        # API_Errors_Site.objects.create(task="create_sale_message_view", error=str(e))
-        print(e)
+        API_Errors_Site.objects.create(task="create_sale_message_view", error=str(e))
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
 @login_required
@@ -962,7 +960,7 @@ def delete_sale_message_view(request, sale_id):
     except (SaleMessage.DoesNotExist, BusinessProfile.DoesNotExist):
         return JsonResponse({'error': 'Sale bericht niet gevonden of geen permissie.'}, status=404)
     except Exception as e:
-        print(e)
+        API_Errors_Site.objects.create(task="delete_sale_message_view", error=str(e))
         return JsonResponse({'error': 'Er is een onverwachte serverfout opgetreden.'}, status=500)
 
 

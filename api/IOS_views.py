@@ -22,6 +22,7 @@ from time import sleep
 import json
 
 from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer
+from .tasks import send_new_recommendation_email
 from .models import API_Errors
 from deals import models as deals_models
 from pages import models as pages_models
@@ -540,6 +541,7 @@ def IOS_API_send_recommendation(request):
             store=store
         )
         new_rec.save()
+        send_new_recommendation_email.delay(store)
         return JsonResponse({'success': True,'message': 'Bedankt! Wij proberen deze winkel zo snel mogelijk toe te voegen.'})
     except Exception as e:
         API_Errors.objects.create(

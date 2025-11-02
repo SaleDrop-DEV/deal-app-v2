@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from deals.models import Store, Click, ClickNoAuth, GmailSaleAnalysis # Keep GmailSaleAnalysis for best_sales
 from .models import BusinessProfile, BusinessLoginCode, SaleMessage, EditProfileRequest, SaleMessageClick
 from .forms import StoreProfileEditForm, SaleMessageForm # Import SaleMessageForm
+from .tasks import moderate_created_sale_messages
 from api.models import API_Errors_Site
 from pages.models import StaticContent
 
@@ -784,6 +785,7 @@ def create_sale_message_view(request):
 
         # Check if the user should be shown the limit warning *after* this creation
         show_warning = check_sale_limit_warning(store) # This function is already correct
+        moderate_created_sale_messages.delay()
         return JsonResponse({
             'success': True,
             'message': 'Sale bericht aangemaakt. Wij controleren z.s.m. het bericht.',
@@ -842,6 +844,8 @@ def edit_sale_message_view(request, sale_id):
         return JsonResponse({'success': True, 'data': data})
 
     elif request.method == 'POST':
+        if sale_message.sent_at:
+            return JsonResponse({'error': 'Verzonden sale berichten kunnen niet worden bewerkt.'}, status=400)
         was_reviewed = sale_message.isReviewed
         was_manual_reviewed = sale_message.isManualReviewed
         was_ready = sale_message.publicReady

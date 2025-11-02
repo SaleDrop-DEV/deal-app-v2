@@ -7,7 +7,7 @@ urlpatterns = [
     path('all/', views.all_deals_view, name='all_deals'),
     path('my-sales/', views.client_deals_view, name='client_deals'),
 
-    path('visit/<int:gmail_analysis_id>/<int:user_id>/', views.visit_sale_view, name='visit_sale'),
+    path('visit/<str:gmail_analysis_id>/<int:user_id>/', views.visit_sale_view, name='visit_sale'),
 
     path('stores-manager/', views.stores_manager_view, name='stores_manager'),
     path('stores-manager/edit/<int:store_id>/', views.edit_store_view, name='edit_store'),

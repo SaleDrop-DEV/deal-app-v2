@@ -581,15 +581,13 @@ def visit_sale_view(request, sale_id, user_id):
     """
     try:
         sale_message = get_object_or_404(SaleMessage, id=sale_id)
-
         # Log the click
         if user_id:
             user = get_object_or_404(User, id=user_id)
-            SaleMessageClick.objects.create(salemessage=sale_message, user=None)
+            SaleMessageClick.objects.create(salemessage=sale_message, user=user)
         else:
             SaleMessageClick.objects.create(salemessage=sale_message, user=None)
-
-        redirect(sale_message.link)
+        return redirect(sale_message.link)
     except Exception as e:
         API_Errors_Site.objects.create(task="visit_sale_view", error=str(e))
         return redirect('/')

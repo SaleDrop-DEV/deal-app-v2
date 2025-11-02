@@ -237,13 +237,16 @@ def get_access_to_business_profile_page_view(request):
             statCard = StaticContent.objects.get(content_name="statistiekKaart")
 
             promoPhoto = StaticContent.objects.get(content_name="businessAccessPromotie")
+            sharingPhoto = StaticContent.objects.get(content_name="sharingPhoto")
+
 
             return render(request, 'business/access.html', {
                 'stores_json': stores_json, 
                 'trusted_stores': stores_data, 
                 'premium_stores_count': premium_stores_count, 
                 'promoPhoto': promoPhoto,
-                'statCard': statCard
+                'statCard': statCard,
+                'sharingPhoto': sharingPhoto,
                 })
 
         if request.method == 'POST':

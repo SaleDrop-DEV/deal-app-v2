@@ -686,7 +686,7 @@ def allow_logo_use_view(request, id):
                     error = str(e)
                 )
                 return JsonResponse({'error': True})
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message': 'Voorkeur is opgeslagen.'})
         else:
             return JsonResponse({'error': True})
 

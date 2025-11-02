@@ -249,7 +249,7 @@ import json
 
 
 
-from business.models import SaleMessage
+from business.models import SaleMessage, EditProfileRequest
 @login_required
 def admin_dashboard(request):
     def get_google_search_console_data(token_name="googleSearchConsole"):
@@ -366,6 +366,10 @@ def admin_dashboard(request):
 
     def get_manualCheckSaleMessages():
         return SaleMessage.objects.filter(needsManualReview=True, isManualReviewed=False).order_by('created_at').all()
+
+    def get_business_profile_edit_requests():
+        return EditProfileRequest.objects.filter(is_processed=False).order_by('requested_at').all()
+
 
     if request.user.is_staff:
         gsc_data = get_google_search_console_data()

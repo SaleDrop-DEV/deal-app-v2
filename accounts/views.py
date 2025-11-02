@@ -388,6 +388,7 @@ def admin_dashboard(request):
             'unhandled_recommendations': get_unhandled_recommendations(),
             'latest_business_requests': get_six_latest_business_requests(),
             'manualCheckSaleMessages': get_manualCheckSaleMessages(),
+            'business_profile_edit_requests': get_business_profile_edit_requests(),
         }
         return render(request, 'admin_templates/dashboard.html', context)
     else:

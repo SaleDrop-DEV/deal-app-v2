@@ -868,7 +868,7 @@
         <div class="how-it-works-container">
             <h2>Aan de slag met je winkel.</h2>
             <p class="intro-p" style="margin: 1rem 0 2.5rem 0; font-size: 1.1rem; color: var(--secondary-text-color); background-color: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 1.5rem 2rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-                Krijg direct toegang tot je persoonlijke dashboard. Kondig sales aan, beheer je profiel en volg je resultaten - allemaal op één plek.
+                Krijg direct toegang tot je persoonlijke dashboard. Kondig sales aan, beheer je profiel, volg je resultaten en dat allemaal op één plek.
             </p>
             <div class="how-it-works-grid">
                 <div class="how-it-works-card">
@@ -912,7 +912,7 @@
         
             <form id="code-login-form" class="access-form active-form">
                 <div id="code-step-1">
-                    <p class="form-intro">Zoek je winkel en vul je zakelijke e-mailadres in. We sturen een code om toegang te krijgen tot het bedrijfsprofiel.</p>
+                    <p class="form-intro">Zoek je winkel en vul je zakelijke e-mailadres in. We sturen je direct een unieke code om toegang te krijgen tot je bedrijfsprofiel.</p>
                     
                     <div class="form-group">
                         <label for="store-search-input">Winkel</label>
@@ -934,7 +934,7 @@
                                 Geverifieerde domeinen info <i class="fas fa-question-circle"></i>
                             </span>
                         </label>
-                        <input type="email" id="code-email" name="email" placeholder="jouw.naam@winkel.com" required>
+                        <input type="email" id="code-email" name="email" placeholder="voorbeeld@winkel.com" required>
                     </div>
         
                     <button type="button" id="send-code-btn" class="btn-primary action-btn-load">
@@ -1241,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const emailInput = document.getElementById('code-email');
                     if (emailInput && domains.length > 0) {
                         // Use the first (and usually primary) domain for the placeholder
-                        emailInput.placeholder = `jouw.naam@${domains[0]}`;
+                        emailInput.placeholder = `voorbeeld@${domains[0]}`;
                     }
                     // ------------------------------------
                 });

@@ -37,7 +37,7 @@
 
     
     <!-- favicon -->
-    <link rel="icon" type="image/x-icon" href="https://saledrop.app/static/images/SDBlack.png">
+    <link rel="icon" type="image/x-icon" href="https://saledrop.app/media/static_content/f491b2bb-4eab-414a-8656-6f81c30f1cf0.png">
     <title>SaleDrop | {% block title %}{% endblock %}</title>
     {% block head %}{% endblock %}
     <style>
@@ -194,7 +194,7 @@
                     </li>
                     <li class="nav-item">
                         <!-- <a class="btn {% if page == 'request_store' %}active{% endif %}" href="/for-business/">Voor bedrijven</a> -->
-                        <a class="btn {% if page == 'public_deals' %}active{% endif %}" href="/deals/search/">Zoek deals</a> 
+                        <a class="btn {% if page == 'public_deals' %}active{% endif %}" href="/deals/search/">Zoek deals</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn {% if page == 'sign-up' %}active{% else %}signup-link-nav{% endif %}" href="/accounts/sign-up/">Meld je aan</a>
@@ -253,7 +253,7 @@
                 </li>
                 <li class="nav-item">
                     <!-- <a class="btn {% if page == 'request_store' %}active{% endif %}" href="/for-business/">Voor bedrijven</a> -->
-                    <a class="btn {% if page == 'public_deals' %}active{% endif %}" href="/deals/search/">Zoek deals</a> 
+                     <a class="btn {% if page == 'public_deals' %}active{% endif %}" href="/deals/search/">Zoek deals</a>
                 </li>
                 <li class="nav-item">
                     <a class="btn {% if page == 'sign-up' %}active{% endif %}" href="/accounts/sign-up/">Aanmelden</a>
@@ -292,6 +292,7 @@
                         <li><a href="/">Home</a></li>
                         <li><a href="/alle-winkels/">Alle winkels</a></li>
                         <li><a href="/accounts/sign-up/">Aanmelden</a></li>
+                        <li><a href="/business/access/">Winkel aanmelden</a></li>
                         <li><a href="/accounts/log-in/">Inloggen</a></li>
                         
                     {% endif %}
@@ -305,7 +306,7 @@
                     <li><a href="https://www.tiktok.com/@saledrop.app" target="_blank" rel="noopener noreferrer">Tiktok</a></li>
                     <li><a href="https://www.trustpilot.com/review/saledrop.app" target="_blank" rel="noopener noreferrer">Trustpilot</a></li>
                     {% if not user.is_authenticated %}
-                        <li><a href="/for-business/">Voor Bedrijven</a></li>
+                        <li><a href="/for-business/">Voor bedrijven</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -313,8 +314,8 @@
                 <h3>Voorwaarden</h3>
                 <ul>
                     <li><a href="/privacy-policy/">Privacybeleid</a></li>
-                    <li><a href="/terms-of-service/">Algemene Voorwaarden</a></li>
-                    <li><a href="/delete-account-policy/">Account Verwijderen</a></li>
+                    <li><a href="/terms-of-service/">Algemene voorwaarden</a></li>
+                    <li><a href="/delete-account-policy/">Account verwijderen</a></li>
                 </ul>
             </div>
         </div>
